@@ -1,0 +1,77 @@
+import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
+import axiosInstance from "../Helper/axiosInstance";
+import toast from "react-hot-toast";
+
+const initialState = {
+    appointment: [],
+    state : false,
+    state: null,
+};
+
+export const AppointmentCreate = createAsyncThunk(
+    "appointment/create", // Changed to match slice name
+    async (data) => {
+        try {
+            const response = axiosInstance.post("/appointment", data);
+            toast.promise(response, {
+                loading: "Creating your appointment",
+                success: (data) => {
+                    return data?.data?.message;
+                },
+                error: (error) => {
+                    return error?.response?.data?.message || "Failed to create appointment";
+                }
+            });
+
+            return (await response).data
+        } catch (error) {
+            return toast.error(error.response?.data?.message || "Failed to create appointment");
+        }
+    }
+);
+
+export const todayAppointment = createAsyncThunk('/today/appintment',async()=>{
+       try {
+            const response =await axiosInstance.patch('/appointment/today');
+            return (await response)?.data
+        } catch (error) {
+            return toast.error(error.response?.data?.message);
+        }
+})
+
+export const getAllAppointment = createAsyncThunk(
+    "appointment/getAll", // Changed to match slice name "appointment"
+    async (_, { rejectWithValue }) => {
+        try {
+            const response = await axiosInstance.get("/appointment");
+            // console.log("Appointment data from API:", response.data); // Log API response
+            return response.data;
+        } catch (error) {
+            return rejectWithValue(error.response?.data?.message || "Failed to fetch appointments");
+        }
+    }
+);
+
+const appointmentSlice = createSlice({
+    name: "appointment",
+    initialState,
+    reducers: {},
+    extraReducers: (builder) => {
+        builder
+            .addCase(getAllAppointment.pending, (state) => {
+                state.loading = true;
+                state.error = null;
+            })
+            .addCase(getAllAppointment.fulfilled, (state, action) => {
+                state.loading = false;
+                state.appointment = action.payload; // Changed from appointment to appointments
+                // console.log("Appointment data in reducer:", action.payload); // Log the payload
+            })
+            .addCase(getAllAppointment.rejected, (state, action) => {
+                state.loading = false;
+                state.error = action.payload;
+            });
+    },
+});
+
+export default appointmentSlice.reducer;
