@@ -15,6 +15,7 @@ const DoctorDashboard = () => {
   const { isLoggedIn, role, data } = useSelector((state) => state.auth);
   const navigate = useNavigate();
   const dispatch = useDispatch()
+
   const [appointment,setAppointment]=useState([])
   const [activeTab, setActiveTab] = useState('appointments');
   const [searchTerm, setSearchTerm] = useState('');
