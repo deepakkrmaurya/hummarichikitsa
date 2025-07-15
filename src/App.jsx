@@ -46,7 +46,7 @@ function App() {
 
         <Route element={<RequireAuth allowedRoles={["doctor", 'hospital','admin']} />}>
 
-          <Route path='doctor/dashboard' element={<DoctorDashboard />} />
+          <Route path='/doctor/dashboard' element={<DoctorDashboard />} />
           <Route path='/patient' element={<Patients />} />
           
         </Route>
@@ -58,7 +58,7 @@ function App() {
 
         </Route>
 
-        <Route element={<RequireAuth allowedRoles={['hospital']} />}>
+        <Route element={<RequireAuth allowedRoles={['hospital',"admin"]} />}>
 
           <Route path='/doctor/list/:hospitalId' element={<DoctorList />} />
           <Route path='/doctor/create/:hospitalId' element={<DoctorForm />} />
