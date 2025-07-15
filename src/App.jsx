@@ -23,12 +23,16 @@ import NotRequireAuth from './components/NotRequireAuth';
 import Denied from './components/Denied';
 import RequireAuth from './components/RequireAuth';
 import Patients from './page/doctors/Patients';
+import HospitalRegistrationForm from './page/Register';
+import AdminLoginForm from './page/admin/AdminLogin';
 function App() {
   return (
     <>
       <Routes>
         <Route element={<NotRequireAuth />}>
           <Route path="/login" element={<Login />} />
+          <Route path="/admin/login" element={<AdminLoginForm />} />
+          <Route path="/patient/register" element={<HospitalRegistrationForm />} />
           <Route path='/doctor/login' element={<DoctorLogin />} />
           <Route path='/hospital/login' element={<HospitalLogin />} />
         </Route>

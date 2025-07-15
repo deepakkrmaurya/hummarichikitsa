@@ -10,8 +10,26 @@ const initialState = {
 
 export const AuthLogin = createAsyncThunk("auth/login", async (data) => {
     try {
-        // console.log("Login data:", data);
+        
         const response = axiosInstance.post("/user/login", data);
+        toast.promise(response, {
+            loading: "Wait! Creating your account",
+            success: (data) => {
+                return data?.data?.message;
+            },
+            error: "Failed to create account",
+        });
+        // console.log((await response).data)
+        return (await response)?.data;
+    } catch (error) {
+        //   return rejectWithValue(error.response?.data?.message || "Failed to fetch hospitals");
+    }
+}
+);
+export const AuthRegister = createAsyncThunk("auth/register", async (data) => {
+    try {
+        
+        const response = axiosInstance.post("/user/register", data);
         toast.promise(response, {
             loading: "Wait! Creating your account",
             success: (data) => {
