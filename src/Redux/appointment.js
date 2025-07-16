@@ -32,7 +32,7 @@ export const AppointmentCreate = createAsyncThunk(
 
 export const todayAppointment = createAsyncThunk('/today/appintment',async()=>{
        try {
-            const response =await axiosInstance.patch('/appointment/today');
+            const response = axiosInstance.patch('/appointment/today');
             return (await response)?.data
         } catch (error) {
             return toast.error(error.response?.data?.message);

@@ -29,10 +29,10 @@ export const createHospital = createAsyncThunk('/create/hospital', async (data) 
   try {
     const response = await axiosInstance.post('/hospital', data);
     toast.promise(response, {
-      loading: "Loading please wait.....",
+      loading: " please wait.....",
       success: (data) => {
         return data?.data?.message;
-      }
+      },
     })
     return (await response)?.data
   } catch (error) {
