@@ -59,9 +59,9 @@ const DoctorDashboard = () => {
       async () => {
         const res = axiosInstance.patch('/appointment/hospital/patient')
         await getAppointment()
-        // await dispatch(getAllAppointment())
-        // await dispatch(getAllHospital())
-        // await dispatch(getAllDoctors())
+        await dispatch(getAllAppointment())
+        await dispatch(getAllHospital())
+        await dispatch(getAllDoctors())
       }
     )()
   }, [])
