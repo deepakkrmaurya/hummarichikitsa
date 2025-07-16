@@ -17,7 +17,7 @@ const Header = () => {
     };
 
     const handleLogin = (isDoctor) => {
-        login(isDoctor);
+        // login(isDoctor);
         setIsMenuOpen(false);
         navigate(isDoctor ? '/doctor-dashboard' : '/');
     };

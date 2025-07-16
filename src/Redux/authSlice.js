@@ -6,6 +6,8 @@ const initialState = {
     isLoggedIn: localStorage.getItem("isLoggedIn") || false,
     data: JSON.parse(localStorage.getItem("data")) || {},
     role: localStorage.getItem("role") || "",
+    token: localStorage.getItem("token") || "",
+
 };
 
 export const AuthLogin = createAsyncThunk("auth/login", async (data) => {
