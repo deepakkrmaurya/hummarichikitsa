@@ -118,7 +118,7 @@ const Header = () => {
                             </Link>
                             {currentUser?.role === 'doctor' || currentUser?.role === 'hospital' || currentUser?.role === 'admin' ? (
                                 <Link
-                                    to="/doctor-dashboard"
+                                    to="/doctor/dashboard"
                                     className="text-gray-700 hover:text-blue-600 transition"
                                     onClick={() => setIsMenuOpen(false)}
                                 >
@@ -150,18 +150,22 @@ const Header = () => {
                                 </div>
                             ) : (
                                 <div className="flex flex-col space-y-2">
-                                    <button
-                                        onClick={() => handleLogin(false)}
-                                        className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition"
-                                    >
-                                        Patient Login
-                                    </button>
-                                    <button
-                                        onClick={() => handleLogin(true)}
-                                        className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition"
-                                    >
-                                        Doctor Login
-                                    </button>
+                                    <Link to='/login'>
+                                        <button
+                                            onClick={() => handleLogin(false)}
+                                            className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition"
+                                        >
+                                            Patient Login
+                                        </button>
+                                    </Link>
+                                    <Link to='/doctor/login'>
+                                        <button
+                                            onClick={() => handleLogin(true)}
+                                            className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition"
+                                        >
+                                            Doctor Login
+                                        </button>
+                                    </Link>
                                 </div>
                             )}
                         </nav>
