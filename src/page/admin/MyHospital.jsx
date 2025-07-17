@@ -17,8 +17,6 @@ const MyHospital = () => {
     const dispatch = useDispatch();
     const deletedoctor = async(id)=>{
          const res = await dispatch(deleteDoctor(id))
-
-
     }
     const [isEditing, setIsEditing] = useState(false);
     const [activeTab, setActiveTab] = useState('overview');
@@ -40,11 +38,11 @@ const MyHospital = () => {
 
         (
             async () => {
-                // alert(hospital._id)
+            
                 const res = axiosInstance.get(`/doctor/?hospitalId=${hospital._id}`)
                 const doc = (await res).data
                 setDoctor(doc)
-                //  console.log( "db", (await res).data)
+              
             }
         )()
 

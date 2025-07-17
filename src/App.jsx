@@ -25,6 +25,7 @@ import RequireAuth from './components/RequireAuth';
 import Patients from './page/doctors/Patients';
 import HospitalRegistrationForm from './page/Register';
 import AdminLoginForm from './page/admin/AdminLogin';
+import AppointmentDetails from './page/doctors/Appointment';
 function App() {
   return (
     <>
@@ -48,6 +49,7 @@ function App() {
 
           <Route path='/doctor/dashboard' element={<DoctorDashboard />} />
           <Route path='/patient' element={<Patients />} />
+          <Route path='/appointment/:id' element={<AppointmentDetails />} />
           
         </Route>
 

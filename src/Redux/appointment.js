@@ -39,6 +39,15 @@ export const todayAppointment = createAsyncThunk('/today/appintment',async()=>{
         }
 })
 
+export const getAppointmentById = createAsyncThunk('/get/appintment',async(id)=>{
+       try {
+            const response = axiosInstance.get(`/appointment/${id}`);
+            return (await response)?.data
+        } catch (error) {
+            return toast.error(error.response?.data?.message);
+        }
+})
+
 export const getAllAppointment = createAsyncThunk(
     "appointment/getAll", // Changed to match slice name "appointment"
     async (_, { rejectWithValue }) => {

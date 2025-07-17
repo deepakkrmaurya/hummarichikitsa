@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Calendar, Clock, User, FileText, BarChart, Settings, Search, Calendar as CalendarIcon, CheckCircle, XCircle, Clock as ClockIcon } from 'lucide-react';
 // import { Search, Calendar as CalendarIcon, CheckCircle, Clock as ClockIcon } from 'lucide-react';
 import { getAllAppointment, todayAppointment } from '../../Redux/appointment';
@@ -186,7 +186,9 @@ const DoctorDashboard = () => {
                         </span>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                        <Link to={`/appointment/${appointment?._id}`}>
                         <button className="text-blue-600 hover:text-blue-900 mr-3">View</button>
+                        </Link>
                         {appointment?.status === 'booked' && (
                           <>
                             <button className="text-green-600 hover:text-green-900 mr-3">Confirm</button>
