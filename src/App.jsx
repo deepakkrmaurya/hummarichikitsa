@@ -26,6 +26,7 @@ import Patients from './page/doctors/Patients';
 import HospitalRegistrationForm from './page/Register';
 import AdminLoginForm from './page/admin/AdminLogin';
 import AppointmentDetails from './page/doctors/Appointment';
+import AppointmentDetailsPage from './page/AppointmentDetails';
 function App() {
   return (
     <>
@@ -44,6 +45,7 @@ function App() {
         <Route path="/doctors/:doctorId" element={<DoctorDetailPage />} />
         <Route path="/payment/:appointmentId" element={<PaymentPage />} />
         <Route path="/confirmation/:appointmentId" element={<ConfirmationPage />} />
+        <Route path="/appointment_details_page/:id" element={<AppointmentDetailsPage />} />
 
         <Route element={<RequireAuth allowedRoles={["doctor", 'hospital','admin']} />}>
 

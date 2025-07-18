@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { getAllHospital } from "../Redux/hospitalSlice";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Search, Calendar, CreditCard, CheckCircle } from 'lucide-react';
 import { AppointmentCancelled, getAllAppointment } from "../Redux/appointment";
 import { getAllDoctors } from "../Redux/doctorSlice";
@@ -104,9 +104,11 @@ const Home = () => {
                         </div>
                         
                         <div className="mt-4 flex justify-between">
-                          <button className="text-blue-600 hover:text-blue-800 text-sm font-medium">
+                          <Link to={`/appointment_details_page/${appointment?._id}`}>
+                          <button  className="text-blue-600 hover:text-blue-800 text-sm font-medium">
                             View Details
                           </button>
+                          </Link>
                           {appointment.status !== 'cancelled' && (
                             <button onClick={()=>CancledAppointment(appointment?._id)} className="text-red-600 hover:text-red-800 text-sm font-medium">
                               Cancel
