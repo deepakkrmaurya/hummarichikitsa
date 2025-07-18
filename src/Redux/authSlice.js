@@ -12,25 +12,29 @@ const initialState = {
 
 export const AuthLogin = createAsyncThunk("auth/login", async (data) => {
     try {
-        
-        const response = axiosInstance.post("/user/login", data);
-        toast.promise(response, {
-            loading: "Wait! Creating your account",
-            success: (data) => {
-                return data?.data?.message;
+
+        const responsePromise = axiosInstance.post("/user/login", data);
+
+        toast.promise(responsePromise, {
+            loading: "Wait! Logging in...",  // Changed from "Creating your account" to "Logging in"
+            success: (response) => {
+                return response?.data?.message || "Login successful";
             },
-            error: "Failed to create account",
+            error: (error) => {
+                return error.response?.data?.message || "Login failed";
+            }
         });
-        // console.log((await response).data)
-        return (await response)?.data;
+
+        const response = await responsePromise;
+        return response.data;
     } catch (error) {
-        //   return rejectWithValue(error.response?.data?.message || "Failed to fetch hospitals");
+        return rejectWithValue(error.response?.data?.message || "Failed to fetch hospitals");
     }
 }
 );
 export const AuthRegister = createAsyncThunk("auth/register", async (data) => {
     try {
-        
+
         const response = axiosInstance.post("/user/register", data);
         toast.promise(response, {
             loading: "Wait! Creating your account",
