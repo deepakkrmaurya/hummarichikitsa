@@ -78,7 +78,7 @@ const AppointmentDetails = () => {
                             </div>
                             <div className="space-y-1">
                                 <p className="text-sm text-gray-500 font-medium">Fees Paid</p>
-                                <p className="text-lg font-semibold text-green-600">₹{appointment.amount}</p>
+                                <p className="text-lg font-semibold text-green-600">₹{appointment?.amount}</p>
                             </div>
                         </div>
                     </div>
@@ -109,8 +109,8 @@ const AppointmentDetails = () => {
                                             </div>
                                         </div>
                                         <div>
-                                            <p className="text-sm text-gray-500">{item.label}</p>
-                                            <p className="font-medium">{item.value}</p>
+                                            <p className="text-sm text-gray-500">{item?.label}</p>
+                                            <p className="font-medium">{item?.value}</p>
                                         </div>
                                     </div>
                                 ))}
@@ -164,15 +164,15 @@ const AppointmentDetails = () => {
                                     { label: 'Contact Number', value: appointment?.hospitalId?.phone },
                                     { label: 'Address', value: appointment?.hospitalId?.address, colSpan: 'md:col-span-2' }
                                 ].map((item, index) => (
-                                    <div key={index} className={`flex gap-3 ${item.colSpan || ''}`}>
+                                    <div key={index} className={`flex gap-3 ${item?.colSpan || ''}`}>
                                         <div className="flex-shrink-0">
                                             <div className="h-5 w-5 rounded-full bg-purple-100 flex items-center justify-center">
                                                 <div className="h-1.5 w-1.5 rounded-full bg-purple-600"></div>
                                             </div>
                                         </div>
                                         <div>
-                                            <p className="text-sm text-gray-500">{item.label}</p>
-                                            <p className="font-medium">{item.value}</p>
+                                            <p className="text-sm text-gray-500">{item?.label}</p>
+                                            <p className="font-medium">{item?.value}</p>
                                         </div>
                                     </div>
                                 ))}
