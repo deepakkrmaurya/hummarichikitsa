@@ -64,7 +64,7 @@ const AppointmentDetails = () => {
                             <div className="space-y-1">
                                 <p className="text-sm text-gray-500 font-medium">Date</p>
                                 <p className="text-lg font-semibold">
-                                    {new Date(appointment.date).toLocaleDateString('en-IN', {
+                                    {new Date(appointment?.date).toLocaleDateString('en-IN', {
                                         weekday: 'long',
                                         day: 'numeric',
                                         month: 'long',
@@ -74,7 +74,7 @@ const AppointmentDetails = () => {
                             </div>
                             <div className="space-y-1">
                                 <p className="text-sm text-gray-500 font-medium">Time Slot</p>
-                                <p className="text-lg font-semibold">{appointment.slot}</p>
+                                <p className="text-lg font-semibold">{appointment?.slot}</p>
                             </div>
                             <div className="space-y-1">
                                 <p className="text-sm text-gray-500 font-medium">Fees Paid</p>
