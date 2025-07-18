@@ -8,43 +8,43 @@ const initialState = {
   error: null,
 };
 
-  
-export const RegisterDoctor = createAsyncThunk('/register/doctor',async(data)=>{
-   try {
-       const response = axiosInstance.post('doctor',data)
-       toast.promise(response,{
-        loading:'wait doctor register',
-        success:(data)=>{
-          return data?.data?.message
-        }
 
-       })
-       console.log((await response)?.data)
-       return (await response)?.data
-   } catch (error) {
+export const RegisterDoctor = createAsyncThunk('/register/doctor', async (data) => {
+  try {
+    const response = axiosInstance.post('doctor', data)
+    toast.promise(response, {
+      loading: 'wait doctor register',
+      success: (data) => {
+        return data?.data?.message
+      }
+
+    })
+    console.log((await response)?.data)
+    return (await response)?.data
+  } catch (error) {
     console.log(error?.response?.data?.message)
     toast.error(error?.response?.data?.message)
-   }
+  }
 })
 
 
-export const deleteDoctor = createAsyncThunk('delete/doctor',async(id)=>{
+export const deleteDoctor = createAsyncThunk('delete/doctor', async (id) => {
   try {
-      // console.log(id)
-       const response = axiosInstance.delete(`doctor/${id}`,)
-       toast.promise(response,{
-        loading:'wait delete',
-        success:(data)=>{
-          return data?.data?.message
-        }
+    // console.log(id)
+    const response = axiosInstance.delete(`doctor/${id}`,)
+    toast.promise(response, {
+      loading: 'wait delete',
+      success: (data) => {
+        return data?.data?.message
+      }
 
-       })
-      //  console.log((await response)?.data)
-       return (await response)?.data
-   } catch (error) {
+    })
+    //  console.log((await response)?.data)
+    return (await response)?.data
+  } catch (error) {
 
     toast.error(error?.response?.data?.message)
-   }
+  }
 })
 
 
@@ -73,7 +73,7 @@ export const Logout = createAsyncThunk('/logout', async () => {
     })
     return (await response)?.data
   } catch (error) {
-       toast.error(error?.response?.data?.message)
+    toast.error(error?.response?.data?.message)
   }
 })
 
@@ -99,7 +99,6 @@ const doctordSlice = createSlice({
       .addCase(getAllDoctors.fulfilled, (state, action) => {
         state.loading = false;
         state.doctors = action.payload;
-        // console.log("doctors data (Redux):", action.payload); // Should log now
       })
   },
 });

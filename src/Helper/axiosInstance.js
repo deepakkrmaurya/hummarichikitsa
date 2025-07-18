@@ -11,6 +11,7 @@
 // // const { token } = useSelector((state) => state.auth);
 
 import axios from "axios";
+import { useSelector } from "react-redux";
 
 // const BASE_URL = "http://localhost:5000/api/v1";
 const BASE_URL = "https://doctor-appointment-backend-t00j.onrender.com/api/v1";

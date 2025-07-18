@@ -66,7 +66,7 @@ const authSlice = createSlice({
                 state.data = action?.payload?.user;
                 state.role = action?.payload?.user?.role;
                 state.token = action?.payload?.token;
-                console.log("doctors data (Redux):", action.payload); // Should log now
+               
             })
     },
 });
