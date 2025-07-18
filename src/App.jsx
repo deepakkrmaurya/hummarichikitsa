@@ -7,7 +7,6 @@ import { Routes, Route } from "react-router-dom";
 import Home from './page/Home';
 import DoctorListPage from './page/DoctorListPage';
 import HospitalListPage from './page/HospitalListPage';
-import Login from './page/Login';
 import DoctorDetailPage from './page/DoctorDetailPage';
 import PaymentPage from './page/PaymentPage';
 import ConfirmationPage from './page/ConfirmationPage';
@@ -23,18 +22,17 @@ import NotRequireAuth from './components/NotRequireAuth';
 import Denied from './components/Denied';
 import RequireAuth from './components/RequireAuth';
 import Patients from './page/doctors/Patients';
-import HospitalRegistrationForm from './page/Register';
 import AdminLoginForm from './page/admin/AdminLogin';
 import AppointmentDetails from './page/doctors/Appointment';
 import AppointmentDetailsPage from './page/AppointmentDetails';
+import MobileOTPLogin from './page/Login';
 function App() {
   return (
     <>
       <Routes>
         <Route element={<NotRequireAuth />}>
-          <Route path="/login" element={<Login />} />
+          <Route path="/login" element={<MobileOTPLogin />} />
           <Route path="/admin/login" element={<AdminLoginForm />} />
-          <Route path="/patient/register" element={<HospitalRegistrationForm />} />
           <Route path='/doctor/login' element={<DoctorLogin />} />
           <Route path='/hospital/login' element={<HospitalLogin />} />
         </Route>

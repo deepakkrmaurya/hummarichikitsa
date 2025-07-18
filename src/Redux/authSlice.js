@@ -32,6 +32,29 @@ export const AuthLogin = createAsyncThunk("auth/login", async (data) => {
     }
 }
 );
+
+export const AuthOtpVerify = createAsyncThunk("auth/verify/otp", async (data) => {
+    try {
+
+        const responsePromise = axiosInstance.post("/user/verify/otp", data);
+
+        toast.promise(responsePromise, {
+            loading: "Wait! Logging in...",  // Changed from "Creating your account" to "Logging in"
+            success: (response) => {
+                return response?.data?.message || "Login successful";
+            },
+            error: (error) => {
+                return error.response?.data?.message || "Login failed";
+            }
+        });
+
+        const response = await responsePromise;
+        return response.data;
+    } catch (error) {
+        return rejectWithValue(error.response?.data?.message || "Failed to fetch hospitals");
+    }
+}
+);
 export const AuthRegister = createAsyncThunk("auth/register", async (data) => {
     try {
 
@@ -58,14 +81,14 @@ const authSlice = createSlice({
     extraReducers: (builder) => {
         builder
             .addCase(AuthLogin.fulfilled, (state, action) => {
-                localStorage.setItem("data", JSON.stringify(action?.payload?.user));
-                localStorage.setItem("isLoggedIn", true);
-                localStorage.setItem("role", action?.payload?.user?.role);
-                localStorage.setItem("token", action?.payload?.token);
-                state.isLoggedIn = true;
-                state.data = action?.payload?.user;
-                state.role = action?.payload?.user?.role;
-                state.token = action?.payload?.token;
+                // localStorage.setItem("data", JSON.stringify(action?.payload?.user));
+                // localStorage.setItem("isLoggedIn", true);
+                // localStorage.setItem("role", action?.payload?.user?.role);
+                // localStorage.setItem("token", action?.payload?.token);
+                // state.isLoggedIn = true;
+                // state.data = action?.payload?.user;
+                // state.role = action?.payload?.user?.role;
+                // state.token = action?.payload?.token;
                
             })
     },

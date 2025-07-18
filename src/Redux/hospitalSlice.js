@@ -27,7 +27,7 @@ export const LoginHospital = createAsyncThunk('/hospital/login', async (data) =>
 
 export const createHospital = createAsyncThunk('/create/hospital', async (data) => {
   try {
-    const response = await axiosInstance.post('/hospital', data);
+    const response = axiosInstance.post('/hospital', data);
     toast.promise(response, {
       loading: " please wait.....",
       success: (data) => {

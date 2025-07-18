@@ -60,10 +60,7 @@ const Header = () => {
 
                         {currentUser ? (
                             <div className="flex items-center">
-                                <div className="flex items-center mr-4">
-                                    <User className="h-5 w-5 text-gray-600 mr-1" />
-                                    <span className="text-gray-800">{currentUser.name}</span>
-                                </div>
+                                
                                 <button
                                     onClick={handleLogout}
                                     className="flex items-center text-gray-700 hover:text-red-600 transition"
@@ -136,10 +133,7 @@ const Header = () => {
 
                             {currentUser ? (
                                 <div className="flex flex-col space-y-2">
-                                    <div className="flex items-center">
-                                        <User className="h-5 w-5 text-gray-600 mr-1" />
-                                        <span className="text-gray-800">{currentUser.name}</span>
-                                    </div>
+                                    
                                     <button
                                         onClick={handleLogout}
                                         className="flex items-center text-gray-700 hover:text-red-600 transition"

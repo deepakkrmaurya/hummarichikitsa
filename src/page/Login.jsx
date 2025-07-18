@@ -1,51 +1,102 @@
 import { useState } from "react";
 import { useFormik } from "formik";
 import * as Yup from "yup";
-import { EyeIcon, EyeSlashIcon } from "@heroicons/react/24/outline";
 import { Link, useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
-import { AuthLogin } from "../Redux/authSlice";
+import { AuthLogin, AuthOtpVerify } from "../Redux/authSlice";
 
-const Login = () => {
-  const [showPassword, setShowPassword] = useState(false);
+const MobileOTPLogin = () => {
   const [loginError, setLoginError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [otpSent, setOtpSent] = useState(false);
+  const [countdown, setCountdown] = useState(0);
   const navigate = useNavigate();
   const dispatch = useDispatch();
+
+  // Start countdown timer
+  const startCountdown = () => {
+    setCountdown(30);
+    const timer = setInterval(() => {
+      setCountdown((prev) => {
+        if (prev <= 1) clearInterval(timer);
+        return prev - 1;
+      });
+    }, 1000);
+  };
+
   // Formik & Yup Validation
   const formik = useFormik({
     initialValues: {
-      email: "",
-      password: "",
+      mobile: "",
+      otp: "",
     },
     validationSchema: Yup.object({
-      email: Yup.string()
-        .email("Invalid email address")
-        .required("Email is required"),
-      password: Yup.string()
-        .min(6, "Password must be at least 6 characters")
-        .required("Password is required"),
+      mobile: Yup.string()
+        .matches(/^[0-9]{10}$/, "Mobile number must be 10 digits")
+        .required("Mobile number is required"),
+      otp: otpSent
+        ? Yup.string()
+          .matches(/^[0-9]{4}$/, "OTP must be 4 digits")
+          .required("OTP is required")
+        : Yup.string().notRequired(),
     }),
 
     onSubmit: async (values) => {
       setLoading(true);
       setLoginError("");
+
       try {
-        const response = await dispatch(AuthLogin(values))
-        
-        if (response?.payload?.success) {
-          localStorage.setItem("data", JSON.stringify(response?.payload?.user));
-          localStorage.setItem("isLoggedIn", true);
-          localStorage.setItem("role", response?.payload?.user?.role);
-          navigate("/"); 
+        if (!otpSent) {
+          // Send OTP request
+          const response = await dispatch(AuthLogin({ userid: values.mobile }));
+          if (response?.payload?.success) {
+            setOtpSent(true);
+            startCountdown();
+          } else {
+            setLoginError(response?.payload?.message || "Failed to send OTP");
+          }
+        } else {
+          // Verify OTP request
+          const response = await dispatch(AuthOtpVerify({
+            userid: values.mobile,
+            otp: values.otp
+          }));
+
+          if (response?.payload?.success) {
+            localStorage.setItem("data", JSON.stringify(response?.payload?.user));
+            localStorage.setItem("isLoggedIn", true);
+            localStorage.setItem("role", response?.payload?.user?.role);
+            localStorage.setItem("token", response?.payload?.token);
+            navigate("/");
+          } else {
+            setLoginError(response?.payload?.message || "Invalid OTP");
+          }
         }
       } catch (error) {
-        setLoginError(error.response?.data?.message || "Login failed");
+        setLoginError(error.response?.data?.message || "Something went wrong");
       } finally {
         setLoading(false);
       }
     },
   });
+
+  const handleResendOTP = async () => {
+    if (countdown > 0) return;
+
+    setLoading(true);
+    try {
+      const response = await dispatch(sendOTP({ mobile: formik.values.mobile }));
+      if (response?.payload?.success) {
+        startCountdown();
+      } else {
+        setLoginError(response?.payload?.message || "Failed to resend OTP");
+      }
+    } catch (error) {
+      setLoginError("Failed to resend OTP");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
@@ -73,90 +124,79 @@ const Login = () => {
           )}
 
           <form className="space-y-6" onSubmit={formik.handleSubmit}>
-            {/* Email Field */}
+            {/* Mobile Number Field */}
             <div>
               <label
-                htmlFor="email"
+                htmlFor="mobile"
                 className="block text-sm font-medium text-gray-700"
               >
-                Email
+                Mobile Number
               </label>
               <div className="mt-1">
                 <input
-                  id="email"
-                  name="email"
-                  type="email"
-                  autoComplete="email"
+                  id="mobile"
+                  name="mobile"
+                  type="tel"
+                  autoComplete="tel"
+                  disabled={otpSent}
                   onChange={formik.handleChange}
                   onBlur={formik.handleBlur}
-                  value={formik.values.email}
-                  className={`w-full px-3 py-2 border ${
-                    formik.touched.email && formik.errors.email
+                  value={formik.values.mobile}
+                  className={`w-full px-3 py-2 border ${formik.touched.mobile && formik.errors.mobile
                       ? "border-red-300"
                       : "border-gray-300"
-                  } rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500`}
+                    } rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 disabled:bg-gray-100`}
                 />
-                {formik.touched.email && formik.errors.email && (
+                {formik.touched.mobile && formik.errors.mobile && (
                   <p className="mt-1 text-sm text-red-600">
-                    {formik.errors.email}
+                    {formik.errors.mobile}
                   </p>
                 )}
               </div>
             </div>
 
-            {/* Password Field */}
-            <div>
-              <label
-                htmlFor="password"
-                className="block text-sm font-medium text-gray-700"
-              >
-                Password
-              </label>
-              <div className="mt-1 relative">
-                <input
-                  id="password"
-                  name="password"
-                  type={showPassword ? "text" : "password"}
-                  autoComplete="current-password"
-                  onChange={formik.handleChange}
-                  onBlur={formik.handleBlur}
-                  value={formik.values.password}
-                  className={`w-full px-3 py-2 border ${
-                    formik.touched.password && formik.errors.password
-                      ? "border-red-300"
-                      : "border-gray-300"
-                  } rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500`}
-                />
-                <button
-                  type="button"
-                  className="absolute inset-y-0 right-0 pr-3 flex items-center"
-                  onClick={() => setShowPassword(!showPassword)}
-                >
-                  {showPassword ? (
-                    <EyeSlashIcon className="h-5 w-5 text-gray-500" />
-                  ) : (
-                    <EyeIcon className="h-5 w-5 text-gray-500" />
+            {/* OTP Field (shown only after OTP is sent) */}
+            {otpSent && (
+              <div>
+                <div className="flex justify-between items-center">
+                  <label
+                    htmlFor="otp"
+                    className="block text-sm font-medium text-gray-700"
+                  >
+                    OTP
+                  </label>
+                  <button
+                    type="button"
+                    onClick={handleResendOTP}
+                    disabled={countdown > 0 || loading}
+                    className="text-sm font-medium text-blue-600 hover:text-blue-500 disabled:text-gray-400"
+                  >
+                    {countdown > 0 ? `Resend in ${countdown}s` : "Resend OTP"}
+                  </button>
+                </div>
+                <div className="mt-1">
+                  <input
+                    id="otp"
+                    name="otp"
+                    type="text"
+                    inputMode="numeric"
+                    autoComplete="one-time-code"
+                    onChange={formik.handleChange}
+                    onBlur={formik.handleBlur}
+                    value={formik.values.otp}
+                    className={`w-full px-3 py-2 border ${formik.touched.otp && formik.errors.otp
+                        ? "border-red-300"
+                        : "border-gray-300"
+                      } rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500`}
+                  />
+                  {formik.touched.otp && formik.errors.otp && (
+                    <p className="mt-1 text-sm text-red-600">
+                      {formik.errors.otp}
+                    </p>
                   )}
-                </button>
+                </div>
               </div>
-              {formik.touched.password && formik.errors.password && (
-                <p className="mt-1 text-sm text-red-600">
-                  {formik.errors.password}
-                </p>
-              )}
-            </div>
-
-            {/* Forgot Password Link */}
-            <div className="flex items-center justify-end">
-              <div className="text-sm">
-                <Link
-                  to="/patient/forgot-password"
-                  className="font-medium text-blue-600 hover:text-blue-500"
-                >
-                  Forgot password?
-                </Link>
-              </div>
-            </div>
+            )}
 
             {/* Submit Button */}
             <div>
@@ -165,7 +205,13 @@ const Login = () => {
                 disabled={loading}
                 className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {loading ? "Logging in..." : "Sign in"}
+                {loading
+                  ? otpSent
+                    ? "Verifying..."
+                    : "Sending OTP..."
+                  : otpSent
+                    ? "Verify OTP"
+                    : "Send OTP"}
               </button>
             </div>
           </form>
@@ -175,4 +221,4 @@ const Login = () => {
   );
 };
 
-export default Login;
+export default MobileOTPLogin;
