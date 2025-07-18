@@ -51,9 +51,9 @@ const AppointmentDetails = () => {
                                 <h1 className="text-2xl sm:text-3xl font-bold">Appointment Summary</h1>
                                 <p className="text-blue-100 mt-1">ID: {appointment?._id}</p>
                             </div>
-                            <span className={`px-4 py-2 rounded-full text-sm font-semibold ${appointment.status === 'confirmed' ? 'bg-green-500' : 'bg-amber-500'
+                            <span className={`px-4 py-2 rounded-full text-sm font-semibold ${appointment?.status === 'confirmed' ? 'bg-green-500' : 'bg-amber-500'
                                 } shadow-md`}>
-                                {appointment.status.charAt(0).toUpperCase() + appointment.status.slice(1)}
+                                {appointment?.status.charAt(0).toUpperCase() + appointment?.status.slice(1)}
                             </span>
                         </div>
                     </div>
