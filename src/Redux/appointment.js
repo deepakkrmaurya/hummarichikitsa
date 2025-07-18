@@ -29,6 +29,54 @@ export const AppointmentCreate = createAsyncThunk(
         }
     }
 );
+export const AppointmentConferm = createAsyncThunk(
+    "appointment/confirmd", // Changed to match slice name
+    async (data) => {
+        try {
+            
+            const response = axiosInstance.patch(`/appointment/${data}/status`, {
+                "status":"confirmed"
+            });
+            toast.promise(response, {
+                loading: "Confirming your appointment...",
+                success: (data) => {
+                    return data?.data?.message;
+                },
+                error: (error) => {
+                    return error?.response?.data?.message || "Failed to book appointment. Please try again."
+                }
+            });
+
+            return (await response).data
+        } catch (error) {
+            return toast.error(error.response?.data?.message || "Appointment booking failed.");
+        }
+    }
+);
+export const AppointmentCancelled = createAsyncThunk(
+    "appointment/cancel", // Changed to match slice name
+    async (data) => {
+        try {
+            
+            const response = axiosInstance.patch(`/appointment/${data}/cancel`, {
+                "status":"cancelled"
+            });
+            toast.promise(response, {
+                loading: "cancelled your appointment...",
+                success: (data) => {
+                    return data?.data?.message;
+                },
+                error: (error) => {
+                    return error?.response?.data?.message || "Failed to cancelled appointment. Please try again."
+                }
+            });
+
+            return (await response).data
+        } catch (error) {
+            return toast.error(error.response?.data?.message || "Appointment cancelled failed.");
+        }
+    }
+);
 
 export const todayAppointment = createAsyncThunk('/today/appintment',async()=>{
        try {

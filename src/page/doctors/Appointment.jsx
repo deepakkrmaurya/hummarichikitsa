@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { getAppointmentById } from '../../Redux/appointment';
+import { AppointmentCancelled, AppointmentConferm, getAppointmentById } from '../../Redux/appointment';
 import { useDispatch } from 'react-redux';
 import { useParams } from 'react-router-dom';
 
@@ -7,13 +7,23 @@ const AppointmentDetails = () => {
     const [isLoading, setIsLoading] = useState(true);
     const [showDetails, setShowDetails] = useState(false);
     const [appointment, setAppointments] = useState()
-    
+
     const { id } = useParams();
     const dispatch = useDispatch()
     const getAppointment = async () => {
         const res = await dispatch(getAppointmentById(id));
-        console.log(res.payload)
         setAppointments(res.payload)
+    }
+
+    const ConfirmAppointment = async (appointment_id) => {
+
+        const res = await dispatch(AppointmentConferm(appointment_id))
+        getAppointment()
+    }
+     const CancelledAppointment = async (appointment_id) => {
+
+        const res = await dispatch(AppointmentCancelled(appointment_id))
+        getAppointment()
     }
 
     useEffect(() => {
@@ -88,7 +98,7 @@ const AppointmentDetails = () => {
 
                         {/* Patient Details */}
                         <div className="bg-blue-50 rounded-xl p-6 transition-all duration-500 delay-100 ease-in-out">
-                            <div className="flex items-center gap-4 mb-5">                      
+                            <div className="flex items-center gap-4 mb-5">
                                 <div className="bg-blue-100 p-3 rounded-full">
                                     <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
@@ -183,24 +193,33 @@ const AppointmentDetails = () => {
                     {/* Action Buttons */}
                     <div className="p-6 sm:p-8 border-t border-gray-100 bg-gray-50">
                         <div className="flex flex-wrap justify-center gap-4">
-                            <button className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg shadow-md transition-all transform hover:scale-[1.02] flex items-center gap-2">
-                                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                                </svg>
-                                Confirm Appointment
-                            </button>
+                            {
+                                appointment?.status != "Confirmed" && (
+                                    <button onClick={() => ConfirmAppointment(appointment?._id)} className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg shadow-md transition-all transform hover:scale-[1.02] flex items-center gap-2">
+                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                            <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                                        </svg>
+                                        Confirm Appointment
+                                    </button>
+                                )
+                            }
+
                             {/* <button className="px-6 py-3 border border-blue-600 text-blue-600 hover:bg-blue-50 font-medium rounded-lg transition-all transform hover:scale-[1.02] flex items-center gap-2">
                                 <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                                 </svg>
                                 Reschedule
                             </button> */}
-                            <button className="px-6 py-3 border border-red-600 text-red-600 hover:bg-red-50 font-medium rounded-lg transition-all transform hover:scale-[1.02] flex items-center gap-2">
+                            {
+                                appointment?.status != 'cancelled' &&  (
+                                    <button onClick={()=>CancelledAppointment(appointment?._id)} className="px-6 py-3 border border-red-600 text-red-600 hover:bg-red-50 font-medium rounded-lg transition-all transform hover:scale-[1.02] flex items-center gap-2">
                                 <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                                 </svg>
                                 Cancel Appointment
                             </button>
+                                )
+                            }
                         </div>
                     </div>
                 </div>

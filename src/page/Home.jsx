@@ -3,7 +3,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { getAllHospital } from "../Redux/hospitalSlice";
 import { useNavigate } from "react-router-dom";
 import { Search, Calendar, CreditCard, CheckCircle } from 'lucide-react';
-import { getAllAppointment } from "../Redux/appointment";
+import { AppointmentCancelled, getAllAppointment } from "../Redux/appointment";
 import { getAllDoctors } from "../Redux/doctorSlice";
 import Header from "../components/Header";
 import Layout from "../components/Layout/Layout";
@@ -16,7 +16,10 @@ const Home = () => {
   const appointments = useSelector((state) => state.appointment?.appointment);
   // console.log("Hospitals data (Home):", hospital);
   const dispatch = useDispatch();
-  
+  const CancledAppointment = async(id)=>{
+      await dispatch(AppointmentCancelled(id))
+      await dispatch(getAllAppointment())
+  }
   useEffect(() => {
         (
             async () => {
@@ -105,7 +108,7 @@ const Home = () => {
                             View Details
                           </button>
                           {appointment.status !== 'cancelled' && (
-                            <button className="text-red-600 hover:text-red-800 text-sm font-medium">
+                            <button onClick={()=>CancledAppointment(appointment?._id)} className="text-red-600 hover:text-red-800 text-sm font-medium">
                               Cancel
                             </button>
                           )}
