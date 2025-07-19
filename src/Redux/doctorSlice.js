@@ -77,6 +77,16 @@ export const Logout = createAsyncThunk('/logout', async () => {
   }
 })
 
+
+export const GetDoctor = createAsyncThunk('/get/doctor', async (id) => {
+  try {
+    const response = axiosInstance.get(`/doctor/${id}`)
+    return (await response)?.data
+  } catch (error) {
+    toast.error(error?.response?.data?.message)
+  }
+})
+
 export const getAllDoctors = createAsyncThunk(
   "doctors/getAll", // Changed to match slice name
   async (_, { rejectWithValue }) => {

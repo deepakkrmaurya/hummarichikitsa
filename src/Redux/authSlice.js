@@ -16,14 +16,15 @@ export const AuthLogin = createAsyncThunk("auth/login", async (data) => {
         const responsePromise = axiosInstance.post("/user/login", data);
 
         toast.promise(responsePromise, {
-            loading: "Wait! Logging in...",  // Changed from "Creating your account" to "Logging in"
+            loading: "Please wait while we verify your phone number...",
             success: (response) => {
-                return response?.data?.message || "Login successful";
+                return response?.data?.message || "OTP has been sent successfully to your number.";
             },
             error: (error) => {
-                return error.response?.data?.message || "Login failed";
+                return error.response?.data?.message || "Failed to send OTP. Please try again.";
             }
         });
+
 
         const response = await responsePromise;
         return response.data;
@@ -89,7 +90,7 @@ const authSlice = createSlice({
                 // state.data = action?.payload?.user;
                 // state.role = action?.payload?.user?.role;
                 // state.token = action?.payload?.token;
-               
+
             })
     },
 });

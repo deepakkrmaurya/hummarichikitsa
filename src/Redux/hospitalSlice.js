@@ -25,6 +25,16 @@ export const LoginHospital = createAsyncThunk('/hospital/login', async (data) =>
 })
 
 
+export const GetHospitalById = createAsyncThunk('/hospital/get', async (id) => {
+  try {
+    const response = axiosInstance.get(`/hospital/${id}`);
+    return (await response)?.data
+  } catch (error) {
+    toast.error(error?.response?.data?.message)
+  }
+})
+
+
 export const createHospital = createAsyncThunk('/create/hospital', async (data) => {
   try {
     const response = axiosInstance.post('/hospital', data);

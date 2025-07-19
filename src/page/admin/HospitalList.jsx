@@ -3,18 +3,26 @@ import Dashboard from '../../components/Layout/Dashboard'
 import { Link, useNavigate } from 'react-router-dom'
 import { useDispatch, useSelector } from 'react-redux'
 import { getAllHospital } from '../../Redux/hospitalSlice'
+import axiosInstance from '../../Helper/axiosInstance'
 
 const HospitalList = () => {
-    const navigate  = useNavigate();
+    const navigate = useNavigate();
     const dispatch = useDispatch();
-      const hospitals = useSelector((state) => state?.hospitals?.hospitals);
-    useEffect(()=>{
-         (
-            async ()=>{
+    const hospitals = useSelector((state) => state?.hospitals?.hospitals);
+    const updateStatus = async (id, status) => {
+
+
+        const res = await axiosInstance.put(`/hospital/${id}/status`, {
+
+        })
+    }
+    useEffect(() => {
+        (
+            async () => {
                 await dispatch(getAllHospital())
             }
-         )()
-    },[])
+        )()
+    }, [])
     return (
         <Dashboard>
             <div class=" mx-auto shadow-xl rounded-2xl py-1">
@@ -25,9 +33,9 @@ const HospitalList = () => {
                     </div>
                     <div class="mt-4 sm:mt-0 sm:ml-16 sm:flex-none">
                         <Link to='/hospital/create'>
-                        <button type="button" class="inline-flex items-center justify-center rounded-md border border-transparent bg-green-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 sm:w-auto">
-                            <i class="fas fa-plus mr-2"></i> Add Hospital
-                        </button>
+                            <button type="button" class="inline-flex items-center justify-center rounded-md border border-transparent bg-green-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 sm:w-auto">
+                                <i class="fas fa-plus mr-2"></i> Add Hospital
+                            </button>
                         </Link>
                     </div>
                 </div>
@@ -82,57 +90,67 @@ const HospitalList = () => {
                                     <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Beds</th>
                                     <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Specialities</th>
                                     <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Status</th>
-                                    <th  scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
-                                       Actions
+                                    <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
+                                        Actions
                                     </th>
                                 </tr>
                             </thead>
                             <tbody class="divide-y divide-gray-200 bg-white">
-                               {
-                                hospitals.map((hospital,index)=>{
-                                    return(
-                                       <tr class="hover:bg-gray-50">
-                                    <td class="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900 sm:pl-6">#HSP00{index +1}</td>
-                                    <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                                        <div class="flex items-center">
-                                            <div class="h-10 w-10 flex-shrink-0">
-                                                <img class="h-10 w-10 rounded-full" src="https://via.placeholder.com/40" alt="" />
-                                            </div>
-                                            <div class="ml-4">
-                                                <div class="font-medium text-gray-900">{hospital?.name}</div>
-                                                <div class="text-gray-500">{hospital?.email}</div>
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                                        <div class="text-gray-900">{hospital?.address}</div>
-                                        <div class="text-gray-500">{hospital?.city}</div>
-                                    </td>
-                                    <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">250</td>
-                                    <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                                        <div class="flex flex-wrap gap-1">
-                                            {
-                                                hospital?.specialties.map((e)=>{
-                                                  return(
-                                                      <span class="inline-flex items-center rounded-full bg-blue-100 px-2.5 py-0.5 text-xs font-medium text-blue-800">{e}</span>
+                                {
+                                    hospitals.map((hospital, index) => {
+                                        return (
+                                            <tr class="hover:bg-gray-50">
+                                                <td class="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900 sm:pl-6">#HSP00{index + 1}</td>
+                                                <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                                                    <div class="flex items-center">
+                                                        <div class="h-10 w-10 flex-shrink-0">
+                                                            <img class="h-10 w-10 rounded-full" src="https://via.placeholder.com/40" alt="" />
+                                                        </div>
+                                                        <div class="ml-4">
+                                                            <div class="font-medium text-gray-900">{hospital?.name}</div>
+                                                            <div class="text-gray-500">{hospital?.email}</div>
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                                <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                                                    <div class="text-gray-900">{hospital?.address}</div>
+                                                    <div class="text-gray-500">{hospital?.city}</div>
+                                                </td>
+                                                <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">250</td>
+                                                <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                                                    <div class="flex flex-wrap gap-1">
+                                                        {
+                                                            hospital?.specialties.map((e) => {
+                                                                return (
+                                                                    <span class="inline-flex items-center rounded-full bg-blue-100 px-2.5 py-0.5 text-xs font-medium text-blue-800">{e}</span>
 
-                                                  )
-                                                })
-                                            }
-                                            {/* <span class="inline-flex items-center rounded-full bg-green-100 px-2.5 py-0.5 text-xs font-medium text-green-800">Neurology</span>
+                                                                )
+                                                            })
+                                                        }
+                                                        {/* <span class="inline-flex items-center rounded-full bg-green-100 px-2.5 py-0.5 text-xs font-medium text-green-800">Neurology</span>
                                             <span class="inline-flex items-center rounded-full bg-purple-100 px-2.5 py-0.5 text-xs font-medium text-purple-800">+3</span> */}
-                                        </div>
-                                    </td>
-                                    <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                                        <span class="inline-flex items-center rounded-full bg-green-100 px-2.5 py-0.5 text-xs font-medium text-green-800">Active</span>
-                                    </td>
-                                    <td class="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-6">
+                                                    </div>
+                                                </td>
+                                                <td
+                                                    onClick={() => updateStatus(hospital?._id,hospital?.status)}
+                                                    className="whitespace-nowrap cursor-pointer px-3 py-4 text-sm text-gray-500"
+                                                >
+                                                    <span
+                                                        className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${hospital?.status === 'active'
+                                                            ? 'bg-green-100 text-green-800 animate-pulse'
+                                                            : 'bg-gray-100 text-gray-800'
+                                                            }`}
+                                                    >
+                                                        {hospital?.status}
+                                                    </span>
+                                                </td>
+                                                <td class="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-6">
 
-                                        <div 
-                                        onClick={()=>navigate(`/doctor/list/${hospital?._id}`)}
-                                        class="flex items-center space-x-2 cursor-pointer">
-                                            View
-                                            {/* <button class="text-indigo-600 hover:text-indigo-900">
+                                                    <div
+                                                        onClick={() => navigate(`/hospital/${hospital?._id}`)}
+                                                        class="flex items-center space-x-2 cursor-pointer">
+                                                        View
+                                                        {/* <button class="text-indigo-600 hover:text-indigo-900">
                                                 <i class="fas fa-eye"></i>
                                             </button>
                                             <button class="text-yellow-600 hover:text-yellow-900">
@@ -141,16 +159,16 @@ const HospitalList = () => {
                                             <button class="text-red-600 hover:text-red-900">
                                                 <i class="fas fa-trash"></i>
                                             </button> */}
-                                        </div>
-                                        
-                                    </td>
-                                </tr>
-                                    )
-                                })
-                               }
-                                
+                                                    </div>
 
-                                
+                                                </td>
+                                            </tr>
+                                        )
+                                    })
+                                }
+
+
+
                             </tbody>
                         </table>
                     </div>

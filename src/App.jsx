@@ -26,6 +26,8 @@ import AdminLoginForm from './page/admin/AdminLogin';
 import AppointmentDetails from './page/doctors/Appointment';
 import AppointmentDetailsPage from './page/AppointmentDetails';
 import MobileOTPLogin from './page/Login';
+import HospitalDetails from './page/admin/HospitalDetails';
+import DoctorDetailsPage from './page/doctors/DoctorDetails';
 function App() {
   return (
     <>
@@ -65,6 +67,8 @@ function App() {
           <Route path='/doctor/list/:hospitalId' element={<DoctorList />} />
           <Route path='/doctor/create/:hospitalId' element={<DoctorForm />} />
           <Route path='/hospital' element={<MyHospital />} />
+          <Route path='/hospital/:id' element={<HospitalDetails />} />
+          <Route path='/doctor/:doctorId' element={<DoctorDetailsPage />} />
 
         </Route>
 
