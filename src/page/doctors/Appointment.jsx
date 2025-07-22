@@ -1,228 +1,326 @@
 import { useState, useEffect } from 'react';
 import { AppointmentCancelled, AppointmentConferm, getAppointmentById } from '../../Redux/appointment';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { useParams } from 'react-router-dom';
+import { motion, AnimatePresence } from 'framer-motion';
+import { FaUser, FaUserMd, FaHospital, FaCalendarAlt, FaClock, FaMoneyBillWave, FaPhone, FaMapMarkerAlt, FaCheck, FaTimes } from 'react-icons/fa';
 
 const AppointmentDetails = () => {
-    const [isLoading, setIsLoading] = useState(true);
-    const [showDetails, setShowDetails] = useState(false);
-    const [appointment, setAppointments] = useState()
+    const {role}=useSelector((state)=>state?.auth)
 
+    const [isLoading, setIsLoading] = useState(true);
+    const [appointment, setAppointments] = useState(null);
     const { id } = useParams();
-    const dispatch = useDispatch()
+    const dispatch = useDispatch();
+
+    // Professional healthcare color palette
+    const colors = {
+        primary: '#3b82f6',       // Blue (trust, professionalism)
+        secondary: '#60a5fa',     // Lighter blue
+        accent: '#10b981',        // Green (health, success)
+        background: '#f9fafb',    // Very light gray
+        text: '#1f2937',          // Dark gray
+        lightText: '#6b7280',     // Gray
+        border: '#e5e7eb',        // Light border
+        success: '#10b981',       // Green for success states
+        warning: '#f59e0b',       // Orange for warnings
+        error: '#ef4444',         // Red for errors
+        cardBg: '#ffffff',        // White for cards
+        inputBg: '#f3f4f6'       // Light gray for inputs
+    };
+
     const getAppointment = async () => {
         const res = await dispatch(getAppointmentById(id));
-        setAppointments(res.payload)
-    }
+        setAppointments(res.payload);
+        setIsLoading(false);
+    };
 
     const ConfirmAppointment = async (appointment_id) => {
+        await dispatch(AppointmentConferm(appointment_id));
+        getAppointment();
+    };
 
-        const res = await dispatch(AppointmentConferm(appointment_id))
-        getAppointment()
-    }
-     const CancelledAppointment = async (appointment_id) => {
-
-        const res = await dispatch(AppointmentCancelled(appointment_id))
-        getAppointment()
-    }
+    const CancelledAppointment = async (appointment_id) => {
+        await dispatch(AppointmentCancelled(appointment_id));
+        getAppointment();
+    };
 
     useEffect(() => {
-        getAppointment()
-        const timer = setTimeout(() => {
-            setIsLoading(false);
-            setShowDetails(true);
-        }, 800);
-
-        return () => clearTimeout(timer);
+        getAppointment();
     }, []);
 
     if (isLoading) {
         return (
-            <div className="flex justify-center items-center h-screen bg-gray-50">
-                <div className="animate-pulse flex flex-col items-center space-y-4">
-                    <div className="h-16 w-16 bg-blue-100 rounded-full"></div>
-                    <div className="h-4 bg-blue-100 rounded w-48"></div>
-                </div>
+            <div className="flex justify-center items-center h-screen" style={{ backgroundColor: colors.background }}>
+                <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ duration: 0.5 }}
+                    className="flex flex-col items-center space-y-4"
+                >
+                    <motion.div
+                        animate={{ rotate: 360 }}
+                        transition={{ repeat: Infinity, duration: 1.5, ease: "linear" }}
+                        className="h-16 w-16 rounded-full border-t-4 border-b-4"
+                        style={{ borderColor: colors.primary }}
+                    ></motion.div>
+                    <p className="text-lg" style={{ color: colors.text }}>Loading appointment details...</p>
+                </motion.div>
             </div>
         );
     }
 
     return (
-        <div className="min-h-screen bg-gray-50 py-8 px-4 sm:px-6 lg:px-8">
+        <div className="min-h-screen py-8 px-4 sm:px-6 lg:px-8" style={{ backgroundColor: colors.background }}>
             <div className="max-w-4xl mx-auto">
-                {/* Main Card */}
-                <div className={`bg-white rounded-2xl shadow-lg overflow-hidden transition-all duration-700 ease-out ${showDetails ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
-                    }`}>
-
-                    {/* Header Section */}
-                    <div className="bg-gradient-to-r from-blue-600 to-blue-700 p-6 sm:p-8 text-white">
-                        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-                            <div>
-                                <h1 className="text-2xl sm:text-3xl font-bold">Appointment Summary</h1>
-                                <p className="text-blue-100 mt-1">ID: {appointment?._id}</p>
+                <AnimatePresence>
+                    <motion.div
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.5 }}
+                        className="bg-white rounded-2xl shadow-xl overflow-hidden"
+                        style={{ 
+                            borderColor: colors.border,
+                            backgroundColor: colors.cardBg
+                        }}
+                    >
+                        {/* Header Section */}
+                        <div 
+                            className="p-6 sm:p-8 text-white"
+                            style={{ 
+                                background: `linear-gradient(135deg, ${colors.primary} 0%, ${colors.secondary} 100%)`
+                            }}
+                        >
+                            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                                <motion.div
+                                    initial={{ opacity: 0, x: -10 }}
+                                    animate={{ opacity: 1, x: 0 }}
+                                    transition={{ delay: 0.2 }}
+                                >
+                                    <h1 className="text-2xl sm:text-3xl font-bold">Appointment Summary</h1>
+                                    <p className="opacity-90 mt-1">ID: {appointment?._id}</p>
+                                </motion.div>
+                                <motion.span
+                                    initial={{ opacity: 0, scale: 0.8 }}
+                                    animate={{ opacity: 1, scale: 1 }}
+                                    transition={{ delay: 0.3 }}
+                                    className={`px-4 py-2 rounded-full text-sm font-semibold shadow-md ${
+                                        appointment?.status === 'confirmed' 
+                                            ? 'bg-green-500' 
+                                            : appointment?.status === 'cancelled'
+                                            ? 'bg-red-500'
+                                            : 'bg-amber-500'
+                                    }`}
+                                >
+                                    {appointment?.status.charAt(0).toUpperCase() + appointment?.status.slice(1)}
+                                </motion.span>
                             </div>
-                            <span className={`px-4 py-2 rounded-full text-sm font-semibold ${appointment?.status === 'confirmed' ? 'bg-green-500' : 'bg-amber-500'
-                                } shadow-md`}>
-                                {appointment?.status.charAt(0).toUpperCase() + appointment?.status.slice(1)}
-                            </span>
                         </div>
-                    </div>
 
-                    {/* Appointment Overview */}
-                    <div className="p-6 sm:p-8 border-b border-gray-100">
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                            <div className="space-y-1">
-                                <p className="text-sm text-gray-500 font-medium">Date</p>
-                                <p className="text-lg font-semibold">
-                                    {new Date(appointment?.date).toLocaleDateString('en-IN', {
-                                        weekday: 'long',
-                                        day: 'numeric',
-                                        month: 'long',
-                                        year: 'numeric'
-                                    })}
-                                </p>
-                            </div>
-                            <div className="space-y-1">
-                                <p className="text-sm text-gray-500 font-medium">Time Slot</p>
-                                <p className="text-lg font-semibold">{appointment?.slot}</p>
-                            </div>
-                            <div className="space-y-1">
-                                <p className="text-sm text-gray-500 font-medium">Fees Paid</p>
-                                <p className="text-lg font-semibold text-green-600">₹{appointment?.amount}</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* Details Sections */}
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 p-6 sm:p-8">
-
-                        {/* Patient Details */}
-                        <div className="bg-blue-50 rounded-xl p-6 transition-all duration-500 delay-100 ease-in-out">
-                            <div className="flex items-center gap-4 mb-5">
-                                <div className="bg-blue-100 p-3 rounded-full">
-                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                                    </svg>
+                        {/* Appointment Overview */}
+                        <motion.div 
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            transition={{ delay: 0.4 }}
+                            className="p-6 sm:p-8 border-b"
+                            style={{ borderColor: colors.border }}
+                        >
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                                <div className="space-y-2">
+                                    <div className="flex items-center gap-2">
+                                        <FaCalendarAlt style={{ color: colors.primary }} />
+                                        <p className="text-sm font-medium" style={{ color: colors.lightText }}>Date</p>
+                                    </div>
+                                    <p className="text-lg font-semibold" style={{ color: colors.text }}>
+                                        {new Date(appointment?.date).toLocaleDateString('en-IN', {
+                                            weekday: 'long',
+                                            day: 'numeric',
+                                            month: 'long',
+                                            year: 'numeric'
+                                        })}
+                                    </p>
                                 </div>
-                                <h2 className="text-xl font-semibold text-gray-800">Patient Details</h2>
+                                <div className="space-y-2">
+                                    <div className="flex items-center gap-2">
+                                        <FaClock style={{ color: colors.primary }} />
+                                        <p className="text-sm font-medium" style={{ color: colors.lightText }}>Time Slot</p>
+                                    </div>
+                                    <p className="text-lg font-semibold" style={{ color: colors.text }}>{appointment?.slot}</p>
+                                </div>
+                                <div className="space-y-2">
+                                    <div className="flex items-center gap-2">
+                                        <FaMoneyBillWave style={{ color: colors.primary }} />
+                                        <p className="text-sm font-medium" style={{ color: colors.lightText }}>Fees Paid</p>
+                                    </div>
+                                    <p className="text-lg font-semibold" style={{ color: colors.success }}>₹{appointment?.amount}</p>
+                                </div>
                             </div>
-                            <div className="space-y-4">
-                                {[
-                                    { label: 'Full Name', value: appointment?.patientId?.name },
-                                    { label: 'Email', value: appointment?.patientId?.email },
-                                    { label: 'Phone', value: appointment?.patientId?.mobile }
-                                ].map((item, index) => (
-                                    <div key={index} className="flex gap-3">
-                                        <div className="flex-shrink-0">
-                                            <div className="h-5 w-5 rounded-full bg-blue-100 flex items-center justify-center">
-                                                <div className="h-1.5 w-1.5 rounded-full bg-blue-600"></div>
+                        </motion.div>
+
+                        {/* Details Sections */}
+                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 p-6 sm:p-8">
+                            {/* Patient Details */}
+                            <motion.div
+                                initial={{ opacity: 0, y: 20 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ delay: 0.5 }}
+                                className="rounded-xl p-6 shadow-sm"
+                                style={{ 
+                                    borderColor: `${colors.primary}20`,
+                                    backgroundColor: `${colors.primary}05`
+                                }}
+                            >
+                                <div className="flex items-center gap-4 mb-5">
+                                    <div className="p-3 rounded-full" style={{ backgroundColor: `${colors.primary}20` }}>
+                                        <FaUser style={{ color: colors.primary }} />
+                                    </div>
+                                    <h2 className="text-xl font-semibold" style={{ color: colors.text }}>Patient Details</h2>
+                                </div>
+                                <div className="space-y-4">
+                                    {[
+                                        { label: 'Full Name', value: appointment?.patient, icon: <FaUser /> },
+                                        { label: 'Mobile', value: appointment?.mobile, icon: <FaPhone /> },
+                                        { label: 'DOB', value: appointment?.dob, icon: <FaCalendarAlt /> }
+                                    ].map((item, index) => (
+                                        <div key={index} className="flex gap-3">
+                                            <div className="flex-shrink-0 mt-1" style={{ color: colors.primary }}>
+                                                {item.icon}
+                                            </div>
+                                            <div>
+                                                <p className="text-sm" style={{ color: colors.lightText }}>{item?.label}</p>
+                                                <p className="font-medium" style={{ color: colors.text }}>{item?.value}</p>
                                             </div>
                                         </div>
-                                        <div>
-                                            <p className="text-sm text-gray-500">{item?.label}</p>
-                                            <p className="font-medium">{item?.value}</p>
-                                        </div>
-                                    </div>
-                                ))}
-                            </div>
-                        </div>
-
-                        {/* Doctor Details */}
-                        <div className="bg-green-50 rounded-xl p-6 transition-all duration-500 delay-200 ease-in-out">
-                            <div className="flex items-center gap-4 mb-5">
-                                <div className="bg-green-100 p-3 rounded-full">
-                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                    </svg>
+                                    ))}
                                 </div>
-                                <h2 className="text-xl font-semibold text-gray-800">Doctor Details</h2>
-                            </div>
-                            <div className="space-y-4">
-                                {[
-                                    { label: 'Name', value: appointment?.doctorId?.name },
-                                    { label: 'Specialization', value: appointment?.doctorId?.specialty },
-                                    { label: 'Experience', value: appointment?.doctorId?.experience }
-                                ].map((item, index) => (
-                                    <div key={index} className="flex gap-3">
-                                        <div className="flex-shrink-0">
-                                            <div className="h-5 w-5 rounded-full bg-green-100 flex items-center justify-center">
-                                                <div className="h-1.5 w-1.5 rounded-full bg-green-600"></div>
+                            </motion.div>
+
+                            {/* Doctor Details */}
+                            <motion.div
+                                initial={{ opacity: 0, y: 20 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ delay: 0.6 }}
+                                className="rounded-xl p-6 shadow-sm"
+                                style={{ 
+                                    borderColor: `${colors.accent}20`,
+                                    backgroundColor: `${colors.accent}05`
+                                }}
+                            >
+                                <div className="flex items-center gap-4 mb-5">
+                                    <div className="p-3 rounded-full" style={{ backgroundColor: `${colors.accent}20` }}>
+                                        <FaUserMd style={{ color: colors.accent }} />
+                                    </div>
+                                    <h2 className="text-xl font-semibold" style={{ color: colors.text }}>Doctor Details</h2>
+                                </div>
+                                <div className="space-y-4">
+                                    {[
+                                        { label: 'Name', value: appointment?.doctorId?.name, icon: <FaUserMd /> },
+                                        { label: 'Specialization', value: appointment?.doctorId?.specialty, icon: <FaUserMd /> },
+                                        { label: 'Experience', value: appointment?.doctorId?.experience, icon: <FaCalendarAlt /> }
+                                    ].map((item, index) => (
+                                        <div key={index} className="flex gap-3">
+                                            <div className="flex-shrink-0 mt-1" style={{ color: colors.accent }}>
+                                                {item.icon}
+                                            </div>
+                                            <div>
+                                                <p className="text-sm" style={{ color: colors.lightText }}>{item?.label}</p>
+                                                <p className="font-medium" style={{ color: colors.text }}>{item?.value}</p>
                                             </div>
                                         </div>
-                                        <div>
-                                            <p className="text-sm text-gray-500">{item?.label}</p>
-                                            <p className="font-medium">{item?.value}</p>
-                                        </div>
-                                    </div>
-                                ))}
-                            </div>
-                        </div>
-
-                        {/* Hospital Details */}
-                        <div className="bg-purple-50 rounded-xl p-6 transition-all duration-500 delay-300 ease-in-out lg:col-span-2">
-                            <div className="flex items-center gap-4 mb-5">
-                                <div className="bg-purple-100 p-3 rounded-full">
-                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-purple-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-                                    </svg>
+                                    ))}
                                 </div>
-                                <h2 className="text-xl font-semibold text-gray-800">Hospital Details</h2>
-                            </div>
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                {[
-                                    { label: 'Hospital Name', value: appointment?.hospitalId?.name },
-                                    { label: 'Contact Number', value: appointment?.hospitalId?.phone },
-                                    { label: 'Address', value: appointment?.hospitalId?.address, colSpan: 'md:col-span-2' }
-                                ].map((item, index) => (
-                                    <div key={index} className={`flex gap-3 ${item?.colSpan || ''}`}>
-                                        <div className="flex-shrink-0">
-                                            <div className="h-5 w-5 rounded-full bg-purple-100 flex items-center justify-center">
-                                                <div className="h-1.5 w-1.5 rounded-full bg-purple-600"></div>
+                            </motion.div>
+
+                            {/* Hospital Details */}
+                            <motion.div
+                                initial={{ opacity: 0, y: 20 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ delay: 0.7 }}
+                                className="rounded-xl p-6 shadow-sm lg:col-span-2"
+                                style={{ 
+                                    borderColor: `${colors.secondary}20`,
+                                    backgroundColor: `${colors.secondary}05`
+                                }}
+                            >
+                                <div className="flex items-center gap-4 mb-5">
+                                    <div className="p-3 rounded-full" style={{ backgroundColor: `${colors.secondary}20` }}>
+                                        <FaHospital style={{ color: colors.secondary }} />
+                                    </div>
+                                    <h2 className="text-xl font-semibold" style={{ color: colors.text }}>Hospital Details</h2>
+                                </div>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    {[
+                                        { label: 'Hospital Name', value: appointment?.hospitalId?.name, icon: <FaHospital /> },
+                                        { label: 'Contact Number', value: appointment?.hospitalId?.phone, icon: <FaPhone /> },
+                                        { label: 'Address', value: appointment?.hospitalId?.address, icon: <FaMapMarkerAlt />, colSpan: 'md:col-span-2' }
+                                    ].map((item, index) => (
+                                        <div key={index} className={`flex gap-3 ${item?.colSpan || ''}`}>
+                                            <div className="flex-shrink-0 mt-1" style={{ color: colors.secondary }}>
+                                                {item.icon}
+                                            </div>
+                                            <div>
+                                                <p className="text-sm" style={{ color: colors.lightText }}>{item?.label}</p>
+                                                <p className="font-medium" style={{ color: colors.text }}>{item?.value}</p>
                                             </div>
                                         </div>
-                                        <div>
-                                            <p className="text-sm text-gray-500">{item?.label}</p>
-                                            <p className="font-medium">{item?.value}</p>
-                                        </div>
-                                    </div>
-                                ))}
-                            </div>
+                                    ))}
+                                </div>
+                            </motion.div>
                         </div>
-                    </div>
 
-                    {/* Action Buttons */}
-                    <div className="p-6 sm:p-8 border-t border-gray-100 bg-gray-50">
-                        <div className="flex flex-wrap justify-center gap-4">
-                            {
-                                appointment?.status != "Confirmed" && (
-                                    <button onClick={() => ConfirmAppointment(appointment?._id)} className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg shadow-md transition-all transform hover:scale-[1.02] flex items-center gap-2">
-                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                                            <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                                        </svg>
+                        {/* Action Buttons */}
+                        {
+                          role==='admin' || role==='doctor' || role==='hospital' &&(
+
+                        <motion.div
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            transition={{ delay: 0.8 }}
+                            className="p-6 sm:p-8 border-t"
+                            style={{ 
+                                borderColor: colors.border,
+                                backgroundColor: colors.background
+                            }}
+                        >
+                            <div className="flex flex-wrap justify-center gap-4">
+                                {appointment?.status !== "confirmed" && (
+                                    <motion.button
+                                        whileHover={{ scale: 1.03 }}
+                                        whileTap={{ scale: 0.97 }}
+                                        onClick={() => ConfirmAppointment(appointment?._id)}
+                                        className="px-6 py-3 rounded-lg shadow-md flex items-center gap-2"
+                                        style={{ 
+                                            backgroundColor: colors.success,
+                                            color: 'white'
+                                        }}
+                                    >
+                                        <FaCheck />
                                         Confirm Appointment
-                                    </button>
-                                )
-                            }
+                                    </motion.button>
+                                )}
 
-                            {/* <button className="px-6 py-3 border border-blue-600 text-blue-600 hover:bg-blue-50 font-medium rounded-lg transition-all transform hover:scale-[1.02] flex items-center gap-2">
-                                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                                </svg>
-                                Reschedule
-                            </button> */}
-                            {
-                                appointment?.status != 'cancelled' &&  (
-                                    <button onClick={()=>CancelledAppointment(appointment?._id)} className="px-6 py-3 border border-red-600 text-red-600 hover:bg-red-50 font-medium rounded-lg transition-all transform hover:scale-[1.02] flex items-center gap-2">
-                                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                                </svg>
-                                Cancel Appointment
-                            </button>
-                                )
-                            }
-                        </div>
-                    </div>
-                </div>
+                                {appointment?.status !== 'cancelled' && (
+                                    <motion.button
+                                        whileHover={{ scale: 1.03 }}
+                                        whileTap={{ scale: 0.97 }}
+                                        onClick={() => CancelledAppointment(appointment?._id)}
+                                        className="px-6 py-3 rounded-lg shadow-md flex items-center gap-2"
+                                        style={{ 
+                                            border: `1px solid ${colors.error}`,
+                                            color: colors.error,
+                                            backgroundColor: `${colors.error}10`
+                                        }}
+                                    >
+                                        <FaTimes />
+                                        Cancel Appointment
+                                    </motion.button>
+                                )}
+                            </div>
+                        </motion.div>
+                          )
+                        }
+                    </motion.div>
+                </AnimatePresence>
             </div>
         </div>
     );

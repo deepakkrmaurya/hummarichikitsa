@@ -19,7 +19,6 @@ export const RegisterDoctor = createAsyncThunk('/register/doctor', async (data) 
       }
 
     })
-    console.log((await response)?.data)
     return (await response)?.data
   } catch (error) {
     console.log(error?.response?.data?.message)

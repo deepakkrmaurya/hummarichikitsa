@@ -48,7 +48,7 @@ const Header = () => {
                         <Link to="/hospitals" className="text-gray-700 hover:text-blue-600 transition">
                             Hospitals
                         </Link>
-                        {currentUser?.role === 'doctor' || currentUser?.role === 'hospital' || currentUser?.role === 'admin' ? (
+                        {currentUser?.role === 'doctor' || currentUser?.role === 'hospital' || currentUser?.role === 'admin' || currentUser?.role === 'staff' ? (
                             <Link to="/doctor/dashboard" className="text-gray-700 hover:text-blue-600 transition">
                                 Dashboard
                             </Link>
@@ -113,7 +113,7 @@ const Header = () => {
                             >
                                 Hospitals
                             </Link>
-                            {currentUser?.role === 'doctor' || currentUser?.role === 'hospital' || currentUser?.role === 'admin' ? (
+                            {currentUser?.role === 'doctor' || currentUser?.role === 'hospital' || currentUser?.role === 'admin' || currentUser?.role === 'staff' ? (
                                 <Link
                                     to="/doctor/dashboard"
                                     className="text-gray-700 hover:text-blue-600 transition"

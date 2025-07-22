@@ -1,49 +1,36 @@
 import { useState } from 'react';
 import { useDispatch } from 'react-redux';
-import { useParams, Link } from 'react-router-dom';
-import { GetHospitalById } from '../../Redux/hospitalSlice';
-import { useEffect } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
 import { GetDoctor } from '../../Redux/doctorSlice';
+import { useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { FaArrowLeft, FaCalendarAlt, FaClock, FaStar, FaUserMd, FaGraduationCap, FaMoneyBillWave, FaCheckCircle } from 'react-icons/fa';
 
 const DoctorDetailsPage = () => {
   const { doctorId } = useParams();
-  const dispatch = useDispatch()
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
   const [selectedDate, setSelectedDate] = useState(null);
   const [selectedSlot, setSelectedSlot] = useState(null);
   const [doctor, setDoctor] = useState(null);
+  const [isBooking, setIsBooking] = useState(false);
+  const [bookingSuccess, setBookingSuccess] = useState(false);
 
-  // Mock data - in a real app, you would fetch this using the doctorId
-//   const doctor = {
-//     _id: "687be647d132d0647316e182",
-//     name: "Indira Delgado",
-//     email: "xaridaruca@mailinator.com",
-//     role: "doctor",
-//     specialty: "Dermatology",
-//     qualification: "Ab duis voluptatem m",
-//     experience: 5, // Assuming years since 527 seems too high
-//     status: "active",
-//     photo: "http://localhost:5000/public/1752950343206-5-WhatsApp Image 2025-04-03…",
-//     bio: "Modi labore exercita",
-//     rating: 4,
-//     consultationFee: 82,
-//     availableSlots: [
-//       {
-//         date: "2025-07-27",
-//         slots: ["9:00 AM", "10:00 AM", "11:00 AM", "3:00 PM"],
-//         _id: "687be647d132d0647316e183"
-//       },
-//       {
-//         date: "2025-07-28",
-//         slots: ["9:00 AM", "10:00 AM", "2:00 PM", "4:00 PM"],
-//         _id: "687be647d132d0647316e184"
-//       }
-//     ]
-//   };
-  const getDoctorById = async()=>{
-     const res = await dispatch(GetDoctor(doctorId))
+  // Professional healthcare color palette
+  const colors = {
+    primary: '#2b6cb0',  // Deep blue
+    secondary: '#4299e1', // Lighter blue
+    accent: '#48bb78',   // Green
+    background: '#f7fafc', // Light gray
+    text: '#2d3748',     // Dark gray
+    lightText: '#718096' // Gray
+  };
 
-     setDoctor(res?.payload)
-  }
+  const getDoctorById = async () => {
+    const res = await dispatch(GetDoctor(doctorId));
+    setDoctor(res?.payload);
+  };
+
   const handleDateSelect = (date) => {
     setSelectedDate(date);
     setSelectedSlot(null);
@@ -51,141 +38,225 @@ const DoctorDetailsPage = () => {
 
   const handleBookAppointment = () => {
     if (selectedDate && selectedSlot) {
-      alert(`Appointment booked with Dr. ${doctor?.name} on ${selectedDate} at ${selectedSlot}`);
-      // Here you would typically make an API call to book the appointment
+      setIsBooking(true);
+      // Simulate API call
+      setTimeout(() => {
+        setIsBooking(false);
+        setBookingSuccess(true);
+        setTimeout(() => setBookingSuccess(false), 3000);
+      }, 1500);
     }
   };
 
-  useEffect(()=>{
-       getDoctorById()
-  },[])
+  useEffect(() => {
+    getDoctorById();
+  }, []);
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8 px-4 sm:px-6 ">
-      <div className="max-w-4xl mx-auto">
-        <div className="bg-white shadow rounded-lg overflow-hidden">
+    <div className="min-h-screen" style={{ backgroundColor: colors.background }}>
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Back button */}
+        <motion.button
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+          onClick={() => navigate(-1)}
+          className="flex items-center text-sm font-medium mb-6"
+          style={{ color: colors.primary }}
+        >
+          <FaArrowLeft className="mr-2" />
+          Back to Hospital
+        </motion.button>
+
+        {/* Main card */}
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+          className="bg-white rounded-xl shadow-lg overflow-hidden"
+        >
           {/* Doctor Header */}
           <div className="md:flex">
-            <div className=" p-6 flex justify-center">
-              <img 
-                className="h-48 w-48 rounded-full object-cover border-4 border-white shadow-lg" 
-                src={doctor?.photo} 
-                alt={doctor?.name} 
-              />
+            <div className="md:w-1/3 p-6 flex justify-center items-start bg-gradient-to-b from-blue-50 to-white">
+              <motion.div 
+                whileHover={{ scale: 1.03 }}
+                className="relative"
+              >
+                <img 
+                  className="h-64 w-64 rounded-xl object-cover border-4 border-white shadow-md" 
+                  src={doctor?.photo} 
+                  alt={doctor?.name} 
+                />
+                {doctor?.status === 'active' && (
+                  <motion.div 
+                    initial={{ scale: 0.8 }}
+                    animate={{ scale: 1 }}
+                    transition={{ repeat: Infinity, repeatType: "reverse", duration: 1.5 }}
+                    className="absolute -top-2 -right-2 bg-green-500 text-white text-xs font-bold px-2 py-1 rounded-full flex items-center"
+                  >
+                    <span className="w-2 h-2 bg-white rounded-full mr-1"></span>
+                    Available
+                  </motion.div>
+                )}
+              </motion.div>
             </div>
-            <div className="md:w-2/3 p-6">
+            
+            <div className="md:w-2/3 p-8">
               <div className="flex justify-between items-start">
                 <div>
-                  <h1 className="text-3xl font-bold text-gray-900">Dr. {doctor?.name}</h1>
-                  <p className="text-indigo-600 font-medium">{doctor?.specialty}</p>
+                  <h1 className="text-3xl font-bold" style={{ color: colors.text }}>
+                    Dr. {doctor?.name}
+                  </h1>
+                  <div className="flex items-center mt-1">
+                    <FaUserMd className="mr-2" style={{ color: colors.secondary }} />
+                    <span style={{ color: colors.primary }} className="font-medium">
+                      {doctor?.specialty}
+                    </span>
+                  </div>
                 </div>
-                <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${
-                  doctor?.status === 'active' 
-                    ? 'bg-green-100 text-green-800 animate-pulse' 
-                    : 'bg-gray-100 text-gray-800'
-                }`}>
-                  {doctor?.status}
-                </span>
+                
+                <div className="flex items-center bg-blue-50 px-3 py-1 rounded-full">
+                  <div className="flex items-center mr-2">
+                    {[...Array(5)].map((_, i) => (
+                      <FaStar
+                        key={i}
+                        className={`text-lg ${i < doctor?.rating ? 'text-yellow-400' : 'text-gray-300'}`}
+                      />
+                    ))}
+                  </div>
+                  <span className="text-sm font-medium" style={{ color: colors.text }}>
+                    {doctor?.rating}/5
+                  </span>
+                </div>
               </div>
               
-              <div className="mt-4 flex items-center">
+              <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="bg-blue-50 p-4 rounded-lg">
+                  <div className="flex items-center mb-2">
+                    <FaGraduationCap className="mr-2" style={{ color: colors.primary }} />
+                    <h3 className="font-medium" style={{ color: colors.text }}>Qualification</h3>
+                  </div>
+                  <p style={{ color: colors.lightText }}>{doctor?.qualification}</p>
+                </div>
+                
+                <div className="bg-blue-50 p-4 rounded-lg">
+                  <div className="flex items-center mb-2">
+                    <FaMoneyBillWave className="mr-2" style={{ color: colors.primary }} />
+                    <h3 className="font-medium" style={{ color: colors.text }}>Consultation Fee</h3>
+                  </div>
+                  <p style={{ color: colors.lightText }}>${doctor?.consultationFee}</p>
+                </div>
+              </div>
+              
+              <div className="mt-6">
+                <h3 className="text-lg font-medium mb-2" style={{ color: colors.text }}>About</h3>
+                <p className="text-gray-600" style={{ color: colors.lightText }}>{doctor?.bio}</p>
+              </div>
+              
+              <div className="mt-6">
                 <div className="flex items-center">
-                  {[...Array(5)].map((_, i) => (
-                    <svg
-                      key={i}
-                      className={`h-5 w-5 ${i < doctor?.rating ? 'text-yellow-400' : 'text-gray-300'}`}
-                      fill="currentColor"
-                      viewBox="0 0 20 20"
-                    >
-                      <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                    </svg>
-                  ))}
-                  <span className="ml-2 text-gray-600">{doctor?.rating} out of 5</span>
-                </div>
-                <span className="mx-4 text-gray-300">|</span>
-                <span className="text-gray-600">{doctor?.experience} years experience</span>
-              </div>
-
-              <div className="mt-4">
-                <h3 className="text-lg font-medium text-gray-900">About</h3>
-                <p className="mt-2 text-gray-600">{doctor?.bio}</p>
-              </div>
-
-              <div className="mt-4 grid grid-cols-2 gap-4">
-                <div>
-                  <h3 className="text-lg font-medium text-gray-900">Qualification</h3>
-                  <p className="mt-1 text-gray-600">{doctor?.qualification}</p>
-                </div>
-                <div>
-                  <h3 className="text-lg font-medium text-gray-900">Consultation Fee</h3>
-                  <p className="mt-1 text-gray-600">${doctor?.consultationFee}</p>
+                  <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center mr-3">
+                    <span className="text-blue-600 font-bold">{doctor?.experience}+</span>
+                  </div>
+                  <span style={{ color: colors.lightText }}>Years of experience</span>
                 </div>
               </div>
             </div>
           </div>
 
           {/* Appointment Booking Section */}
-          <div className="border-t border-gray-200 px-6 py-4">
-            <h2 className="text-xl font-semibold text-gray-900">Book Appointment</h2>
+          <div className="border-t border-gray-200 px-8 py-6 bg-gray-50">
+            <h2 className="text-2xl font-semibold mb-6" style={{ color: colors.text }}>
+              Book Appointment
+            </h2>
             
-            <div className="mt-4">
-              <h3 className="text-lg font-medium text-gray-900">Available Dates</h3>
-              <div className="mt-2 flex flex-wrap gap-2">
-                {doctor?.availableSlots.map((slot) => (
-                  <button
-                    key={slot._id}
-                    onClick={() => handleDateSelect(slot?.date)}
-                    className={`px-4 py-2 rounded-md ${
-                      selectedDate === slot?.date
-                        ? 'bg-indigo-600 text-white'
-                        : 'bg-gray-200 text-gray-800 hover:bg-gray-300'
-                    }`}
-                  >
-                    {new Date(slot?.date).toLocaleDateString('en-US', { 
-                      weekday: 'short', 
-                      month: 'short', 
-                      day: 'numeric' 
-                    })}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {selectedDate && (
-              <div className="mt-6">
-                <h3 className="text-lg font-medium text-gray-900">Available Time Slots</h3>
-                <div className="mt-2 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2">
-                  {doctor?.availableSlots
-                    .find(slot => slot?.date === selectedDate)
-                    .slots.map((time, index) => (
-                      <button
-                        key={index}
-                        onClick={() => setSelectedSlot(time)}
-                        className={`px-4 py-2 rounded-md ${
-                          selectedSlot === time
-                            ? 'bg-indigo-600 text-white'
-                            : 'bg-gray-200 text-gray-800 hover:bg-gray-300'
-                        }`}
-                      >
-                        {time}
-                      </button>
-                    ))}
+            <div className="space-y-8">
+              {/* Date Selection */}
+              <div>
+                <div className="flex items-center mb-4">
+                  <FaCalendarAlt className="mr-2" style={{ color: colors.primary }} />
+                  <h3 className="text-lg font-medium" style={{ color: colors.text }}>Available Dates</h3>
+                </div>
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+                  {doctor?.availableSlots.map((slot) => (
+                    <motion.button
+                      key={slot._id}
+                      whileHover={{ y: -2 }}
+                      whileTap={{ scale: 0.98 }}
+                      onClick={() => handleDateSelect(slot?.date)}
+                      className={`px-4 py-3 rounded-lg border transition-all ${
+                        selectedDate === slot?.date
+                          ? 'border-blue-500 bg-blue-50 shadow-inner'
+                          : 'border-gray-200 hover:border-blue-300'
+                      }`}
+                    >
+                      <div className="text-sm font-medium" style={{ color: selectedDate === slot?.date ? colors.primary : colors.text }}>
+                        {new Date(slot?.date).toLocaleDateString('en-US', { 
+                          weekday: 'short' 
+                        })}
+                      </div>
+                      <div className="text-lg font-bold" style={{ color: selectedDate === slot?.date ? colors.primary : colors.text }}>
+                        {new Date(slot?.date).getDate()}
+                      </div>
+                      <div className="text-xs" style={{ color: colors.lightText }}>
+                        {new Date(slot?.date).toLocaleDateString('en-US', { 
+                          month: 'short' 
+                        })}
+                      </div>
+                    </motion.button>
+                  ))}
                 </div>
               </div>
-            )}
 
-            
+              {/* Time Slot Selection */}
+              {selectedDate && (
+                <motion.div
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: 'auto' }}
+                  exit={{ opacity: 0, height: 0 }}
+                  transition={{ duration: 0.3 }}
+                >
+                  <div className="flex items-center mb-4">
+                    <FaClock className="mr-2" style={{ color: colors.primary }} />
+                    <h3 className="text-lg font-medium" style={{ color: colors.text }}>Available Time Slots</h3>
+                  </div>
+                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+                    {doctor?.availableSlots
+                      .find(slot => slot?.date === selectedDate)
+                      .slots.map((time, index) => (
+                        <motion.button
+                          key={index}
+                          whileHover={{ y: -2 }}
+                          whileTap={{ scale: 0.98 }}
+                          onClick={() => setSelectedSlot(time)}
+                          className={`px-4 py-2 rounded-lg border transition-all ${
+                            selectedSlot === time
+                              ? 'border-blue-500 bg-blue-500 text-white'
+                              : 'border-gray-200 hover:border-blue-300'
+                          }`}
+                        >
+                          {time}
+                        </motion.button>
+                      ))}
+                  </div>
+                </motion.div>
+              )}
+
+              {/* Book Button */}
+              {selectedSlot && (
+                <motion.div
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.2 }}
+                  className="pt-4"
+                >
+                 
+                </motion.div>
+              )}
+            </div>
           </div>
-        </div>
+        </motion.div>
 
-        <div className="mt-6 text-center">
-          <Link 
-            to={`/hospital/${doctor?.hospitalId}`} 
-            className="text-indigo-600 hover:text-indigo-800"
-          >
-            ← Back to Hospital
-          </Link>
-        </div>
+        
       </div>
     </div>
   );

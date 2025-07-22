@@ -80,6 +80,8 @@ const Dashboard = ({ children }) => {
                     </button>
                   </Link>
                 </li>
+                {
+                  role === 'doctor' &&(
                 <li>
                   <button
                     onClick={() => {
@@ -94,6 +96,27 @@ const Dashboard = ({ children }) => {
                     <Clock className="h-4 w-4 sm:h-5 sm:w-5 mr-2 sm:mr-3" />
                     <span className="font-medium">Schedule</span>
                   </button>
+                </li>
+
+                  )
+                }
+
+                <li>
+                  <Link to={`/book/appointment`}>
+                  <button
+                    onClick={() => {
+                      setActiveTab('bookAppointment');
+                      setMobileMenuOpen(false);
+                    }}
+                    className={`w-full flex items-center p-2 sm:p-3 rounded-lg transition text-sm sm:text-base ${activeTab === 'bookAppointment'
+                      ? 'bg-blue-50 text-blue-700'
+                      : 'text-gray-700 hover:bg-gray-100'
+                      }`}
+                  >
+                    <Clock className="h-4 w-4 sm:h-5 sm:w-5 mr-2 sm:mr-3" />
+                    <span className="font-medium">Book Appointment</span>
+                  </button>
+                  </Link>
                 </li>
                 <li>
                   <Link className=' cursor-pointer' to='/patient'>

@@ -1,218 +1,301 @@
 import { useState, useEffect } from 'react';
 import { AppointmentCancelled, AppointmentConferm, getAppointmentById } from '../Redux/appointment';
 import { useDispatch } from 'react-redux';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
+import { CheckCircle, XCircle, Calendar, Clock, User, Phone, MapPin, Hospital, BriefcaseMedical } from 'lucide-react';
+
 
 const AppointmentDetailsPage = () => {
     const [isLoading, setIsLoading] = useState(true);
-    const [showDetails, setShowDetails] = useState(false);
-    const [appointment, setAppointments] = useState()
-
+    const [appointment, setAppointments] = useState(null);
     const { id } = useParams();
-    const dispatch = useDispatch()
+    const dispatch = useDispatch();
+    const navigate = useNavigate();
+
     const getAppointment = async () => {
         const res = await dispatch(getAppointmentById(id));
-        setAppointments(res.payload)
-    }
+        setAppointments(res.payload);
+        setIsLoading(false);
+    };
 
     const ConfirmAppointment = async (appointment_id) => {
+        await dispatch(AppointmentConferm(appointment_id));
+        getAppointment();
+    };
 
-        const res = await dispatch(AppointmentConferm(appointment_id))
-        getAppointment()
-    }
-     const CancelledAppointment = async (appointment_id) => {
-
-        const res = await dispatch(AppointmentCancelled(appointment_id))
-        getAppointment()
-    }
+    const CancelledAppointment = async (appointment_id) => {
+        await dispatch(AppointmentCancelled(appointment_id));
+        getAppointment();
+    };
 
     useEffect(() => {
-        getAppointment()
-        const timer = setTimeout(() => {
-            setIsLoading(false);
-            setShowDetails(true);
-        }, 800);
-
-        return () => clearTimeout(timer);
+        getAppointment();
     }, []);
 
-    if (isLoading) {
-        return (
-            <div className="flex justify-center items-center h-screen bg-gray-50">
-                <div className="animate-pulse flex flex-col items-center space-y-4">
-                    <div className="h-16 w-16 bg-blue-100 rounded-full"></div>
-                    <div className="h-4 bg-blue-100 rounded w-48"></div>
-                </div>
-            </div>
-        );
-    }
+    
+
+    const statusColors = {
+        confirmed: 'bg-emerald-100 text-emerald-800',
+        pending: 'bg-amber-100 text-amber-800',
+        cancelled: 'bg-red-100 text-red-800'
+    };
+
+    const formatDate = (dateString) => {
+        return new Date(dateString).toLocaleDateString('en-IN', {
+            weekday: 'long',
+            day: 'numeric',
+            month: 'long',
+            year: 'numeric'
+        });
+    };
 
     return (
         <div className="min-h-screen bg-gray-50 py-8 px-4 sm:px-6 lg:px-8">
-            <div className="max-w-4xl mx-auto">
-                {/* Main Card */}
-                <div className={`bg-white rounded-2xl shadow-lg overflow-hidden transition-all duration-700 ease-out ${showDetails ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
-                    }`}>
+            <div className="max-w-5xl mx-auto">
+                {/* Back Button */}
+                <button 
+                    onClick={() => navigate(-1)}
+                    className="flex items-center text-blue-600 hover:text-blue-800 mb-6 transition-colors"
+                >
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-1" viewBox="0 0 20 20" fill="currentColor">
+                        <path fillRule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z" clipRule="evenodd" />
+                    </svg>
+                    Back to Appointments
+                </button>
 
+                {/* Main Card */}
+                <div className="bg-white rounded-xl shadow-md overflow-hidden transition-all duration-300">
                     {/* Header Section */}
-                    <div className="bg-gradient-to-r from-blue-600 to-blue-700 p-6 sm:p-8 text-white">
+                    <div className="bg-gradient-to-r from-blue-600 to-blue-700 px-6 py-8 text-white">
                         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                             <div>
-                                <h1 className="text-2xl sm:text-3xl font-bold">Appointment Summary</h1>
-                                <p className="text-blue-100 mt-1">ID: {appointment?._id}</p>
+                                <h1 className="text-2xl sm:text-3xl font-bold">Appointment Details</h1>
+                                <div className="flex items-center mt-2">
+                                    <span className={`px-3 py-1 rounded-full text-sm font-medium ${statusColors[appointment?.status]}`}>
+                                        {appointment?.status.charAt(0).toUpperCase() + appointment?.status.slice(1)}
+                                    </span>
+                                    <span className="ml-3 text-blue-100 text-sm">ID: {appointment?._id?.slice(-8).toUpperCase()}</span>
+                                </div>
                             </div>
-                            <span className={`px-4 py-2 rounded-full text-sm font-semibold ${appointment?.status === 'confirmed' ? 'bg-green-500' : 'bg-amber-500'
-                                } shadow-md`}>
-                                {appointment?.status.charAt(0).toUpperCase() + appointment?.status.slice(1)}
-                            </span>
+                            <div className="bg-white/10 p-3 rounded-lg">
+                                <Calendar className="h-6 w-6" />
+                            </div>
                         </div>
                     </div>
 
                     {/* Appointment Overview */}
-                    <div className="p-6 sm:p-8 border-b border-gray-100">
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                            <div className="space-y-1">
-                                <p className="text-sm text-gray-500 font-medium">Date</p>
-                                <p className="text-lg font-semibold">
-                                    {new Date(appointment?.date).toLocaleDateString('en-IN', {
-                                        weekday: 'long',
-                                        day: 'numeric',
-                                        month: 'long',
-                                        year: 'numeric'
-                                    })}
+                    <div className="p-6 border-b border-gray-100">
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div className="bg-blue-50 p-4 rounded-lg">
+                                <div className="flex items-center mb-2">
+                                    <Calendar className="h-5 w-5 text-blue-600 mr-2" />
+                                    <span className="text-sm font-medium text-gray-600">Date</span>
+                                </div>
+                                <p className="text-lg font-semibold text-gray-800">
+                                    {formatDate(appointment?.date)}
                                 </p>
                             </div>
-                            <div className="space-y-1">
-                                <p className="text-sm text-gray-500 font-medium">Time Slot</p>
-                                <p className="text-lg font-semibold">{appointment?.slot}</p>
+                            <div className="bg-blue-50 p-4 rounded-lg">
+                                <div className="flex items-center mb-2">
+                                    <Clock className="h-5 w-5 text-blue-600 mr-2" />
+                                    <span className="text-sm font-medium text-gray-600">Time Slot</span>
+                                </div>
+                                <p className="text-lg font-semibold text-gray-800">{appointment?.slot}</p>
                             </div>
-                            <div className="space-y-1">
-                                <p className="text-sm text-gray-500 font-medium">Fees Paid</p>
-                                <p className="text-lg font-semibold text-green-600">₹{appointment?.amount}</p>
+                            <div className="bg-blue-50 p-4 rounded-lg">
+                                <div className="flex items-center mb-2">
+                                    <svg className="h-5 w-5 text-blue-600 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                    </svg>
+                                    <span className="text-sm font-medium text-gray-600">Fees Paid</span>
+                                </div>
+                                <p className="text-lg font-semibold text-emerald-600">₹{appointment?.amount}</p>
                             </div>
                         </div>
                     </div>
 
                     {/* Details Sections */}
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 p-6 sm:p-8">
-
-                        {/* Patient Details */}
-                        <div className="bg-blue-50 rounded-xl p-6 transition-all duration-500 delay-100 ease-in-out">
-                            <div className="flex items-center gap-4 mb-5">
-                                <div className="bg-blue-100 p-3 rounded-full">
-                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                                    </svg>
+                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 p-6">
+                        {/* Patient Card */}
+                        <div className="bg-white border border-gray-200 rounded-xl p-5 shadow-sm hover:shadow-md transition-shadow">
+                            <div className="flex items-center gap-3 mb-4">
+                                <div className="bg-blue-100 p-2 rounded-lg">
+                                    <User className="h-5 w-5 text-blue-600" />
                                 </div>
-                                <h2 className="text-xl font-semibold text-gray-800">Patient Details</h2>
+                                <h2 className="text-xl font-semibold text-gray-800">Patient Information</h2>
                             </div>
                             <div className="space-y-4">
-                                {[
-                                    { label: 'Full Name', value: appointment?.patientId?.name },
-                                    { label: 'Email', value: appointment?.patientId?.email },
-                                    { label: 'Phone', value: appointment?.patientId?.mobile }
-                                ].map((item, index) => (
-                                    <div key={index} className="flex gap-3">
-                                        <div className="flex-shrink-0">
-                                            <div className="h-5 w-5 rounded-full bg-blue-100 flex items-center justify-center">
-                                                <div className="h-1.5 w-1.5 rounded-full bg-blue-600"></div>
-                                            </div>
-                                        </div>
-                                        <div>
-                                            <p className="text-sm text-gray-500">{item?.label}</p>
-                                            <p className="font-medium">{item?.value}</p>
-                                        </div>
+                                <div className="flex items-start gap-3">
+                                    <div className="mt-1">
+                                        <div className="h-2 w-2 rounded-full bg-blue-600"></div>
                                     </div>
-                                ))}
+                                    <div>
+                                        <p className="text-sm text-gray-500">Full Name</p>
+                                        <p className="font-medium">{appointment?.patient}</p>
+                                    </div>
+                                </div>
+                                <div className="flex items-start gap-3">
+                                    <div className="mt-1">
+                                        <div className="h-2 w-2 rounded-full bg-blue-600"></div>
+                                    </div>
+                                    <div>
+                                        <p className="text-sm text-gray-500">Mobile</p>
+                                        <p className="font-medium">{appointment?.mobile}</p>
+                                    </div>
+                                </div>
+                                <div className="flex items-start gap-3">
+                                    <div className="mt-1">
+                                        <div className="h-2 w-2 rounded-full bg-blue-600"></div>
+                                    </div>
+                                    <div>
+                                        <p className="text-sm text-gray-500">Date of Birth</p>
+                                        <p className="font-medium">{appointment?.dob || 'Not specified'}</p>
+                                    </div>
+                                </div>
                             </div>
                         </div>
 
-                        {/* Doctor Details */}
-                        <div className="bg-green-50 rounded-xl p-6 transition-all duration-500 delay-200 ease-in-out">
-                            <div className="flex items-center gap-4 mb-5">
-                                <div className="bg-green-100 p-3 rounded-full">
-                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                    </svg>
+                        {/* Doctor Card */}
+                        <div className="bg-white border border-gray-200 rounded-xl p-5 shadow-sm hover:shadow-md transition-shadow">
+                            <div className="flex items-center gap-3 mb-4">
+                                <div className="bg-emerald-100 p-2 rounded-lg">
+                                    <BriefcaseMedical className="h-5 w-5 text-emerald-600" />
                                 </div>
-                                <h2 className="text-xl font-semibold text-gray-800">Doctor Details</h2>
+                                <h2 className="text-xl font-semibold text-gray-800">Doctor Information</h2>
                             </div>
                             <div className="space-y-4">
-                                {[
-                                    { label: 'Name', value: appointment?.doctorId?.name },
-                                    { label: 'Specialization', value: appointment?.doctorId?.specialty },
-                                    { label: 'Experience', value: appointment?.doctorId?.experience }
-                                ].map((item, index) => (
-                                    <div key={index} className="flex gap-3">
-                                        <div className="flex-shrink-0">
-                                            <div className="h-5 w-5 rounded-full bg-green-100 flex items-center justify-center">
-                                                <div className="h-1.5 w-1.5 rounded-full bg-green-600"></div>
-                                            </div>
-                                        </div>
-                                        <div>
-                                            <p className="text-sm text-gray-500">{item?.label}</p>
-                                            <p className="font-medium">{item?.value}</p>
-                                        </div>
+                                <div className="flex items-start gap-3">
+                                    <div className="mt-1">
+                                        <div className="h-2 w-2 rounded-full bg-emerald-600"></div>
                                     </div>
-                                ))}
+                                    <div>
+                                        <p className="text-sm text-gray-500">Name</p>
+                                        <p className="font-medium">Dr. {appointment?.doctorId?.name}</p>
+                                    </div>
+                                </div>
+                                <div className="flex items-start gap-3">
+                                    <div className="mt-1">
+                                        <div className="h-2 w-2 rounded-full bg-emerald-600"></div>
+                                    </div>
+                                    <div>
+                                        <p className="text-sm text-gray-500">Specialization</p>
+                                        <p className="font-medium">{appointment?.doctorId?.specialty}</p>
+                                    </div>
+                                </div>
+                                <div className="flex items-start gap-3">
+                                    <div className="mt-1">
+                                        <div className="h-2 w-2 rounded-full bg-emerald-600"></div>
+                                    </div>
+                                    <div>
+                                        <p className="text-sm text-gray-500">Experience</p>
+                                        <p className="font-medium">{appointment?.doctorId?.experience || 'Not specified'}</p>
+                                    </div>
+                                </div>
                             </div>
                         </div>
 
-                        {/* Hospital Details */}
-                        <div className="bg-purple-50 rounded-xl p-6 transition-all duration-500 delay-300 ease-in-out lg:col-span-2">
-                            <div className="flex items-center gap-4 mb-5">
-                                <div className="bg-purple-100 p-3 rounded-full">
-                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-purple-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-                                    </svg>
+                        {/* Hospital Card */}
+                        <div className="bg-white border border-gray-200 rounded-xl p-5 shadow-sm hover:shadow-md transition-shadow lg:col-span-1">
+                            <div className="flex items-center gap-3 mb-4">
+                                <div className="bg-purple-100 p-2 rounded-lg">
+                                    <Hospital className="h-5 w-5 text-purple-600" />
                                 </div>
-                                <h2 className="text-xl font-semibold text-gray-800">Hospital Details</h2>
+                                <h2 className="text-xl font-semibold text-gray-800">Hospital Information</h2>
                             </div>
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                {[
-                                    { label: 'Hospital Name', value: appointment?.hospitalId?.name },
-                                   
-                                    { label: 'Address', value: appointment?.hospitalId?.address, colSpan: 'md:col-span-2' }
-                                ].map((item, index) => (
-                                    <div key={index} className={`flex gap-3 ${item?.colSpan || ''}`}>
-                                        <div className="flex-shrink-0">
-                                            <div className="h-5 w-5 rounded-full bg-purple-100 flex items-center justify-center">
-                                                <div className="h-1.5 w-1.5 rounded-full bg-purple-600"></div>
-                                            </div>
-                                        </div>
-                                        <div>
-                                            <p className="text-sm text-gray-500">{item?.label}</p>
-                                            <p className="font-medium">{item?.value}</p>
-                                        </div>
+                            <div className="space-y-4">
+                                <div className="flex items-start gap-3">
+                                    <div className="mt-1">
+                                        <div className="h-2 w-2 rounded-full bg-purple-600"></div>
                                     </div>
-                                ))}
+                                    <div>
+                                        <p className="text-sm text-gray-500">Name</p>
+                                        <p className="font-medium">{appointment?.hospitalId?.name}</p>
+                                    </div>
+                                </div>
+                                <div className="flex items-start gap-3">
+                                    <div className="mt-1">
+                                        <div className="h-2 w-2 rounded-full bg-purple-600"></div>
+                                    </div>
+                                    <div>
+                                        <p className="text-sm text-gray-500">Address</p>
+                                        <p className="font-medium">{appointment?.hospitalId?.address}</p>
+                                    </div>
+                                </div>
+                                <div className="flex items-start gap-3">
+                                    <div className="mt-1">
+                                        <div className="h-2 w-2 rounded-full bg-purple-600"></div>
+                                    </div>
+                                    <div>
+                                        <p className="text-sm text-gray-500">Contact</p>
+                                        <p className="font-medium">{appointment?.hospitalId?.phone || 'Not specified'}</p>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
 
                     {/* Action Buttons */}
-                    <div className="p-6 sm:p-8 border-t border-gray-100 bg-gray-50">
+                    <div className="p-6 border-t border-gray-100 bg-gray-50">
                         <div className="flex flex-wrap justify-center gap-4">
-                           
+                            {appointment?.status === 'pending' && (
+                                <button 
+                                    onClick={() => ConfirmAppointment(appointment?._id)}
+                                    className="px-6 py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-medium rounded-lg transition-all flex items-center gap-2 shadow-md hover:shadow-lg"
+                                >
+                                    <CheckCircle className="h-5 w-5" />
+                                    Confirm Appointment
+                                </button>
+                            )}
 
-                            {/* <button className="px-6 py-3 border border-blue-600 text-blue-600 hover:bg-blue-50 font-medium rounded-lg transition-all transform hover:scale-[1.02] flex items-center gap-2">
+                            {appointment?.status !== 'cancelled' && (
+                                <button 
+                                    onClick={() => CancelledAppointment(appointment?._id)}
+                                    className="px-6 py-3 bg-white border border-red-600 text-red-600 hover:bg-red-50 font-medium rounded-lg transition-all flex items-center gap-2 shadow-sm hover:shadow-md"
+                                >
+                                    <XCircle className="h-5 w-5" />
+                                    Cancel Appointment
+                                </button>
+                            )}
+
+                            <button 
+                                onClick={() => navigate(`/doctors/${appointment?.doctorId?._id}`)}
+                                className="px-6 py-3 bg-white border border-blue-600 text-blue-600 hover:bg-blue-50 font-medium rounded-lg transition-all flex items-center gap-2 shadow-sm hover:shadow-md"
+                            >
                                 <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                                 </svg>
-                                Reschedule
-                            </button> */}
-                            {
-                                appointment?.status != 'cancelled' &&  (
-                                    <button onClick={()=>CancelledAppointment(appointment?._id)} className="px-6 py-3 border border-red-600 text-red-600 hover:bg-red-50 font-medium rounded-lg transition-all transform hover:scale-[1.02] flex items-center gap-2">
-                                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                                </svg>
-                                Cancel Appointment
+                                Book Follow-up
                             </button>
-                                )
-                            }
                         </div>
                     </div>
+                </div>
+
+                {/* Important Notes Section */}
+                <div className="mt-8 bg-white rounded-xl shadow-md p-6">
+                    <h2 className="text-xl font-semibold text-gray-800 mb-4 flex items-center gap-2">
+                        <svg className="h-6 w-6 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                        </svg>
+                        Important Notes
+                    </h2>
+                    <ul className="space-y-3 text-gray-700">
+                        <li className="flex items-start gap-2">
+                            <span className="text-amber-500 mt-1">•</span>
+                            <span>Please arrive 15 minutes before your scheduled appointment time</span>
+                        </li>
+                        <li className="flex items-start gap-2">
+                            <span className="text-amber-500 mt-1">•</span>
+                            <span>Bring your ID and any relevant medical records</span>
+                        </li>
+                        <li className="flex items-start gap-2">
+                            <span className="text-amber-500 mt-1">•</span>
+                            <span>Face masks are required in all clinical areas</span>
+                        </li>
+                        <li className="flex items-start gap-2">
+                            <span className="text-amber-500 mt-1">•</span>
+                            <span>Cancellations require 24 hours notice to avoid fees</span>
+                        </li>
+                    </ul>
                 </div>
             </div>
         </div>

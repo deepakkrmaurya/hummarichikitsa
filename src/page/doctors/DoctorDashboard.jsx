@@ -1,235 +1,349 @@
 import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Calendar, Clock, User, FileText, BarChart, Settings, Search, Calendar as CalendarIcon, CheckCircle, XCircle, Clock as ClockIcon } from 'lucide-react';
-// import { Search, Calendar as CalendarIcon, CheckCircle, Clock as ClockIcon } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { getAllAppointment, todayAppointment } from '../../Redux/appointment';
 import { getAllHospital } from '../../Redux/hospitalSlice';
 import { getAllDoctors } from '../../Redux/doctorSlice';
 import { useDispatch, useSelector } from 'react-redux';
 import Dashboard from '../../components/Layout/Dashboard';
-import axios from 'axios';
 import axiosInstance from '../../Helper/axiosInstance';
-
 
 const DoctorDashboard = () => {
   const { isLoggedIn, role, data } = useSelector((state) => state.auth);
   const navigate = useNavigate();
-  const dispatch = useDispatch()
-  
-  const [appointment,setAppointment]=useState([])
+  const dispatch = useDispatch();
+
+  const [appointment, setAppointment] = useState([]);
   const [activeTab, setActiveTab] = useState('appointments');
   const [searchTerm, setSearchTerm] = useState('');
+  const [isLoading, setIsLoading] = useState(true);
   const hospitals = useSelector((state) => state?.hospitals?.hospitals);
   const { doctors } = useSelector((state) => state?.doctors);
   const appointments = useSelector((state) => state.appointment?.appointment);
-  // If not logged in as a doctor, redirect to home
-  //   if (!currentUser || !currentUser.isDoctor) {
-  //     return (
-  //       <div className="container mx-auto px-4 py-16 text-center">
-  //         <h2 className="text-2xl font-bold text-gray-800 mb-4">Access Denied</h2>
-  //         <p className="text-gray-600 mb-6">You must be logged in as a doctor to view this page.</p>
-  //         <button
-  //           onClick={() => navigate('/')}
-  //           className="text-blue-600 hover:text-blue-800 font-medium"
-  //         >
-  //           Back to Home
-  //         </button>
-  //       </div>
-  //     );
-  //   }
+  
+  // Professional healthcare color scheme
+  const colors = {
+    primary: '#2B6CB0',      // Deep blue
+    secondary: '#4299E1',    // Light blue
+    accent: '#48BB78',       // Green
+    danger: '#F56565',       // Red
+    warning: '#ED8936',      // Orange
+    background: '#F7FAFC',   // Light gray
+    card: '#FFFFFF',         // White
+    text: '#2D3748',         // Dark gray
+    muted: '#718096'         // Gray
+  };
 
-  // Get appointments for the current doctor
-  //   const doctor = doctors.find(d => d.id === 'doc-1'); // Assuming the logged-in doctor
-  //   const appointments = getAppointmentsForDoctor(doctor?.id || ''); 
-  //   // Filter appointments based on search term
-  const filteredAppointments = appointments?.filter(appointment =>
-    appointment._id.toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredAppointments = appointment?.filter(appointment =>
+    appointment._id.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    appointment.patient?.name?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   const getAppointment = async () => {
-  
-    // alert(formattedDate)
-    const res = await dispatch(todayAppointment())
-    setAppointment(res.payload.appointments)
-    console.log(res.payload.appointments)
-  }
+    setIsLoading(true);
+    try {
+      const res = await dispatch(todayAppointment());
+      setAppointment(res.payload.appointments);
+    } catch (error) {
+      console.error("Error fetching appointments:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   useEffect(() => {
-    (
-      async () => {
-        const res = axiosInstance.patch('/appointment/hospital/patient')
-        await getAppointment()
-        await dispatch(getAllAppointment())
-        await dispatch(getAllHospital())
-        await dispatch(getAllDoctors())
+    const fetchData = async () => {
+      setIsLoading(true);
+      try {
+        await axiosInstance.patch('/appointment/hospital/patient');
+        await getAppointment();
+        await dispatch(getAllAppointment());
+        await dispatch(getAllHospital());
+        await dispatch(getAllDoctors());
+      } catch (error) {
+        console.error("Error in initial data loading:", error);
+      } finally {
+        setIsLoading(false);
       }
-    )()
-  }, [])
+    };
+    fetchData();
+  }, []);
+
+  // Animation variants
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    show: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.1
+      }
+    }
+  };
+
+  const itemVariants = {
+    hidden: { opacity: 0, y: 20 },
+    show: { opacity: 1, y: 0 }
+  };
+
+  const statusBadgeVariants = {
+    confirmed: { backgroundColor: colors.accent },
+    booked: { backgroundColor: colors.warning },
+    cancelled: { backgroundColor: colors.danger },
+    completed: { backgroundColor: colors.primary }
+  };
+
   return (
     <Dashboard>
-      {activeTab === 'appointments' && (
-        <div className="space-y-6">
-          {/* Stats */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="bg-white rounded-lg shadow-md p-4">
-              <div className="flex items-center">
-                <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center mr-3">
-                  <CalendarIcon className="h-5 w-5 text-blue-600" />
-                </div>
-                <div>
-                  <p className="text-gray-500 text-sm">Today's Appointments</p>
-                  <p className="text-2xl font-semibold text-gray-800">{appointments?.length}</p>
-                </div>
-              </div>
-            </div>
-            <div className="bg-white rounded-lg shadow-md p-4">
-              <div className="flex items-center">
-                <div className="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center mr-3">
-                  <CheckCircle className="h-5 w-5 text-green-600" />
-                </div>
-                <div>
-                  <p className="text-gray-500 text-sm">Confirmed</p>
-                  <p className="text-2xl font-semibold text-gray-800">
-                    {appointments?.filter(a => a.status === 'confirmed').length}
-                  </p>
-                </div>
-              </div>
-            </div>
-            <div className="bg-white rounded-lg shadow-md p-4">
-              <div className="flex items-center">
-                <div className="w-10 h-10 rounded-full bg-yellow-100 flex items-center justify-center mr-3">
-                  <ClockIcon className="h-5 w-5 text-yellow-600" />
-                </div>
-                <div>
-                  <p className="text-gray-500 text-sm">Pending</p>
-                  <p className="text-2xl font-semibold text-gray-800">
-                    {appointments?.filter(a => a.status === 'booked').length}
-                  </p>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Appointments List */}
-          <div className="bg-white rounded-lg shadow-md overflow-hidden">
-            <div className="p-4 border-b border-gray-200 flex justify-between items-center">
-              <h2 className="text-lg font-semibold text-gray-800">Today's Appointments</h2>
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <Search className="h-4 w-4 text-gray-400" />
-                </div>
-                <input
-                  type="text"
-                  placeholder="Search appointments..."
-                  className="pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                />
-              </div>
-            </div>
-
-            <div className="overflow-x-auto">
-              <table className="min-w-full divide-y divide-gray-200">
-                <thead className="bg-gray-50">
-                  <tr>
-                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Patient
-                    </th>
-                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Time
-                    </th>
-                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Status
-                    </th>
-                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Payment
-                    </th>
-                    <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Actions
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
-                  {appointment?.map((appointment, index) => (
-                    <tr key={index} className="hover:bg-gray-50">
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="flex items-center">
-                          <div className="h-10 w-10 rounded-full bg-gray-200 flex items-center justify-center">
-                            <User className="h-6 w-6 text-gray-500" />
-                          </div>
-                          <div className="ml-4">
-                            <div className="text-sm font-medium text-gray-900">Patient ID: {index + 1}</div>
-                            <div className="text-sm text-gray-500">Appointment ID: {appointment?.id}</div>
-                          </div>
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm text-gray-900">{appointment?.slot}</div>
-                        <div className="text-sm text-gray-500">{appointment?.date}</div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${appointment?.status === 'confirmed'
-                          ? 'bg-green-100 text-green-800'
-                          : appointment?.status === 'cancelled'
-                            ? 'bg-red-100 text-red-800'
-                            : 'bg-yellow-100 text-yellow-800'
-                          }`}>
-                          {appointment?.status.charAt(0).toUpperCase() + appointment?.status.slice(1)}
-                        </span>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${appointment?.paymentStatus === 'completed'
-                          ? 'bg-green-100 text-green-800'
-                          : 'bg-yellow-100 text-yellow-800'
-                          }`}>
-                          {appointment?.paymentStatus.charAt(0).toUpperCase() + appointment?.paymentStatus.slice(1)}
-                        </span>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                        <Link to={`/appointment/${appointment?._id}`}>
-                        <button className="text-blue-600 hover:text-blue-900 mr-3">View</button>
-                        </Link>
-                        {appointment?.status === 'booked' && (
-                          <>
-                            <button className="text-green-600 hover:text-green-900 mr-3">Confirm</button>
-                            <button className="text-red-600 hover:text-red-900">Cancel</button>
-                          </>
-                        )}
-                        {appointment?.status === 'confirmed' && (
-                          <button className="text-purple-600 hover:text-purple-900">Complete</button>
-                        )}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-
-            {filteredAppointments.length === 0 && (
-              <div className="text-center py-8">
-                <p className="text-gray-500">No appointments found</p>
-              </div>
-            )}
-          </div>
-        </div>
-      )}
-
-      {activeTab !== 'appointments' && (
-        <div className="bg-white rounded-lg shadow-md p-8 text-center">
-          <h2 className="text-xl font-bold text-gray-800 mb-4">
-            {activeTab.charAt(0).toUpperCase() + activeTab.slice(1)} Feature
-          </h2>
-          <p className="text-gray-600 mb-6">
-            This feature is not implemented in the demo version.
-          </p>
-          <button
-            onClick={() => setActiveTab('appointments')}
-            className="text-blue-600 hover:text-blue-800 font-medium"
+      <div className="min-h-screen" style={{ backgroundColor: colors.background }}>
+        {activeTab === 'appointments' && (
+          <motion.div 
+            initial="hidden"
+            animate="show"
+            variants={containerVariants}
+            className="space-y-6 p-6"
           >
-            Back to Appointments
-          </button>
-        </div>
-      )}
+            {/* Stats Cards */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <motion.div 
+                variants={itemVariants}
+                className="bg-white rounded-xl shadow-sm p-6 transition-all hover:shadow-md"
+                style={{ borderLeft: `4px solid ${colors.primary}` }}
+              >
+                <div className="flex items-center">
+                  <div className="w-12 h-12 rounded-full flex items-center justify-center mr-4" style={{ backgroundColor: `${colors.primary}20` }}>
+                    <CalendarIcon className="h-6 w-6" style={{ color: colors.primary }} />
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium" style={{ color: colors.muted }}>Today's Appointments</p>
+                    <p className="text-2xl font-semibold mt-1" style={{ color: colors.text }}>
+                      {isLoading ? (
+                        <div className="h-8 w-12 bg-gray-200 rounded animate-pulse"></div>
+                      ) : (
+                        appointments?.length
+                      )}
+                    </p>
+                  </div>
+                </div>
+              </motion.div>
+
+              <motion.div 
+                variants={itemVariants}
+                className="bg-white rounded-xl shadow-sm p-6 transition-all hover:shadow-md"
+                style={{ borderLeft: `4px solid ${colors.accent}` }}
+              >
+                <div className="flex items-center">
+                  <div className="w-12 h-12 rounded-full flex items-center justify-center mr-4" style={{ backgroundColor: `${colors.accent}20` }}>
+                    <CheckCircle className="h-6 w-6" style={{ color: colors.accent }} />
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium" style={{ color: colors.muted }}>Confirmed</p>
+                    <p className="text-2xl font-semibold mt-1" style={{ color: colors.text }}>
+                      {isLoading ? (
+                        <div className="h-8 w-12 bg-gray-200 rounded animate-pulse"></div>
+                      ) : (
+                        appointments?.filter(a => a.status === 'confirmed').length
+                      )}
+                    </p>
+                  </div>
+                </div>
+              </motion.div>
+
+              <motion.div 
+                variants={itemVariants}
+                className="bg-white rounded-xl shadow-sm p-6 transition-all hover:shadow-md"
+                style={{ borderLeft: `4px solid ${colors.warning}` }}
+              >
+                <div className="flex items-center">
+                  <div className="w-12 h-12 rounded-full flex items-center justify-center mr-4" style={{ backgroundColor: `${colors.warning}20` }}>
+                    <ClockIcon className="h-6 w-6" style={{ color: colors.warning }} />
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium" style={{ color: colors.muted }}>Pending</p>
+                    <p className="text-2xl font-semibold mt-1" style={{ color: colors.text }}>
+                      {isLoading ? (
+                        <div className="h-8 w-12 bg-gray-200 rounded animate-pulse"></div>
+                      ) : (
+                        appointments?.filter(a => a.status === 'booked').length
+                      )}
+                    </p>
+                  </div>
+                </div>
+              </motion.div>
+            </div>
+
+            {/* Appointments List */}
+            <motion.div 
+              variants={itemVariants}
+              className="bg-white rounded-xl shadow-sm overflow-hidden transition-all hover:shadow-md"
+            >
+              <div className="p-6 border-b border-gray-200 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                <h2 className="text-xl font-semibold" style={{ color: colors.text }}>Today's Appointments</h2>
+                <div className="relative w-full md:w-64">
+                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <Search className="h-4 w-4" style={{ color: colors.muted }} />
+                  </div>
+                  <input
+                    type="text"
+                    placeholder="Search appointments..."
+                    className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm w-full"
+                    style={{ borderColor: colors.muted }}
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                  />
+                </div>
+              </div>
+
+              {isLoading ? (
+                <div className="p-8 flex justify-center">
+                  <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2" style={{ borderColor: colors.primary }}></div>
+                </div>
+              ) : (
+                <div className="overflow-x-auto">
+                  <table className="min-w-full divide-y divide-gray-200">
+                    <thead className="bg-gray-50">
+                      <tr>
+                        <th scope="col" className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider" style={{ color: colors.muted }}>
+                          Patient
+                        </th>
+                        <th scope="col" className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider" style={{ color: colors.muted }}>
+                          Time
+                        </th>
+                        <th scope="col" className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider" style={{ color: colors.muted }}>
+                          Status
+                        </th>
+                        <th scope="col" className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider" style={{ color: colors.muted }}>
+                          Payment
+                        </th>
+                        <th scope="col" className="px-6 py-3 text-right text-xs font-medium uppercase tracking-wider" style={{ color: colors.muted }}>
+                          Actions
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody className="bg-white divide-y divide-gray-200">
+                      <AnimatePresence>
+                        {filteredAppointments?.length > 0 ? (
+                          filteredAppointments.map((appointment, index) => (
+                            <motion.tr 
+                              key={appointment._id}
+                              initial={{ opacity: 0, y: 10 }}
+                              animate={{ opacity: 1, y: 0 }}
+                              exit={{ opacity: 0 }}
+                              transition={{ duration: 0.3 }}
+                              className="hover:bg-gray-50"
+                            >
+                              <td className="px-6 py-4 whitespace-nowrap">
+                                <div className="flex items-center">
+                                  <div className="h-10 w-10 rounded-full flex items-center justify-center" style={{ backgroundColor: `${colors.primary}20` }}>
+                                    <User className="h-5 w-5" style={{ color: colors.primary }} />
+                                  </div>
+                                  <div className="ml-4">
+                                    <div className="text-sm font-medium" style={{ color: colors.text }}>
+                                      {appointment.patient?.name || `Patient ${index + 1}`}
+                                    </div>
+                                    <div className="text-sm" style={{ color: colors.muted }}>
+                                      ID: {appointment._id.substring(0, 8)}...
+                                    </div>
+                                  </div>
+                                </div>
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap">
+                                <div className="text-sm font-medium" style={{ color: colors.text }}>{appointment?.slot}</div>
+                                <div className="text-sm" style={{ color: colors.muted }}>{appointment?.date}</div>
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap">
+                                <motion.span
+                                  className="px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full text-white"
+                                  animate={appointment?.status}
+                                  variants={statusBadgeVariants}
+                                >
+                                  {appointment?.status.charAt(0).toUpperCase() + appointment?.status.slice(1)}
+                                </motion.span>
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap">
+                                <span className={`px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                                  appointment?.paymentStatus === 'completed'
+                                    ? 'bg-green-100 text-green-800'
+                                    : 'bg-yellow-100 text-yellow-800'
+                                }`}>
+                                  {appointment?.paymentStatus.charAt(0).toUpperCase() + appointment?.paymentStatus.slice(1)}
+                                </span>
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                <Link to={`/appointment/${appointment?._id}`}>
+                                  <motion.button 
+                                    whileHover={{ scale: 1.05 }}
+                                    whileTap={{ scale: 0.95 }}
+                                    className="px-3 py-1 rounded-lg mr-2" 
+                                    style={{ 
+                                      backgroundColor: `${colors.primary}20`,
+                                      color: colors.primary
+                                    }}
+                                  >
+                                    View
+                                  </motion.button>
+                                </Link>
+                              </td>
+                            </motion.tr>
+                          ))
+                        ) : (
+                          <motion.tr 
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                          >
+                            <td colSpan="5" className="px-6 py-12 text-center">
+                              <div className="flex flex-col items-center justify-center">
+                                <FileText className="h-12 w-12 mb-4" style={{ color: colors.muted }} />
+                                <h3 className="text-lg font-medium mb-1" style={{ color: colors.text }}>
+                                  No appointments found
+                                </h3>
+                                <p className="text-sm" style={{ color: colors.muted }}>
+                                  {searchTerm ? 'Try a different search term' : 'No appointments scheduled for today'}
+                                </p>
+                              </div>
+                            </td>
+                          </motion.tr>
+                        )}
+                      </AnimatePresence>
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </motion.div>
+          </motion.div>
+        )}
+
+        {activeTab !== 'appointments' && (
+          <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="bg-white rounded-xl shadow-md p-8 text-center max-w-2xl mx-auto my-8"
+          >
+            <div className="w-20 h-20 mx-auto mb-6 rounded-full flex items-center justify-center" style={{ backgroundColor: `${colors.primary}20` }}>
+              <Settings className="h-10 w-10" style={{ color: colors.primary }} />
+            </div>
+            <h2 className="text-2xl font-bold mb-4" style={{ color: colors.text }}>
+              {activeTab.charAt(0).toUpperCase() + activeTab.slice(1)} Feature
+            </h2>
+            <p className="text-gray-600 mb-6">
+              This feature is currently under development and will be available soon.
+            </p>
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={() => setActiveTab('appointments')}
+              className="px-6 py-2 rounded-lg font-medium"
+              style={{ 
+                backgroundColor: colors.primary,
+                color: 'white'
+              }}
+            >
+              Back to Appointments
+            </motion.button>
+          </motion.div>
+        )}
+      </div>
     </Dashboard>
   );
 };
