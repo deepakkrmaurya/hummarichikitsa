@@ -1,6 +1,6 @@
 import { ChevronLeft, ChevronRight, CalendarCheck } from 'lucide-react';
 import { User, Smartphone } from 'lucide-react';
-import { isSameDay } from 'date-fns';
+import { isSameDay, isBefore, addDays } from 'date-fns';
 import { Check } from 'lucide-react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { MapPin, Star, Clock, Calendar, CreditCard, CheckCircle, Award, BookOpen } from 'lucide-react';
@@ -18,14 +18,23 @@ import { useRef } from 'react';
 import axiosInstance from '../Helper/axiosInstance';
 
 const DoctorDetailPage = () => {
-    const rzpInstanceRef = useRef(null); // Us
+    const rzpInstanceRef = useRef(null);
     const [currentMonth, setCurrentMonth] = useState(new Date());
     const dispatch = useDispatch();
     const currentUser = JSON.parse(localStorage.getItem('data')) || null;
     const isLoggdIn = JSON.parse(localStorage.getItem('isLoggedIn')) || false;
     const { doctorId } = useParams();
     const navigate = useNavigate();
-
+    const getDaysInMonth = (date) => {
+  const year = date.getFullYear();
+  const month = date.getMonth();
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
+  
+  return Array.from({ length: daysInMonth }, (_, i) => {
+    const day = i + 1;
+    return new Date(year, month, day);
+  });
+};
     // Redux state
     const hospitals = useSelector((state) => state.hospitals.hospitals);
     const { doctors, loading: doctorsLoading } = useSelector((state) => state.doctors);
@@ -36,12 +45,30 @@ const DoctorDetailPage = () => {
     const hospital = doctor ? hospitals.find(h => h?._id === doctor?.hospitalId?._id) : null;
 
     // Local state
-    const [selectedDate, setSelectedDate] = useState(doctor?.availableSlots[0]?.date || '');
+    const [selectedDate, setSelectedDate] = useState('');
     const [selectedSlot, setSelectedSlot] = useState('');
     const [patient, setPatient] = useState('');
     const [mobile, setMobile] = useState('');
     const [dob, setDob] = useState('');
     const [isLoading, setIsLoading] = useState(true);
+
+    // Helper function to check if date is today or in the past
+    const isDisabledDate = (dateString) => {
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        const slotDate = new Date(dateString);
+        return isBefore(slotDate, today) || isSameDay(slotDate, today);
+    };
+
+    // Set first available future date as default on load
+    useEffect(() => {
+        if (doctor?.availableSlots) {
+            const futureSlot = doctor.availableSlots.find(slot => !isDisabledDate(slot.date));
+            if (futureSlot) {
+                setSelectedDate(futureSlot.date);
+            }
+        }
+    }, [doctor]);
 
     // Format experience text
     const formatExperience = (years) => {
@@ -99,10 +126,9 @@ const DoctorDetailPage = () => {
         };
 
         const res = await dispatch(AppointmentCreate(newAppointment));
-
+         
         if (res?.payload?.success) {
             const orderData = res?.payload;
-            // Check if orderData exists and has required properties
             if (!orderData || !orderData.orderId) {
                 console.error('Invalid order data:', orderData);
                 navigate('/');
@@ -156,12 +182,7 @@ const DoctorDetailPage = () => {
                                 const res = result.data;
 
                                 if (res?.success) {
-                                    // Close the Razorpay modal explicitly
-                                    // if (rzpInstanceRef.current) {
-                                    //     rzpInstanceRef.current.close();
-                                    // }
                                     navigate(`/confirmation/${res?.appointment?._id}`);
-
                                 } else {
                                     alert('Payment verification failed');
                                 }
@@ -198,18 +219,13 @@ const DoctorDetailPage = () => {
 
             displayRazorpay();
 
-            // Cleanup function to close modal if component unmounts
             return () => {
                 if (rzpInstanceRef.current) {
                     rzpInstanceRef.current.close();
                 }
             };
-
         }
     };
-
-
-
 
     // Fetch data on component mount
     useEffect(() => {
@@ -227,486 +243,398 @@ const DoctorDetailPage = () => {
         fetchData();
     }, []);
 
-    // Loading state
-    // if (isLoading || hospitalsLoading || doctorsLoading) {
-    //     return (
-    //         <Layout>
-    //             <div className="container mx-auto px-4 py-8">
-    //                 {/* Doctor Profile Header Skeleton */}
-    //                 <div className="bg-white rounded-lg shadow-md overflow-hidden mb-8">
-    //                     <div className="bg-gradient-to-r from-blue-50 to-blue-100 p-6">
-    //                         <div className="flex flex-col md:flex-row">
-    //                             <div className="md:w-1/4 flex justify-center md:justify-start mb-6 md:mb-0">
-    //                                 <Skeleton circle width={160} height={160} />
-    //                             </div>
-    //                             <div className="md:w-3/4 md:pl-6">
-    //                                 <Skeleton width={200} height={30} className="mb-2" />
-    //                                 <Skeleton width={150} height={20} className="mb-3" />
-    //                                 <Skeleton width={250} height={20} className="mb-4" />
-    //                                 <Skeleton width={120} height={20} />
-    //                             </div>
-    //                         </div>
-    //                     </div>
-    //                 </div>
-
-    //                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-    //                     {/* Doctor Info Skeleton */}
-    //                     <div className="lg:col-span-2 space-y-8">
-    //                         <Skeleton height={150} className="rounded-lg" />
-    //                         <Skeleton height={200} className="rounded-lg" />
-    //                         <Skeleton height={250} className="rounded-lg" />
-    //                     </div>
-
-    //                     {/* Booking Section Skeleton */}
-    //                     <div className="lg:col-span-1">
-    //                         <Skeleton height={600} className="rounded-lg" />
-    //                     </div>
-    //                 </div>
-    //             </div>
-    //         </Layout>
-    //     );
-    // }
-
-    // // Doctor not found state
-    // if (!doctor || !hospital) {
-    //     return (
-    //         <Layout>
-    //             <div className="container mx-auto px-4 py-16 text-center">
-    //                 <h2 className="text-2xl font-bold text-gray-800 mb-4">Doctor not found</h2>
-    //                 <button
-    //                     onClick={() => navigate('/hospitals')}
-    //                     className="flex items-center justify-center mx-auto px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition"
-    //                 >
-    //                     <ChevronLeft className="h-5 w-5 mr-1" />
-    //                     Back to Hospitals
-    //                 </button>
-    //             </div>
-    //         </Layout>
-    //     );
-    // }
-
     return (
-        <>
-            <Layout>
-                <div className="container mx-auto px-4 py-8">
-                    {/* Back button */}
-                    <button
-                        onClick={() => navigate(-1)}
-                        className="flex items-center text-blue-600 hover:text-blue-800 mb-6 transition"
-                    >
-                        <ChevronLeft className="h-5 w-5 mr-1" />
-                        Back
-                    </button>
+        <Layout>
+            <div className="container mx-auto px-4 py-8">
+                {/* Back button */}
+                <button
+                    onClick={() => navigate(-1)}
+                    className="flex items-center text-blue-600 hover:text-blue-800 mb-6 transition"
+                >
+                    <ChevronLeft className="h-5 w-5 mr-1" />
+                    Back
+                </button>
 
-                    {/* Doctor Profile Header */}
-                    {/* <div className="bg-white rounded-xl shadow-md overflow-hidden mb-8 border border-gray-100">
-                    <div className="bg-gradient-to-r from-teal-600 to-teal-500 text-white p-6">
-                        <div className="flex flex-col md:flex-row">
-                            <div className="md:w-1/4 flex justify-center md:justify-start mb-6 md:mb-0">
-                                <img
-                                    src={doctor?.photo || '/default-doctor.jpg'}
-                                    alt={doctor?.name}
-                                    className="w-40 h-40 rounded-full object-cover border-4 border-white shadow-lg"
-                                    onError={(e) => {
-                                        e.target.onerror = null;
-                                        e.target.src = '/default-doctor.jpg';
-                                    }}
-                                />
-                            </div>
-                            <div className="md:w-3/4 md:pl-6">
-                                <h1 className="text-2xl font-bold mb-2">Dr. {doctor?.name}</h1>
-                                <p className="text-teal-100 font-medium mb-3">{doctor?.specialty}</p>
-                                <p className="text-white mb-3">
-                                    {doctor?.qualification} • {formatExperience(doctor?.experience)} Experience
-                                </p>
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                    {/* Doctor Info */}
+                    <div className="lg:col-span-2 space-y-8">
+                        {/* About */}
+                        <div className="bg-white rounded-xl shadow-md p-6 border border-gray-100">
+                            <h2 className="text-xl font-semibold text-gray-800 mb-4 flex items-center">
+                                <BookOpen className="h-5 w-5 text-teal-600 mr-2" />
+                                About
+                            </h2>
+                            <p className="text-gray-600">
+                                {doctor?.bio || 'No biography available for this doctor.'}
+                            </p>
+                        </div>
 
-                                <div className="flex items-center mb-4">
-                                    <div className="bg-white bg-opacity-20 rounded-md px-3 py-1 flex items-center">
-                                        <Star className="h-5 w-5 text-yellow-400 mr-1" />
-                                        <span className="font-semibold">{formatRating(doctor?.rating)}</span>
-                                        <span className="text-sm ml-1 text-teal-100">
-                                            ({getRandomReviews()} reviews)
-                                        </span>
-                                    </div>
+                        {/* Experience & Qualifications */}
+                        <div className="bg-white rounded-xl shadow-md p-6 border border-gray-100">
+                            <h2 className="text-xl font-semibold text-gray-800 mb-4 flex items-center">
+                                <Award className="h-5 w-5 text-teal-600 mr-2" />
+                                Experience & Qualifications
+                            </h2>
+                            <div className="space-y-4">
+                                <div className="border-l-4 border-teal-600 pl-4">
+                                    <h3 className="font-medium text-gray-800">Education</h3>
+                                    <p className="text-gray-600">{doctor?.qualification}</p>
                                 </div>
+                                <div className="border-l-4 border-teal-600 pl-4">
+                                    <h3 className="font-medium text-gray-800">Experience</h3>
+                                    <p className="text-gray-600">
+                                        {formatExperience(doctor?.experience)} of clinical experience
+                                    </p>
+                                </div>
+                                <div className="border-l-4 border-teal-600 pl-4">
+                                    <h3 className="font-medium text-gray-800">Languages</h3>
+                                    <p className="text-gray-600">English, Hindi</p>
+                                </div>
+                            </div>
+                        </div>
 
-                                <div className="flex items-center">
-                                    <MapPin className="h-5 w-5 text-teal-200 mr-2" />
-                                    <span className="text-white">{hospital?.name}, {hospital?.city}</span>
+                        {/* Hospital Info */}
+                        <div className="bg-white rounded-xl shadow-md overflow-hidden border border-gray-100">
+                            <div className="p-6">
+                                <h2 className="text-xl font-semibold text-gray-800 mb-4">
+                                    Hospital Information
+                                </h2>
+                                <div className="flex flex-col md:flex-row">
+                                    <div className="md:w-1/3 mb-4 md:mb-0">
+                                        <img
+                                            src={hospital?.image}
+                                            alt={hospital?.name}
+                                            className="w-full h-auto rounded-lg object-cover"
+                                            style={{ maxHeight: '150px' }}
+                                        />
+                                    </div>
+                                    <div className="md:w-2/3 md:pl-6">
+                                        <h3 className="text-lg font-medium text-gray-800 mb-2">
+                                            {hospital?.name}
+                                        </h3>
+                                        <p className="text-gray-600 mb-3">
+                                            {hospital?.address}, {hospital?.city}, {hospital?.state}
+                                        </p>
+                                        <div className="flex items-center mb-4">
+                                            <Star className="h-5 w-5 text-yellow-500 mr-1" />
+                                            <span className="font-semibold text-gray-800">
+                                                {formatRating(hospital?.rating)}
+                                            </span>
+                                            <span className="text-gray-600 text-sm ml-1">
+                                                ({getRandomReviews()} reviews)
+                                            </span>
+                                        </div>
+                                        <div className="flex flex-wrap gap-2">
+                                            {hospital?.facilities?.slice(0, 4).map((facility, index) => (
+                                                <span
+                                                    key={index}
+                                                    className="px-3 py-1 bg-gray-100 text-gray-800 text-sm font-medium rounded-full"
+                                                >
+                                                    {facility}
+                                                </span>
+                                            ))}
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </div>
-                </div> */}
 
-                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                        {/* Doctor Info */}
-                        <div className="lg:col-span-2 space-y-8">
-                            {/* About */}
-                            <div className="bg-white rounded-xl shadow-md p-6 border border-gray-100">
-                                <h2 className="text-xl font-semibold text-gray-800 mb-4 flex items-center">
-                                    <BookOpen className="h-5 w-5 text-teal-600 mr-2" />
-                                    About
+                    {/* Booking Section */}
+                    <div className="lg:col-span-1">
+                        <div className="bg-white rounded-xl shadow-md p-6 sticky top-24 border border-gray-100">
+                            <div className="border-b pb-4 mb-4">
+                                <h2 className="text-xl font-semibold text-gray-800 mb-1">
+                                    Book Appointment
                                 </h2>
                                 <p className="text-gray-600">
-                                    {doctor?.bio || 'No biography available for this doctor.'}
+                                    Consultation Fee: ₹{doctor?.consultationFee}
                                 </p>
                             </div>
 
-                            {/* Experience & Qualifications */}
-                            <div className="bg-white rounded-xl shadow-md p-6 border border-gray-100">
-                                <h2 className="text-xl font-semibold text-gray-800 mb-4 flex items-center">
-                                    <Award className="h-5 w-5 text-teal-600 mr-2" />
-                                    Experience & Qualifications
-                                </h2>
-                                <div className="space-y-4">
-                                    <div className="border-l-4 border-teal-600 pl-4">
-                                        <h3 className="font-medium text-gray-800">Education</h3>
-                                        <p className="text-gray-600">{doctor?.qualification}</p>
-                                    </div>
-                                    <div className="border-l-4 border-teal-600 pl-4">
-                                        <h3 className="font-medium text-gray-800">Experience</h3>
-                                        <p className="text-gray-600">
-                                            {formatExperience(doctor?.experience)} of clinical experience
-                                        </p>
-                                    </div>
-                                    <div className="border-l-4 border-teal-600 pl-4">
-                                        <h3 className="font-medium text-gray-800">Languages</h3>
-                                        <p className="text-gray-600">English, Hindi</p>
-                                    </div>
-                                </div>
+                            {/* Calendar Picker */}
+                            <div className="mb-8">
+                                <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-3">
+                                    <Calendar className="h-4 w-4 text-teal-600" />
+                                    <span>Choose Appointment Date</span>
+                                </label>
+
+                                <div className="bg-white rounded-lg border border-gray-100 shadow-[0px_2px_8px_rgba(0,0,0,0.05)] overflow-hidden">
+  {/* Month Navigation */}
+  <div className="flex justify-between items-center p-3 bg-gradient-to-r from-teal-50 to-teal-50/30">
+    <button
+      className="p-1.5 rounded-lg hover:bg-white/50 transition"
+      onClick={() => {
+        const prevMonth = new Date(currentMonth);
+        prevMonth.setMonth(prevMonth.getMonth() - 1);
+        setCurrentMonth(prevMonth);
+      }}
+    >
+      <ChevronLeft className="h-5 w-5 text-teal-600" />
+    </button>
+    <h3 className="font-semibold text-teal-800">
+      {currentMonth.toLocaleDateString('en-US', {
+        month: 'long',
+        year: 'numeric'
+      })}
+    </h3>
+    <button
+      className="p-1.5 rounded-lg hover:bg-white/50 transition"
+      onClick={() => {
+        const nextMonth = new Date(currentMonth);
+        nextMonth.setMonth(nextMonth.getMonth() + 1);
+        setCurrentMonth(nextMonth);
+      }}
+    >
+      <ChevronRight className="h-5 w-5 text-teal-600" />
+    </button>
+  </div>
+
+  {/* Day Headers */}
+  <div className="grid grid-cols-7 px-2 pt-2">
+    {['S', 'M', 'T', 'W', 'T', 'F', 'S'].map((day) => (
+      <div key={day} className="text-center text-xs font-medium text-gray-400 py-2">
+        {day}
+      </div>
+    ))}
+  </div>
+
+  {/* Dates Grid */}
+  <div className="grid grid-cols-7 p-2">
+    {getDaysInMonth(currentMonth).map((date) => {
+      const day = date.getDate();
+      const dateString = date.toISOString().split('T')[0];
+      const slotData = doctor?.availableSlots?.find(s => s.date === dateString);
+      const isSelected = selectedDate === dateString;
+      const isToday = isSameDay(new Date(), date);
+      const isDisabled = isDisabledDate(dateString) || !slotData;
+
+      return (
+        <button
+          key={dateString}
+          onClick={() => {
+            if (!isDisabled) {
+              setSelectedDate(dateString);
+              setSelectedSlot('');
+            }
+          }}
+          disabled={isDisabled}
+          className={`
+            relative h-12 flex flex-col items-center justify-center
+            transition-all duration-200
+            ${isSelected
+              ? 'bg-teal-600 text-white rounded-xl'
+              : isDisabled
+                ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                : 'hover:bg-teal-50/50 rounded-lg'
+            }
+            ${isToday && !isSelected && !isDisabled ? 'border border-teal-300' : ''}
+          `}
+        >
+          <span className={`
+            text-sm font-medium
+            ${isSelected ? 'text-white' :
+              isDisabled ? 'text-gray-400' :
+                isToday ? 'text-teal-600' : 'text-gray-700'}
+          `}>
+            {day}
+          </span>
+
+          {slotData?.slots?.length > 0 && !isDisabled && (
+            <span className={`
+              absolute bottom-2 w-1.5 h-1.5 rounded-full
+              ${isSelected ? 'bg-white/90' : 'bg-teal-500'}
+            `} />
+          )}
+
+          {isDisabled && (
+            <div className="absolute inset-0 bg-white bg-opacity-70 rounded-lg flex items-center justify-center">
+              <span className="text-xs text-gray-500">{day}</span>
+            </div>
+          )}
+        </button>
+      );
+    })}
+  </div>
+
+  {/* Selected Date Card */}
+  {selectedDate && (
+    <div className="px-4 pb-3">
+      <div className="bg-teal-50/70 rounded-lg p-3 flex items-center gap-2">
+        <CalendarCheck className="h-4 w-4 text-teal-600" />
+        <span className="text-sm font-medium text-gray-700">
+          {new Date(selectedDate).toLocaleDateString('en-US', {
+            weekday: 'short',
+            month: 'short',
+            day: 'numeric'
+          })}
+        </span>
+        <span className="ml-auto text-xs bg-teal-100 text-teal-800 px-2 py-1 rounded-full">
+          {availableSlots.length} slots available
+        </span>
+      </div>
+    </div>
+  )}
+</div>
                             </div>
 
-                            {/* Hospital Info */}
-                            <div className="bg-white rounded-xl shadow-md overflow-hidden border border-gray-100">
-                                <div className="p-6">
-                                    <h2 className="text-xl font-semibold text-gray-800 mb-4">
-                                        Hospital Information
-                                    </h2>
-                                    <div className="flex flex-col md:flex-row">
-                                        <div className="md:w-1/3 mb-4 md:mb-0">
-                                            <img
-                                                src={hospital?.image}
-                                                alt={hospital?.name}
-                                                className="w-full h-auto rounded-lg object-cover"
-                                                style={{ maxHeight: '150px' }}
+                            {/* Time Slot Selection */}
+                            <div className="mb-8">
+                                <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-3">
+                                    <Clock className="h-4 w-4 text-teal-600" />
+                                    <span>Select Time Slot</span>
+                                </label>
 
-                                            />
-                                        </div>
-                                        <div className="md:w-2/3 md:pl-6">
-                                            <h3 className="text-lg font-medium text-gray-800 mb-2">
-                                                {hospital?.name}
-                                            </h3>
-                                            <p className="text-gray-600 mb-3">
-                                                {hospital?.address}, {hospital?.city}, {hospital?.state}
-                                            </p>
-                                            <div className="flex items-center mb-4">
-                                                <Star className="h-5 w-5 text-yellow-500 mr-1" />
-                                                <span className="font-semibold text-gray-800">
-                                                    {formatRating(hospital?.rating)}
-                                                </span>
-                                                <span className="text-gray-600 text-sm ml-1">
-                                                    ({getRandomReviews()} reviews)
-                                                </span>
-                                            </div>
-                                            <div className="flex flex-wrap gap-2">
-                                                {hospital?.facilities?.slice(0, 4).map((facility, index) => (
-                                                    <span
-                                                        key={index}
-                                                        className="px-3 py-1 bg-gray-100 text-gray-800 text-sm font-medium rounded-full"
-                                                    >
-                                                        {facility}
-                                                    </span>
-                                                ))}
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
+                                {selectedDate ? (
+                                    <div className="space-y-3">
+                                        <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                                            {availableSlots?.map((slot) => (
+                                                <button
+                                                    key={slot}
+                                                    onClick={() => setSelectedSlot(slot)}
+                                                    className={`
+                                                        relative p-3 rounded-xl border transition-all duration-200
+                                                        ${selectedSlot === slot
+                                                            ? 'bg-teal-600 text-white border-teal-700 shadow-md'
+                                                            : 'bg-white border-gray-200 hover:border-teal-300 hover:bg-teal-50/30'
+                                                        }
+                                                    `}
+                                                >
+                                                    <span className="block text-sm font-medium">{slot}</span>
 
-                        {/* Booking Section */}
-                        <div className="lg:col-span-1">
-                            <div className="bg-white rounded-xl shadow-md p-6 sticky top-24 border border-gray-100">
-                                <div className="border-b pb-4 mb-4">
-                                    <h2 className="text-xl font-semibold text-gray-800 mb-1">
-                                        Book Appointment
-                                    </h2>
-                                    <p className="text-gray-600">
-                                        Consultation Fee: ₹{doctor?.consultationFee}
-                                    </p>
-                                </div>
-
-                                {/* Calendar Picker */}
-                                <div className="mb-8">
-                                    <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-3">
-                                        <Calendar className="h-4 w-4 text-teal-600" />
-                                        <span>Choose Appointment Date</span>
-                                    </label>
-
-                                    <div className="bg-white rounded-lg border border-gray-100 shadow-[0px_2px_8px_rgba(0,0,0,0.05)] overflow-hidden">
-                                        {/* Month Navigation */}
-                                        <div className="flex justify-between items-center p-3 bg-gradient-to-r from-teal-50 to-teal-50/30">
-                                            <button
-                                                className="p-1.5 rounded-lg hover:bg-white/50 transition"
-                                                onClick={() => {
-                                                    const prevMonth = new Date(currentMonth);
-                                                    prevMonth.setMonth(prevMonth.getMonth() - 1);
-                                                    setCurrentMonth(prevMonth);
-                                                }}
-                                            >
-                                                <ChevronLeft className="h-5 w-5 text-teal-600" />
-                                            </button>
-                                            <h3 className="font-semibold text-teal-800">
-                                                {currentMonth.toLocaleDateString('en-US', {
-                                                    month: 'long',
-                                                    year: 'numeric'
-                                                })}
-                                            </h3>
-                                            <button
-                                                className="p-1.5 rounded-lg hover:bg-white/50 transition"
-                                                onClick={() => {
-                                                    const nextMonth = new Date(currentMonth);
-                                                    nextMonth.setMonth(nextMonth.getMonth() + 1);
-                                                    setCurrentMonth(nextMonth);
-                                                }}
-                                            >
-                                                <ChevronRight className="h-5 w-5 text-teal-600" />
-                                            </button>
-                                        </div>
-
-                                        {/* Day Headers */}
-                                        <div className="grid grid-cols-7 px-2 pt-2">
-                                            {['S', 'M', 'T', 'W', 'T', 'F', 'S'].map((day) => (
-                                                <div key={day} className="text-center text-xs font-medium text-gray-400 py-2">
-                                                    {day}
-                                                </div>
+                                                    {selectedSlot === slot && (
+                                                        <div className="absolute -top-2 -right-2">
+                                                            <div className="bg-teal-700 text-white p-1 rounded-full">
+                                                                <Check className="h-3 w-3" />
+                                                            </div>
+                                                        </div>
+                                                    )}
+                                                </button>
                                             ))}
                                         </div>
 
-                                        {/* Dates Grid */}
-                                        <div className="grid grid-cols-7 p-2">
-                                            {doctor?.availableSlots?.map((slot) => {
-                                                const date = new Date(slot.date);
-                                                const day = date.getDate();
-                                                const isSelected = selectedDate === slot.date;
-                                                const isToday = isSameDay(new Date(), date);
-
-                                                return (
-                                                    <button
-                                                        key={slot.date}
-                                                        onClick={() => {
-                                                            setSelectedDate(slot.date);
-                                                            setSelectedSlot('');
-                                                        }}
-                                                        className={`
-                                                        relative h-12 flex flex-col items-center justify-center
-                                                        transition-all duration-200
-                                                        ${isSelected
-                                                                ? 'bg-teal-600 text-white rounded-xl'
-                                                                : 'hover:bg-teal-50/50 rounded-lg'
-                                                            }
-                                                        ${isToday && !isSelected ? 'border border-teal-300' : ''}
-                                                    `}
-                                                    >
-                                                        <span className={`
-                                                        text-sm font-medium
-                                                        ${isSelected ? 'text-white' :
-                                                                isToday ? 'text-teal-600' : 'text-gray-700'}
-                                                    `}>
-                                                            {day}
-                                                        </span>
-
-                                                        {slot.slots.length > 0 && (
-                                                            <span className={`
-                                                            absolute bottom-2 w-1.5 h-1.5 rounded-full
-                                                            ${isSelected ? 'bg-white/90' : 'bg-teal-500'}
-                                                        `} />
-                                                        )}
-                                                    </button>
-                                                );
-                                            })}
-                                        </div>
-
-                                        {/* Selected Date Card */}
-                                        {selectedDate && (
-                                            <div className="px-4 pb-3">
-                                                <div className="bg-teal-50/70 rounded-lg p-3 flex items-center gap-2">
-                                                    <CalendarCheck className="h-4 w-4 text-teal-600" />
-                                                    <span className="text-sm font-medium text-gray-700">
-                                                        {new Date(selectedDate).toLocaleDateString('en-US', {
-                                                            weekday: 'short',
-                                                            month: 'short',
-                                                            day: 'numeric'
-                                                        })}
-                                                    </span>
-                                                    <span className="ml-auto text-xs bg-teal-100 text-teal-800 px-2 py-1 rounded-full">
-                                                        {availableSlots.length} slots available
-                                                    </span>
+                                        {selectedSlot && (
+                                            <div className="mt-4 flex items-center justify-between bg-teal-50/50 rounded-lg px-4 py-3">
+                                                <div className="flex items-center gap-2">
+                                                    <Clock className="h-4 w-4 text-teal-600" />
+                                                    <span className="text-sm font-medium text-gray-700">Selected Time</span>
                                                 </div>
+                                                <span className="text-sm font-semibold bg-teal-100 text-teal-800 px-3 py-1 rounded-full">
+                                                    {selectedSlot}
+                                                </span>
                                             </div>
                                         )}
                                     </div>
-                                </div>
+                                ) : (
+                                    <div className="text-center py-4 bg-gray-50 rounded-lg">
+                                        <Clock className="mx-auto h-5 w-5 text-gray-400 mb-1" />
+                                        <p className="text-sm text-gray-500">Please select a date first</p>
+                                    </div>
+                                )}
+                            </div>
 
-                                {/* Time Slot Selection */}
-                                <div className="mb-8">
-                                    <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-3">
-                                        <Clock className="h-4 w-4 text-teal-600" />
-                                        <span>Select Time Slot</span>
+                            {/* Patient Information Form */}
+                            <div className="space-y-4 bg-white p-6 rounded-xl border border-gray-100 shadow-sm mb-6">
+                                <h3 className="text-lg font-medium text-gray-800 mb-2">Patient Details</h3>
+
+                                {/* Patient Name Field */}
+                                <div className="space-y-1">
+                                    <label className="text-sm font-medium text-gray-700 flex items-center gap-1">
+                                        <User className="h-4 w-4 text-teal-600" />
+                                        Patient Name
                                     </label>
-
-                                    {selectedDate ? (
-                                        <div className="space-y-3">
-                                            <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-                                                {availableSlots?.map((slot) => (
-                                                    <button
-                                                        key={slot}
-                                                        onClick={() => setSelectedSlot(slot)}
-                                                        className={`
-                                                        relative p-3 rounded-xl border transition-all duration-200
-                                                        ${selectedSlot === slot
-                                                                ? 'bg-teal-600 text-white border-teal-700 shadow-md'
-                                                                : 'bg-white border-gray-200 hover:border-teal-300 hover:bg-teal-50/30'
-                                                            }
-                                                    `}
-                                                    >
-                                                        <span className="block text-sm font-medium">{slot}</span>
-
-                                                        {selectedSlot === slot && (
-                                                            <div className="absolute -top-2 -right-2">
-                                                                <div className="bg-teal-700 text-white p-1 rounded-full">
-                                                                    <Check className="h-3 w-3" />
-                                                                </div>
-                                                            </div>
-                                                        )}
-                                                    </button>
-                                                ))}
-                                            </div>
-
-                                            {selectedSlot && (
-                                                <div className="mt-4 flex items-center justify-between bg-teal-50/50 rounded-lg px-4 py-3">
-                                                    <div className="flex items-center gap-2">
-                                                        <Clock className="h-4 w-4 text-teal-600" />
-                                                        <span className="text-sm font-medium text-gray-700">Selected Time</span>
-                                                    </div>
-                                                    <span className="text-sm font-semibold bg-teal-100 text-teal-800 px-3 py-1 rounded-full">
-                                                        {selectedSlot}
-                                                    </span>
-                                                </div>
-                                            )}
-                                        </div>
-                                    ) : (
-                                        <div className="text-center py-4 bg-gray-50 rounded-lg">
-                                            <Clock className="mx-auto h-5 w-5 text-gray-400 mb-1" />
-                                            <p className="text-sm text-gray-500">Please select a date first</p>
-                                        </div>
-                                    )}
+                                    <input
+                                        type="text"
+                                        value={patient}
+                                        onChange={(e) => setPatient(e.target.value)}
+                                        placeholder="Enter full name"
+                                        className="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:border-teal-500 focus:ring-2 focus:ring-teal-200 transition-all placeholder:text-gray-400"
+                                        required
+                                    />
                                 </div>
 
-                                {/* Patient Information Form */}
-                                <div className="space-y-4 bg-white p-6 rounded-xl border border-gray-100 shadow-sm mb-6">
-                                    <h3 className="text-lg font-medium text-gray-800 mb-2">Patient Details</h3>
-
-                                    {/* Patient Name Field */}
-                                    <div className="space-y-1">
-                                        <label className="text-sm font-medium text-gray-700 flex items-center gap-1">
-                                            <User className="h-4 w-4 text-teal-600" />
-                                            Patient Name
-                                        </label>
+                                {/* Mobile Number Field */}
+                                <div className="space-y-1">
+                                    <label className="text-sm font-medium text-gray-700 flex items-center gap-1">
+                                        <Smartphone className="h-4 w-4 text-teal-600" />
+                                        Mobile Number
+                                    </label>
+                                    <div className="relative">
+                                        <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                                            <span className="text-gray-500">+91</span>
+                                        </div>
                                         <input
-                                            type="text"
-                                            value={patient}
-                                            onChange={(e) => setPatient(e.target.value)}
-                                            placeholder="Enter full name"
-                                            className="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:border-teal-500 focus:ring-2 focus:ring-teal-200 transition-all placeholder:text-gray-400"
+                                            type="tel"
+                                            value={mobile}
+                                            onChange={(e) => setMobile(e.target.value)}
+                                            placeholder="98765 43210"
+                                            className="w-full pl-12 px-4 py-2.5 rounded-lg border border-gray-300 focus:border-teal-500 focus:ring-2 focus:ring-teal-200 transition-all placeholder:text-gray-400"
+                                            maxLength="10"
+                                            pattern="[0-9]{10}"
                                             required
                                         />
                                     </div>
-
-                                    {/* Mobile Number Field */}
-                                    <div className="space-y-1">
-                                        <label className="text-sm font-medium text-gray-700 flex items-center gap-1">
-                                            <Smartphone className="h-4 w-4 text-teal-600" />
-                                            Mobile Number
-                                        </label>
-                                        <div className="relative">
-                                            <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-                                                <span className="text-gray-500">+91</span>
-                                            </div>
-                                            <input
-                                                type="tel"
-                                                value={mobile}
-                                                onChange={(e) => setMobile(e.target.value)}
-                                                placeholder="98765 43210"
-                                                className="w-full pl-12 px-4 py-2.5 rounded-lg border border-gray-300 focus:border-teal-500 focus:ring-2 focus:ring-teal-200 transition-all placeholder:text-gray-400"
-                                                maxLength="10"
-                                                pattern="[0-9]{10}"
-                                                required
-                                            />
-                                        </div>
-                                        <p className="text-xs text-gray-500 mt-1">
-                                            We'll send appointment confirmation via WhatsApp
-                                        </p>
-                                    </div>
-
-                                    {/* Date of Birth Field */}
-                                    <div className="space-y-1">
-                                        <label className="text-sm font-medium text-gray-700 flex items-center gap-1">
-                                            <Calendar className="h-4 w-4 text-teal-600" />
-                                            Date of Birth (Optional)
-                                        </label>
-                                        <input
-                                            type="date"
-                                            value={dob}
-                                            onChange={(e) => setDob(e.target.value)}
-                                            className="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:border-teal-500 focus:ring-2 focus:ring-teal-200 transition-all text-gray-700"
-                                        />
-                                    </div>
-                                </div>
-
-                                {/* Payment Summary */}
-                                <div className="bg-gray-50 p-4 rounded-lg mb-6 border border-gray-200">
-                                    <div className="flex justify-between items-center mb-2">
-                                        <span className="text-gray-600">Consultation Fee</span>
-                                        <span className="font-medium text-gray-800">₹{doctor?.consultationFee}</span>
-                                    </div>
-                                    <div className="flex justify-between items-center text-sm text-gray-500 mb-2">
-                                        <span>Booking Fee</span>
-                                        <span>₹0</span>
-                                    </div>
-                                    <div className="border-t pt-2 mt-2 flex justify-between items-center font-medium">
-                                        <span>Total Payable</span>
-                                        <span className="text-lg text-teal-800">₹{doctor?.consultationFee}</span>
-                                    </div>
-                                </div>
-
-                                {/* Book Button */}
-                                <button
-                                    onClick={handleBooking}
-                                    disabled={!selectedDate || !selectedSlot || !patient || !mobile || mobile.length !== 10}
-                                    className={`w-full py-3 rounded-lg font-medium flex items-center justify-center transition
-                                    ${!selectedDate || !selectedSlot || !patient || !mobile || mobile.length !== 10
-                                            ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                                            : 'bg-gradient-to-r from-teal-600 to-teal-500 text-white hover:from-teal-700 hover:to-teal-600 shadow-md'
-                                        }
-                                `}
-                                >
-                                    <CreditCard className="h-5 w-5 mr-2" />
-                                    {currentUser ? 'Confirm Appointment' : 'Login to Book'}
-                                </button>
-
-                                {!currentUser && (
-                                    <p className="text-center text-sm text-gray-500 mt-2">
-                                        Please login to book an appointment
+                                    <p className="text-xs text-gray-500 mt-1">
+                                        We'll send appointment confirmation via WhatsApp
                                     </p>
-                                )}
+                                </div>
+
+                                {/* Date of Birth Field */}
+                                <div className="space-y-1">
+                                    <label className="text-sm font-medium text-gray-700 flex items-center gap-1">
+                                        <Calendar className="h-4 w-4 text-teal-600" />
+                                        Date of Birth (Optional)
+                                    </label>
+                                    <input
+                                        type="date"
+                                        value={dob}
+                                        onChange={(e) => setDob(e.target.value)}
+                                        className="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:border-teal-500 focus:ring-2 focus:ring-teal-200 transition-all text-gray-700"
+                                    />
+                                </div>
                             </div>
+
+                            {/* Payment Summary */}
+                            <div className="bg-gray-50 p-4 rounded-lg mb-6 border border-gray-200">
+                                <div className="flex justify-between items-center mb-2">
+                                    <span className="text-gray-600">Consultation Fee</span>
+                                    <span className="font-medium text-gray-800">₹{doctor?.consultationFee}</span>
+                                </div>
+                                <div className="flex justify-between items-center text-sm text-gray-500 mb-2">
+                                    <span>Booking Fee</span>
+                                    <span>₹0</span>
+                                </div>
+                                <div className="border-t pt-2 mt-2 flex justify-between items-center font-medium">
+                                    <span>Total Payable</span>
+                                    <span className="text-lg text-teal-800">₹{doctor?.consultationFee}</span>
+                                </div>
+                            </div>
+
+                            {/* Book Button */}
+                            <button
+                                onClick={handleBooking}
+                                disabled={!selectedDate || !selectedSlot || !patient || !mobile || mobile.length !== 10}
+                                className={`w-full py-3 rounded-lg font-medium flex items-center justify-center transition
+                                    ${!selectedDate || !selectedSlot || !patient || !mobile || mobile.length !== 10
+                                        ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                                        : 'bg-gradient-to-r from-teal-600 to-teal-500 text-white hover:from-teal-700 hover:to-teal-600 shadow-md'
+                                    }
+                                `}
+                            >
+                                <CreditCard className="h-5 w-5 mr-2" />
+                                {currentUser ? 'Confirm Appointment' : 'Login to Book'}
+                            </button>
+
+                            {!currentUser && (
+                                <p className="text-center text-sm text-gray-500 mt-2">
+                                    Please login to book an appointment
+                                </p>
+                            )}
                         </div>
                     </div>
                 </div>
-            </Layout>
-        </>
+            </div>
+        </Layout>
     );
 };
 

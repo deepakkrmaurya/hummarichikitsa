@@ -12,7 +12,7 @@ import { useDispatch } from 'react-redux';
 import { deleteDoctor } from '../../Redux/doctorSlice';
 import { GetHospitalById } from '../../Redux/hospitalSlice';
 import { toast } from 'react-hot-toast';
-import { GetStaff } from '../../Redux/staffSlice';
+import { GetStaff, StaffDelete } from '../../Redux/staffSlice';
 
 const HospitalDetails = () => {
     const navigate = useNavigate();
@@ -47,22 +47,34 @@ const HospitalDetails = () => {
             toast.error("Failed to load hospital data");
         }
     };
-
-    const getDoctors = async () => {
-        try {
-            const res = await axiosInstance.get(`/doctor/?hospitalId=${id}`);
-            setDoctor(res.data);
-        } catch (error) {
-            console.error("Error fetching doctors:", error);
-            toast.error("Failed to load doctors");
-        }
-    };
     const getstaff = async () => {
         try {
             const res = await dispatch(GetStaff())
             const data = res?.payload
             setStaff(data?.staff)
 
+        } catch (error) {
+            console.error("Error fetching doctors:", error);
+            toast.error("Failed to load doctors");
+        }
+    };
+
+    const deleteStaffId = async (id) => {
+        try {
+            const res = await dispatch(StaffDelete(id));
+            if (res?.payload?.success) {
+                getstaff()
+            }
+        } catch (error) {
+            console.error("Error fetching hospital:", error);
+            toast.error("Failed to load hospital data");
+        }
+    };
+
+    const getDoctors = async () => {
+        try {
+            const res = await axiosInstance.get(`/doctor/?hospitalId=${id}`);
+            setDoctor(res.data);
         } catch (error) {
             console.error("Error fetching doctors:", error);
             toast.error("Failed to load doctors");
@@ -294,8 +306,8 @@ const HospitalDetails = () => {
                                         <div className="text-xl font-bold" style={{ color: colors.primary }}>{doctor.length}</div>
                                     </div>
                                     <div className="p-3 rounded-lg text-center" style={{ backgroundColor: `${colors.accent}05` }}>
-                                        <div className="text-sm" style={{ color: colors.muted }}>Beds</div>
-                                        <div className="text-xl font-bold" style={{ color: colors.accent }}>120</div>
+                                        <div className="text-sm" style={{ color: colors.muted }}>Staff</div>
+                                        <div className="text-xl font-bold" style={{ color: colors.accent }}>{staff.length}</div>
                                     </div>
                                 </div>
 
@@ -647,7 +659,7 @@ const HospitalDetails = () => {
                                                                         </td>
                                                                         <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                                                                             <div className="flex justify-end space-x-2">
-                                                                                <Link to={`/doctor/${doc._id}`}>
+                                                                                {/* <Link to={`/doctor/${doc._id}`}>
                                                                                     <motion.button
                                                                                         whileHover={{ scale: 1.05 }}
                                                                                         whileTap={{ scale: 0.95 }}
@@ -659,8 +671,8 @@ const HospitalDetails = () => {
                                                                                     >
                                                                                         View
                                                                                     </motion.button>
-                                                                                </Link>
-                                                                                <Link to={`/doctor/update/${doc._id}`}>
+                                                                                </Link> */}
+                                                                                {/* <Link to={`/doctor/update/${doc._id}`}>
                                                                                     <motion.button
                                                                                         whileHover={{ scale: 1.05 }}
                                                                                         whileTap={{ scale: 0.95 }}
@@ -672,11 +684,15 @@ const HospitalDetails = () => {
                                                                                     >
                                                                                         Edit
                                                                                     </motion.button>
-                                                                                </Link>
+                                                                                </Link> */}
                                                                                 <motion.button
                                                                                     whileHover={{ scale: 1.05 }}
                                                                                     whileTap={{ scale: 0.95 }}
-                                                                                    onClick={() => deleteDoctorHandler(doc._id)}
+                                                                                    onClick={() => {
+                                                                                        if (window.confirm('Are you sure you want to delete this staff member?')) {
+                                                                                            deleteStaffId(doc._id);
+                                                                                        }
+                                                                                    }}
                                                                                     className="inline-flex items-center px-3 py-1 rounded-md text-sm"
                                                                                     style={{
                                                                                         backgroundColor: `${colors.danger}10`,

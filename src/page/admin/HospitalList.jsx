@@ -33,9 +33,9 @@ const HospitalList = () => {
 
     // Filter hospitals based on search and status
     const filteredHospitals = hospitals?.filter(hospital => {
-        const matchesSearch = hospital.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
-                             hospital.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                             hospital.city.toLowerCase().includes(searchTerm.toLowerCase());
+        const matchesSearch = hospital.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            hospital.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            hospital.city.toLowerCase().includes(searchTerm.toLowerCase());
         const matchesStatus = statusFilter === 'all' || hospital.status === statusFilter;
         return matchesSearch && matchesStatus;
     });
@@ -109,7 +109,7 @@ const HospitalList = () => {
 
     return (
         <Dashboard>
-            <motion.div 
+            <motion.div
                 initial="hidden"
                 animate="show"
                 variants={containerVariants}
@@ -117,7 +117,7 @@ const HospitalList = () => {
                 style={{ backgroundColor: colors.background, minHeight: '100vh' }}
             >
                 {/* Header Section */}
-                <motion.div 
+                <motion.div
                     variants={itemVariants}
                     className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-8 p-6 rounded-xl"
                     style={{ backgroundColor: colors.primary }}
@@ -130,9 +130,9 @@ const HospitalList = () => {
                     </div>
                     <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
                         <Link to='/hospital/create'>
-                            <button 
+                            <button
                                 className="flex items-center gap-2 px-4 py-2 rounded-lg font-medium shadow-sm"
-                                style={{ 
+                                style={{
                                     backgroundColor: colors.accent,
                                     color: 'white'
                                 }}
@@ -145,7 +145,7 @@ const HospitalList = () => {
                 </motion.div>
 
                 {/* Filters Section */}
-                <motion.div 
+                <motion.div
                     variants={itemVariants}
                     className="bg-white p-6 rounded-xl shadow-sm mb-6"
                 >
@@ -161,7 +161,7 @@ const HospitalList = () => {
                                 <input
                                     type="text"
                                     className="block w-full pl-10 pr-3 py-2 rounded-md border focus:outline-none focus:ring-2 text-sm"
-                                    style={{ 
+                                    style={{
                                         borderColor: colors.muted,
                                         focusRingColor: colors.primary
                                     }}
@@ -177,7 +177,7 @@ const HospitalList = () => {
                             </label>
                             <select
                                 className="block w-full pl-3 pr-10 py-2 rounded-md border focus:outline-none focus:ring-2 text-sm"
-                                style={{ 
+                                style={{
                                     borderColor: colors.muted,
                                     focusRingColor: colors.primary
                                 }}
@@ -190,11 +190,11 @@ const HospitalList = () => {
                             </select>
                         </div>
                         <div className="flex items-end">
-                            <motion.button 
+                            <motion.button
                                 whileHover={{ scale: 1.02 }}
                                 whileTap={{ scale: 0.98 }}
                                 className="flex items-center gap-2 px-4 py-2 rounded-md border font-medium text-sm"
-                                style={{ 
+                                style={{
                                     borderColor: colors.primary,
                                     color: colors.primary
                                 }}
@@ -207,7 +207,7 @@ const HospitalList = () => {
                 </motion.div>
 
                 {/* Hospitals Table */}
-                <motion.div 
+                <motion.div
                     variants={itemVariants}
                     className="bg-white rounded-xl shadow-sm overflow-hidden"
                 >
@@ -239,7 +239,7 @@ const HospitalList = () => {
                                         <AnimatePresence>
                                             {currentItems?.length > 0 ? (
                                                 currentItems.map((hospital, index) => (
-                                                    <motion.tr 
+                                                    <motion.tr
                                                         key={hospital._id}
                                                         initial={{ opacity: 0, y: 10 }}
                                                         animate={{ opacity: 1, y: 0 }}
@@ -253,10 +253,10 @@ const HospitalList = () => {
                                                         <td className="whitespace-nowrap px-6 py-4">
                                                             <div className="flex items-center">
                                                                 <div className="h-10 w-10 flex-shrink-0 rounded-full overflow-hidden bg-gray-100 flex items-center justify-center">
-                                                                    <img 
-                                                                        className="h-full w-full object-cover" 
-                                                                        src={hospital.image || 'https://via.placeholder.com/40'} 
-                                                                        alt={hospital.name} 
+                                                                    <img
+                                                                        className="h-full w-full object-cover"
+                                                                        src={hospital.image || 'https://via.placeholder.com/40'}
+                                                                        alt={hospital.name}
                                                                     />
                                                                 </div>
                                                                 <div className="ml-4">
@@ -286,7 +286,7 @@ const HospitalList = () => {
                                                                     <motion.span
                                                                         key={i}
                                                                         className="inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium"
-                                                                        style={{ 
+                                                                        style={{
                                                                             backgroundColor: `${colors.primary}20`,
                                                                             color: colors.primary
                                                                         }}
@@ -301,7 +301,7 @@ const HospitalList = () => {
                                                                 )}
                                                             </div>
                                                         </td>
-                                                        <td 
+                                                        <td
                                                             onClick={() => updateStatus(hospital._id, hospital.status)}
                                                             className="whitespace-nowrap px-6 py-4 text-sm cursor-pointer"
                                                         >
@@ -329,7 +329,11 @@ const HospitalList = () => {
                                                                 <motion.button
                                                                     whileHover={{ scale: 1.05 }}
                                                                     whileTap={{ scale: 0.95 }}
-                                                                    onClick={() => handleDelete(hospital._id)}
+                                                                    onClick={() => {
+                                                                        if (window.confirm("Are you sure you want to delete this hospital?")) {
+                                                                            handleDelete(hospital._id);
+                                                                        }
+                                                                    }}
                                                                     className="flex items-center gap-1"
                                                                     style={{ color: colors.danger }}
                                                                 >
@@ -341,7 +345,7 @@ const HospitalList = () => {
                                                     </motion.tr>
                                                 ))
                                             ) : (
-                                                <motion.tr 
+                                                <motion.tr
                                                     initial={{ opacity: 0 }}
                                                     animate={{ opacity: 1 }}
                                                     exit={{ opacity: 0 }}
@@ -374,7 +378,7 @@ const HospitalList = () => {
                                             onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
                                             disabled={currentPage === 1}
                                             className="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md"
-                                            style={{ 
+                                            style={{
                                                 color: currentPage === 1 ? colors.muted : colors.text,
                                                 backgroundColor: colors.card
                                             }}
@@ -385,7 +389,7 @@ const HospitalList = () => {
                                             onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
                                             disabled={currentPage === totalPages}
                                             className="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md"
-                                            style={{ 
+                                            style={{
                                                 color: currentPage === totalPages ? colors.muted : colors.text,
                                                 backgroundColor: colors.card
                                             }}
@@ -408,7 +412,7 @@ const HospitalList = () => {
                                                     onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
                                                     disabled={currentPage === 1}
                                                     className="relative inline-flex items-center px-2 py-2 rounded-l-md border text-sm font-medium"
-                                                    style={{ 
+                                                    style={{
                                                         color: currentPage === 1 ? colors.muted : colors.text,
                                                         backgroundColor: colors.card,
                                                         borderColor: colors.muted
@@ -422,7 +426,7 @@ const HospitalList = () => {
                                                         key={page}
                                                         onClick={() => setCurrentPage(page)}
                                                         className={`relative inline-flex items-center px-4 py-2 border text-sm font-medium ${currentPage === page ? 'z-10' : ''}`}
-                                                        style={{ 
+                                                        style={{
                                                             backgroundColor: currentPage === page ? colors.primary : colors.card,
                                                             color: currentPage === page ? 'white' : colors.text,
                                                             borderColor: colors.muted
@@ -435,7 +439,7 @@ const HospitalList = () => {
                                                     onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
                                                     disabled={currentPage === totalPages}
                                                     className="relative inline-flex items-center px-2 py-2 rounded-r-md border text-sm font-medium"
-                                                    style={{ 
+                                                    style={{
                                                         color: currentPage === totalPages ? colors.muted : colors.text,
                                                         backgroundColor: colors.card,
                                                         borderColor: colors.muted

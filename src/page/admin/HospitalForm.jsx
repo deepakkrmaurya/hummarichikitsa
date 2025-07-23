@@ -14,6 +14,7 @@ export default function App() {
   );
 }
 const HospitalForm = () => {
+  const [previewImage, setImagePreview] = useState("");
   const [formData, setFormData] = useState({
     name: '',
     address: '',
@@ -76,7 +77,24 @@ const HospitalForm = () => {
     }
   };
 
-  // --- Specialties Handlers ---
+
+  const getImage = (event) => {
+    event.preventDefault();
+    const uploadedImage = event.target.files[0];
+    if (uploadedImage) {
+      setFormData({
+        ...formData,
+        image: uploadedImage,
+      });
+      const fileReader = new FileReader();
+      fileReader.readAsDataURL(uploadedImage);
+      fileReader.addEventListener("load", function () {
+        setImagePreview(this.result);
+      });
+    }
+  };
+
+
   const handleAddSpecialty = () => {
     if (formData.currentSpecialty.trim() && !formData.specialties.includes(formData.currentSpecialty.trim())) {
       setFormData(prev => ({
@@ -134,8 +152,6 @@ const HospitalForm = () => {
     else if (!/^[0-9]{10,15}$/.test(formData.phone)) newErrors.phone = 'Invalid phone number (10-15 digits)';
     if (!formData.email.trim()) newErrors.email = 'Email is required';
     else if (!/^\S+@\S+\.\S+$/.test(formData.email)) newErrors.email = 'Invalid email format';
-    if (formData.website.trim() && !/^(https?:\/\/)?([\da-z.-]+)\.([a-z.]{2,6})([/\w .-]*)*\/?$/.test(formData.website)) newErrors.website = 'Invalid website URL (e.g., http://example.com)';
-    if (formData.image.trim() && !/^(https?:\/\/.*\.(?:png|jpg|jpeg|gif|svg|webp))$/.test(formData.image)) newErrors.image = 'Invalid image URL (must be a direct link to an image)';
     if (formData.rating === 0) newErrors.rating = 'Rating is required';
 
 
@@ -150,7 +166,7 @@ const HospitalForm = () => {
   // --- Form Submission ---
   const handleSubmit = async (e) => {
     e.preventDefault();
-
+    
     if (!validateForm()) {
       // Determine which section has the first error and navigate to it
       const errorFields = Object.keys(errors);
@@ -177,7 +193,29 @@ const HospitalForm = () => {
       return
     }
     // Simulate API call
-    const res = await dispatch(createHospital(formData))
+    
+    
+   
+    
+    const hospitalData = new FormData();
+    hospitalData.append("name", formData.name);
+    hospitalData.append("address", formData.address);
+    hospitalData.append("city", formData.city);
+    hospitalData.append("state", formData.state);
+    hospitalData.append("pincode", formData.pincode);
+    hospitalData.append("phone", formData.phone);
+    hospitalData.append("email", formData.email);
+    hospitalData.append("password", formData.password);
+    hospitalData.append("website", formData.website);
+    hospitalData.append("image", formData.image);
+    hospitalData.append("rating", formData.rating);
+    hospitalData.append("specialties", formData.specialties);
+    hospitalData.append("facilities", formData.facilities);
+    hospitalData.append("currentSpecialty", formData.currentSpecialty);
+    hospitalData.append("facilities", formData.facilities);
+
+    
+    const res = await dispatch(createHospital(hospitalData))
 
     // try {
     //   // Replace with your actual API endpoint
@@ -390,13 +428,13 @@ const HospitalForm = () => {
                       {renderError('website')}
                     </div>
                     <div>
-                      <label htmlFor="image" className="block text-sm font-medium text-gray-700 mb-1">Hospital Image URL <span className="text-gray-500 text-xs">(Optional)</span></label>
-                      <input type="url" {...getInputProps('image')} placeholder="https://example.com/hospital-image.jpg" />
+                      <label htmlFor="image" className="block text-sm font-medium text-gray-700 mb-1">Hospital Image</label>
+                      <input type="file" onChange={getImage} placeholder="https://example.com/hospital-image.jpg" />
                       {renderError('image')}
-                      {formData.image && !errors.image && (
+                      {previewImage && !errors.image && (
                         <div className="mt-3">
                           <p className="text-xs text-gray-500 mb-1">Image preview:</p>
-                          <img src={formData.image} alt="Hospital preview" className="h-28 w-auto object-cover rounded-lg border border-gray-200 shadow-sm" onError={(e) => { e.target.style.display = 'none'; /* Hide if broken */ }} />
+                          <img src={previewImage} alt="Hospital preview" className="h-28 w-auto object-cover rounded-lg border border-gray-200 shadow-sm" onError={(e) => { e.target.style.display = 'none'; /* Hide if broken */ }} />
                         </div>
                       )}
                     </div>

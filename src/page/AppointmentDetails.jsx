@@ -247,7 +247,7 @@ const AppointmentDetailsPage = () => {
                                 </button>
                             )}
 
-                            {appointment?.status !== 'cancelled' && (
+                            {/* {appointment?.status !== 'cancelled' && (
                                 <button 
                                     onClick={() => CancelledAppointment(appointment?._id)}
                                     className="px-6 py-3 bg-white border border-red-600 text-red-600 hover:bg-red-50 font-medium rounded-lg transition-all flex items-center gap-2 shadow-sm hover:shadow-md"
@@ -255,7 +255,7 @@ const AppointmentDetailsPage = () => {
                                     <XCircle className="h-5 w-5" />
                                     Cancel Appointment
                                 </button>
-                            )}
+                            )} */}
 
                             <button 
                                 onClick={() => navigate(`/doctors/${appointment?.doctorId?._id}`)}

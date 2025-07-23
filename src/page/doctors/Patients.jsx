@@ -56,23 +56,29 @@ const Patients = () => {
     }, [dispatch]);
 
     // Filter appointments based on search and selected date
-    const filteredAppointments = appointments?.filter(appointment => {
-        const matchesSearch = appointment._id.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                            (appointment.patientId?.name && appointment.patientId.name.toLowerCase().includes(searchTerm.toLowerCase()));
-        const matchesDate = selectedDate ? isSameDay(new Date(appointment.date), new Date(selectedDate)) : true;
-        return matchesSearch && matchesDate;
-    });
+    // const filteredAppointments = appointments?.filter(appointment => {
+    //     const matchesSearch = appointment._id.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    //         (appointment.patientId?.name && appointment.patientId.name.toLowerCase().includes(searchTerm.toLowerCase()));
+    //     const matchesDate = selectedDate ? isSameDay(new Date(appointment.date), new Date(selectedDate)) : true;
+    //     return matchesSearch && matchesDate;
+    // });
+
+    const filteredAppointments = appointments?.filter(appointment =>
+        appointment?.token?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        appointment._id.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        appointment.patient?.name?.toLowerCase().includes(searchTerm.toLowerCase())
+    );
 
     // Get dates for current month view
     const getDaysInMonth = () => {
         const days = [];
         const startDate = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), 1);
         const endDate = new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1, 0);
-        
+
         for (let date = startDate; date <= endDate; date.setDate(date.getDate() + 1)) {
             days.push(new Date(date));
         }
-        
+
         return days;
     };
 
@@ -101,7 +107,7 @@ const Patients = () => {
 
     return (
         <Dashboard>
-            <motion.div 
+            <motion.div
                 initial="hidden"
                 animate="show"
                 variants={containerVariants}
@@ -109,7 +115,7 @@ const Patients = () => {
                 style={{ backgroundColor: colors.background, minHeight: '100vh' }}
             >
                 {/* Date Filter Section */}
-                <motion.div 
+                <motion.div
                     variants={itemVariants}
                     className="bg-white rounded-xl shadow-sm p-6 transition-all hover:shadow-md"
                     style={{ borderLeft: `4px solid ${colors.primary}` }}
@@ -117,7 +123,7 @@ const Patients = () => {
                     <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-4 gap-4">
                         <h3 className="text-lg font-semibold" style={{ color: colors.text }}>Filter by Date</h3>
                         <div className="flex items-center space-x-3">
-                            <motion.button 
+                            <motion.button
                                 whileHover={{ scale: 1.1 }}
                                 whileTap={{ scale: 0.9 }}
                                 onClick={() => setCurrentMonth(subMonths(currentMonth, 1))}
@@ -128,7 +134,7 @@ const Patients = () => {
                             <span className="font-medium" style={{ color: colors.text }}>
                                 {format(currentMonth, 'MMMM yyyy')}
                             </span>
-                            <motion.button 
+                            <motion.button
                                 whileHover={{ scale: 1.1 }}
                                 whileTap={{ scale: 0.9 }}
                                 onClick={() => setCurrentMonth(addMonths(currentMonth, 1))}
@@ -154,7 +160,7 @@ const Patients = () => {
                                 const hasAppointments = appointmentsByDate[dateStr] > 0;
                                 const isSelected = selectedDate && isSameDay(date, new Date(selectedDate));
                                 const isToday = isSameDay(date, new Date());
-                                
+
                                 return (
                                     <motion.button
                                         key={dateStr}
@@ -175,7 +181,7 @@ const Patients = () => {
                                     >
                                         {date.getDate()}
                                         {hasAppointments && (
-                                            <motion.span 
+                                            <motion.span
                                                 className={`w-2 h-2 rounded-full mt-1 
                                                     ${isSelected ? 'bg-white' : 'bg-blue-500'}`}
                                                 animate={{
@@ -195,7 +201,7 @@ const Patients = () => {
 
                     <AnimatePresence>
                         {selectedDate && (
-                            <motion.div 
+                            <motion.div
                                 initial={{ opacity: 0, y: -10 }}
                                 animate={{ opacity: 1, y: 0 }}
                                 exit={{ opacity: 0, y: -10 }}
@@ -205,12 +211,12 @@ const Patients = () => {
                                 <span className="text-sm font-medium" style={{ color: colors.primary }}>
                                     Showing appointments for {format(new Date(selectedDate), 'MMMM d, yyyy')}
                                 </span>
-                                <motion.button 
+                                <motion.button
                                     whileHover={{ scale: 1.05 }}
                                     whileTap={{ scale: 0.95 }}
                                     onClick={() => setSelectedDate(null)}
                                     className="text-sm font-medium px-3 py-1 rounded-md"
-                                    style={{ 
+                                    style={{
                                         backgroundColor: `${colors.primary}20`,
                                         color: colors.primary
                                     }}
@@ -223,13 +229,13 @@ const Patients = () => {
                 </motion.div>
 
                 {/* Appointments Table */}
-                <motion.div 
+                <motion.div
                     variants={itemVariants}
                     className="bg-white rounded-xl shadow-sm overflow-hidden transition-all hover:shadow-md"
                 >
                     <div className="p-6 border-b border-gray-200 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                         <h2 className="text-xl font-semibold" style={{ color: colors.text }}>
-                            {selectedDate 
+                            {selectedDate
                                 ? `Appointments on ${format(new Date(selectedDate), 'MMMM d, yyyy')}`
                                 : "All Patient Appointments"}
                         </h2>
@@ -241,13 +247,13 @@ const Patients = () => {
                                 type="text"
                                 placeholder="Search by ID or name..."
                                 className="w-full pl-10 pr-4 py-2 border rounded-lg focus:outline-none focus:ring-2 text-sm"
-                                style={{ 
+                                style={{
                                     borderColor: colors.muted,
                                     focusRingColor: colors.primary
                                 }}
                                 value={searchTerm}
                                 onChange={(e) => setSearchTerm(e.target.value)}
-                                whileFocus={{ 
+                                whileFocus={{
                                     borderColor: colors.primary,
                                     boxShadow: `0 0 0 3px ${colors.primary}20`
                                 }}
@@ -257,7 +263,7 @@ const Patients = () => {
 
                     {isLoading ? (
                         <div className="p-8 flex justify-center">
-                            <motion.div 
+                            <motion.div
                                 animate={{ rotate: 360 }}
                                 transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
                                 className="rounded-full h-12 w-12 border-t-2 border-b-2"
@@ -271,6 +277,7 @@ const Patients = () => {
                                     <tr>
                                         <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider" style={{ color: colors.muted }}>Patient</th>
                                         <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider" style={{ color: colors.muted }}>Time</th>
+                                        <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider" style={{ color: colors.muted }}>Token</th>
                                         <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider" style={{ color: colors.muted }}>Status</th>
                                         <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider" style={{ color: colors.muted }}>Payment</th>
                                         <th className="px-6 py-3 text-right text-xs font-medium uppercase tracking-wider" style={{ color: colors.muted }}>Actions</th>
@@ -280,7 +287,7 @@ const Patients = () => {
                                     <AnimatePresence>
                                         {filteredAppointments?.length > 0 ? (
                                             filteredAppointments.map((appointment) => (
-                                                <motion.tr 
+                                                <motion.tr
                                                     key={appointment._id}
                                                     initial={{ opacity: 0, y: 10 }}
                                                     animate={{ opacity: 1, y: 0 }}
@@ -310,15 +317,29 @@ const Patients = () => {
                                                         </div>
                                                     </td>
                                                     <td className="px-6 py-4 whitespace-nowrap">
+                                                        <div className="text-sm font-medium" style={{ color: colors.text }}>{appointment.token}</div>
+
+                                                    </td>
+                                                    <td className="px-6 py-4 whitespace-nowrap">
                                                         <motion.span
-                                                            className="px-3 py-1 inline-flex items-center text-xs leading-5 font-semibold rounded-full text-white"
-                                                            animate={appointment.status}
-                                                            variants={statusBadgeVariants}
+                                                            className={`px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${appointment?.status === 'confirmed'
+                                                                ? 'bg-green-100 text-green-800'
+                                                                : appointment?.status === 'pending'
+                                                                    ? 'bg-yellow-100 text-yellow-800'
+                                                                    : appointment?.status === 'cancelled'
+                                                                        ? 'bg-red-100 text-red-800'
+                                                                        : 'bg-blue-100 text-blue-800'
+                                                                }`}
+                                                            initial={{ opacity: 0, scale: 0.8 }}
+                                                            animate={{
+                                                                opacity: 1,
+                                                                scale: 1,
+                                                                transition: { type: 'spring', stiffness: 300 }
+                                                            }}
+                                                            whileHover={{ scale: 1.05 }}
+                                                            whileTap={{ scale: 0.95 }}
                                                         >
-                                                            {appointment.status === 'confirmed' && <CheckCircle className="h-3 w-3 mr-1" />}
-                                                            {appointment.status === 'cancelled' && <XCircle className="h-3 w-3 mr-1" />}
-                                                            {appointment.status === 'completed' && <CircleCheck className="h-3 w-3 mr-1" />}
-                                                            {appointment.status.charAt(0).toUpperCase() + appointment.status.slice(1)}
+                                                            {appointment?.status.charAt(0).toUpperCase() + appointment?.status.slice(1)}
                                                         </motion.span>
                                                     </td>
                                                     <td className="px-6 py-4 whitespace-nowrap">
@@ -332,11 +353,11 @@ const Patients = () => {
                                                     </td>
                                                     <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                                                         <Link to={`/appointment/${appointment?._id}`}>
-                                                            <motion.button 
+                                                            <motion.button
                                                                 whileHover={{ scale: 1.05 }}
                                                                 whileTap={{ scale: 0.95 }}
-                                                                className="px-3 py-1 rounded-lg" 
-                                                                style={{ 
+                                                                className="px-3 py-1 rounded-lg"
+                                                                style={{
                                                                     backgroundColor: `${colors.primary}20`,
                                                                     color: colors.primary
                                                                 }}
@@ -348,7 +369,7 @@ const Patients = () => {
                                                 </motion.tr>
                                             ))
                                         ) : (
-                                            <motion.tr 
+                                            <motion.tr
                                                 initial={{ opacity: 0 }}
                                                 animate={{ opacity: 1 }}
                                                 exit={{ opacity: 0 }}

@@ -6,8 +6,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { FaUser, FaUserMd, FaHospital, FaCalendarAlt, FaClock, FaMoneyBillWave, FaPhone, FaMapMarkerAlt, FaCheck, FaTimes } from 'react-icons/fa';
 
 const AppointmentDetails = () => {
-    const {role}=useSelector((state)=>state?.auth)
-
+    const { role } = useSelector((state) => state?.auth)
     const [isLoading, setIsLoading] = useState(true);
     const [appointment, setAppointments] = useState(null);
     const { id } = useParams();
@@ -79,15 +78,15 @@ const AppointmentDetails = () => {
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.5 }}
                         className="bg-white rounded-2xl shadow-xl overflow-hidden"
-                        style={{ 
+                        style={{
                             borderColor: colors.border,
                             backgroundColor: colors.cardBg
                         }}
                     >
                         {/* Header Section */}
-                        <div 
+                        <div
                             className="p-6 sm:p-8 text-white"
-                            style={{ 
+                            style={{
                                 background: `linear-gradient(135deg, ${colors.primary} 0%, ${colors.secondary} 100%)`
                             }}
                         >
@@ -104,13 +103,12 @@ const AppointmentDetails = () => {
                                     initial={{ opacity: 0, scale: 0.8 }}
                                     animate={{ opacity: 1, scale: 1 }}
                                     transition={{ delay: 0.3 }}
-                                    className={`px-4 py-2 rounded-full text-sm font-semibold shadow-md ${
-                                        appointment?.status === 'confirmed' 
-                                            ? 'bg-green-500' 
-                                            : appointment?.status === 'cancelled'
+                                    className={`px-4 py-2 rounded-full text-sm font-semibold shadow-md ${appointment?.status === 'confirmed'
+                                        ? 'bg-green-500'
+                                        : appointment?.status === 'cancelled'
                                             ? 'bg-red-500'
                                             : 'bg-amber-500'
-                                    }`}
+                                        }`}
                                 >
                                     {appointment?.status.charAt(0).toUpperCase() + appointment?.status.slice(1)}
                                 </motion.span>
@@ -118,7 +116,7 @@ const AppointmentDetails = () => {
                         </div>
 
                         {/* Appointment Overview */}
-                        <motion.div 
+                        <motion.div
                             initial={{ opacity: 0 }}
                             animate={{ opacity: 1 }}
                             transition={{ delay: 0.4 }}
@@ -165,7 +163,7 @@ const AppointmentDetails = () => {
                                 animate={{ opacity: 1, y: 0 }}
                                 transition={{ delay: 0.5 }}
                                 className="rounded-xl p-6 shadow-sm"
-                                style={{ 
+                                style={{
                                     borderColor: `${colors.primary}20`,
                                     backgroundColor: `${colors.primary}05`
                                 }}
@@ -201,7 +199,7 @@ const AppointmentDetails = () => {
                                 animate={{ opacity: 1, y: 0 }}
                                 transition={{ delay: 0.6 }}
                                 className="rounded-xl p-6 shadow-sm"
-                                style={{ 
+                                style={{
                                     borderColor: `${colors.accent}20`,
                                     backgroundColor: `${colors.accent}05`
                                 }}
@@ -237,7 +235,7 @@ const AppointmentDetails = () => {
                                 animate={{ opacity: 1, y: 0 }}
                                 transition={{ delay: 0.7 }}
                                 className="rounded-xl p-6 shadow-sm lg:col-span-2"
-                                style={{ 
+                                style={{
                                     borderColor: `${colors.secondary}20`,
                                     backgroundColor: `${colors.secondary}05`
                                 }}
@@ -270,54 +268,56 @@ const AppointmentDetails = () => {
 
                         {/* Action Buttons */}
                         {
-                          role==='admin' || role==='doctor' || role==='hospital' &&(
+                            (role === 'admin' || role === 'doctor' || role === 'hospital') && (
 
-                        <motion.div
-                            initial={{ opacity: 0 }}
-                            animate={{ opacity: 1 }}
-                            transition={{ delay: 0.8 }}
-                            className="p-6 sm:p-8 border-t"
-                            style={{ 
-                                borderColor: colors.border,
-                                backgroundColor: colors.background
-                            }}
-                        >
-                            <div className="flex flex-wrap justify-center gap-4">
-                                {appointment?.status !== "confirmed" && (
-                                    <motion.button
-                                        whileHover={{ scale: 1.03 }}
-                                        whileTap={{ scale: 0.97 }}
-                                        onClick={() => ConfirmAppointment(appointment?._id)}
-                                        className="px-6 py-3 rounded-lg shadow-md flex items-center gap-2"
-                                        style={{ 
-                                            backgroundColor: colors.success,
-                                            color: 'white'
-                                        }}
-                                    >
-                                        <FaCheck />
-                                        Confirm Appointment
-                                    </motion.button>
-                                )}
+                                <motion.div
+                                    initial={{ opacity: 0 }}
+                                    animate={{ opacity: 1 }}
+                                    transition={{ delay: 0.8 }}
+                                    className="p-6 sm:p-8 border-t"
+                                    style={{
+                                        borderColor: colors.border,
+                                        backgroundColor: colors.background
+                                    }}
+                                >
+                                    <div className="flex flex-wrap justify-center gap-4">
+                                        {appointment?.status !== "Confirmed" && (
+                                            <motion.button
+                                                whileHover={{ scale: 1.03 }}
+                                                whileTap={{ scale: 0.97 }}
+                                                onClick={() => ConfirmAppointment(appointment?._id)}
+                                                className="px-6 py-3 rounded-lg shadow-md flex items-center gap-2"
+                                                style={{
+                                                    backgroundColor: colors.success,
+                                                    color: 'white'
+                                                }}
+                                            >
+                                                <FaCheck />
+                                                Confirm Appointment
+                                            </motion.button>
+                                        )}
 
-                                {appointment?.status !== 'cancelled' && (
-                                    <motion.button
-                                        whileHover={{ scale: 1.03 }}
-                                        whileTap={{ scale: 0.97 }}
-                                        onClick={() => CancelledAppointment(appointment?._id)}
-                                        className="px-6 py-3 rounded-lg shadow-md flex items-center gap-2"
-                                        style={{ 
-                                            border: `1px solid ${colors.error}`,
-                                            color: colors.error,
-                                            backgroundColor: `${colors.error}10`
-                                        }}
-                                    >
-                                        <FaTimes />
-                                        Cancel Appointment
-                                    </motion.button>
-                                )}
-                            </div>
-                        </motion.div>
-                          )
+                                        {appointment?.status != 'cancelled' && (
+                                            <motion.button
+                                                whileHover={{ scale: 1.03 }}
+                                                whileTap={{ scale: 0.97 }}
+                                                onClick={() => CancelledAppointment(appointment?._id)}
+                                                className="px-6 py-3 rounded-lg shadow-md flex items-center gap-2"
+                                                style={{
+                                                    border: `1px solid ${colors.error}`,
+                                                    color: colors.error,
+                                                    backgroundColor: `${colors.error}10`
+                                                }}
+                                            >
+                                                <FaTimes />
+                                                Cancel Appointment
+                                            </motion.button>
+
+                                        )}
+
+                                    </div>
+                                </motion.div>
+                            )
                         }
                     </motion.div>
                 </AnimatePresence>

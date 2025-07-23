@@ -21,7 +21,7 @@ const DoctorDashboard = () => {
   const hospitals = useSelector((state) => state?.hospitals?.hospitals);
   const { doctors } = useSelector((state) => state?.doctors);
   const appointments = useSelector((state) => state.appointment?.appointment);
-  
+
   // Professional healthcare color scheme
   const colors = {
     primary: '#2B6CB0',      // Deep blue
@@ -36,6 +36,7 @@ const DoctorDashboard = () => {
   };
 
   const filteredAppointments = appointment?.filter(appointment =>
+    appointment?.token?.toLowerCase().includes(searchTerm.toLowerCase())||
     appointment._id.toLowerCase().includes(searchTerm.toLowerCase()) ||
     appointment.patient?.name?.toLowerCase().includes(searchTerm.toLowerCase())
   );
@@ -97,7 +98,7 @@ const DoctorDashboard = () => {
     <Dashboard>
       <div className="min-h-screen" style={{ backgroundColor: colors.background }}>
         {activeTab === 'appointments' && (
-          <motion.div 
+          <motion.div
             initial="hidden"
             animate="show"
             variants={containerVariants}
@@ -105,7 +106,7 @@ const DoctorDashboard = () => {
           >
             {/* Stats Cards */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <motion.div 
+              <motion.div
                 variants={itemVariants}
                 className="bg-white rounded-xl shadow-sm p-6 transition-all hover:shadow-md"
                 style={{ borderLeft: `4px solid ${colors.primary}` }}
@@ -127,7 +128,7 @@ const DoctorDashboard = () => {
                 </div>
               </motion.div>
 
-              <motion.div 
+              <motion.div
                 variants={itemVariants}
                 className="bg-white rounded-xl shadow-sm p-6 transition-all hover:shadow-md"
                 style={{ borderLeft: `4px solid ${colors.accent}` }}
@@ -149,7 +150,7 @@ const DoctorDashboard = () => {
                 </div>
               </motion.div>
 
-              <motion.div 
+              <motion.div
                 variants={itemVariants}
                 className="bg-white rounded-xl shadow-sm p-6 transition-all hover:shadow-md"
                 style={{ borderLeft: `4px solid ${colors.warning}` }}
@@ -173,7 +174,7 @@ const DoctorDashboard = () => {
             </div>
 
             {/* Appointments List */}
-            <motion.div 
+            <motion.div
               variants={itemVariants}
               className="bg-white rounded-xl shadow-sm overflow-hidden transition-all hover:shadow-md"
             >
@@ -210,6 +211,9 @@ const DoctorDashboard = () => {
                           Time
                         </th>
                         <th scope="col" className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider" style={{ color: colors.muted }}>
+                          Token
+                        </th>
+                        <th scope="col" className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider" style={{ color: colors.muted }}>
                           Status
                         </th>
                         <th scope="col" className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider" style={{ color: colors.muted }}>
@@ -224,7 +228,7 @@ const DoctorDashboard = () => {
                       <AnimatePresence>
                         {filteredAppointments?.length > 0 ? (
                           filteredAppointments.map((appointment, index) => (
-                            <motion.tr 
+                            <motion.tr
                               key={appointment._id}
                               initial={{ opacity: 0, y: 10 }}
                               animate={{ opacity: 1, y: 0 }}
@@ -252,30 +256,46 @@ const DoctorDashboard = () => {
                                 <div className="text-sm" style={{ color: colors.muted }}>{appointment?.date}</div>
                               </td>
                               <td className="px-6 py-4 whitespace-nowrap">
+                                
+                                <div className="text-sm" style={{ color: colors.muted }}>{appointment?.token}</div>
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap">
                                 <motion.span
-                                  className="px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full text-white"
-                                  animate={appointment?.status}
-                                  variants={statusBadgeVariants}
+                                  className={`px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${appointment?.status === 'confirmed'
+                                    ? 'bg-green-100 text-green-800'
+                                    : appointment?.status === 'pending'
+                                      ? 'bg-yellow-100 text-yellow-800'
+                                      : appointment?.status === 'cancelled'
+                                        ? 'bg-red-100 text-red-800'
+                                        : 'bg-blue-100 text-blue-800'
+                                    }`}
+                                  initial={{ opacity: 0, scale: 0.8 }}
+                                  animate={{
+                                    opacity: 1,
+                                    scale: 1,
+                                    transition: { type: 'spring', stiffness: 300 }
+                                  }}
+                                  whileHover={{ scale: 1.05 }}
+                                  whileTap={{ scale: 0.95 }}
                                 >
                                   {appointment?.status.charAt(0).toUpperCase() + appointment?.status.slice(1)}
                                 </motion.span>
                               </td>
                               <td className="px-6 py-4 whitespace-nowrap">
-                                <span className={`px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                                  appointment?.paymentStatus === 'completed'
-                                    ? 'bg-green-100 text-green-800'
-                                    : 'bg-yellow-100 text-yellow-800'
-                                }`}>
+                                <span className={`px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${appointment?.paymentStatus === 'completed'
+                                  ? 'bg-green-100 text-green-800'
+                                  : 'bg-yellow-100 text-yellow-800'
+                                  }`}>
                                   {appointment?.paymentStatus.charAt(0).toUpperCase() + appointment?.paymentStatus.slice(1)}
                                 </span>
                               </td>
                               <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                                 <Link to={`/appointment/${appointment?._id}`}>
-                                  <motion.button 
+                                  <motion.button
                                     whileHover={{ scale: 1.05 }}
                                     whileTap={{ scale: 0.95 }}
-                                    className="px-3 py-1 rounded-lg mr-2" 
-                                    style={{ 
+                                    className="px-3 py-1 rounded-lg mr-2"
+                                    style={{
                                       backgroundColor: `${colors.primary}20`,
                                       color: colors.primary
                                     }}
@@ -287,7 +307,7 @@ const DoctorDashboard = () => {
                             </motion.tr>
                           ))
                         ) : (
-                          <motion.tr 
+                          <motion.tr
                             initial={{ opacity: 0 }}
                             animate={{ opacity: 1 }}
                             exit={{ opacity: 0 }}
@@ -315,7 +335,7 @@ const DoctorDashboard = () => {
         )}
 
         {activeTab !== 'appointments' && (
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             className="bg-white rounded-xl shadow-md p-8 text-center max-w-2xl mx-auto my-8"
@@ -334,7 +354,7 @@ const DoctorDashboard = () => {
               whileTap={{ scale: 0.95 }}
               onClick={() => setActiveTab('appointments')}
               className="px-6 py-2 rounded-lg font-medium"
-              style={{ 
+              style={{
                 backgroundColor: colors.primary,
                 color: 'white'
               }}

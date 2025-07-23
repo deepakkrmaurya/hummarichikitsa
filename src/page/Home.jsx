@@ -188,7 +188,7 @@ const Home = () => {
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7"></path>
                             </svg>
                           </Link>
-                          {appointment.status !== 'cancelled' && (
+                          {/* {appointment.status !== 'cancelled' && (
                             <button 
                               onClick={() => CancledAppointment(appointment?._id)} 
                               className="text-red-600 hover:text-red-800 text-sm font-medium flex items-center"
@@ -198,7 +198,7 @@ const Home = () => {
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path>
                               </svg>
                             </button>
-                          )}
+                          )} */}
                         </div>
                       </div>
                     </div>

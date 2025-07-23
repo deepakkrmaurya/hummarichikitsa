@@ -25,3 +25,17 @@ export const StaffLogin = createAsyncThunk('/staff/login', async (data) => {
         toast.error(error?.response?.data?.message)
     }
 })
+
+export const StaffDelete = createAsyncThunk('/staff/delete', async (id) => {
+    try {
+        const response = axiosInstance.delete(`/staff/delete/${id}`)
+        toast.promise(response, {
+            loading: 'remove  please wait.',
+            success: (data) => data?.data?.message,
+           
+        })
+        return (await response)?.data
+    } catch (error) {
+        toast.error(error?.response?.data?.message)
+    }
+})

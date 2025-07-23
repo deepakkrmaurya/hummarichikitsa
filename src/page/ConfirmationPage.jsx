@@ -170,7 +170,7 @@ const ConfirmationPage = () => {
               Your appointment with Dr. {doctor?.name} has been successfully booked.
             </p>
             <div className="inline-block bg-teal-50 text-teal-800 px-4 py-2 rounded-lg font-medium border border-teal-100">
-              Booking ID: {appointment?._id?.slice(-8).toUpperCase()}
+              Booking ID: {appointment?.razorpayOrderId?.slice(0,15).toUpperCase()}
             </div>
           </div>
           
