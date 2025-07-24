@@ -161,14 +161,11 @@ const DoctorListPage = () => {
           <div className="flex flex-col md:flex-row items-start">
             <div className="md:w-1/4 mb-4 md:mb-0 md:mr-6">
               <img
-                src={hospital.image || '/default-hospital.jpg'}
+                src={hospital.image}
                 alt={hospital.name}
                 className="w-full h-auto rounded-lg object-cover"
                 style={{ maxHeight: '150px' }}
-                onError={(e) => {
-                  e.target.onerror = null;
-                  e.target.src = '/default-hospital.jpg';
-                }}
+                
               />
             </div>
             <div className="md:w-3/4">
@@ -269,13 +266,10 @@ const DoctorListPage = () => {
                 <div className="md:flex">
                   <div className="md:w-1/4 bg-gray-50 flex items-center justify-center p-6">
                     <img
-                      src={doctor.photo || '/default-doctor.jpg'}
+                      src={doctor.photo}
                       alt={doctor.name}
                       className="w-32 h-32 md:w-40 md:h-40 rounded-full object-cover border-4 border-white shadow-md"
-                      onError={(e) => {
-                        e.target.onerror = null;
-                        e.target.src = '/default-doctor.jpg';
-                      }}
+                      
                     />
                   </div>
                   <div className="p-6 md:w-3/4">

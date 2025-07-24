@@ -143,7 +143,7 @@ const DoctorDashboard = () => {
                       {isLoading ? (
                         <div className="h-8 w-12 bg-gray-200 rounded animate-pulse"></div>
                       ) : (
-                        appointments?.filter(a => a.status === 'confirmed').length
+                        appointments?.filter(a => a.status === 'Confirmed').length
                       )}
                     </p>
                   </div>
@@ -165,7 +165,7 @@ const DoctorDashboard = () => {
                       {isLoading ? (
                         <div className="h-8 w-12 bg-gray-200 rounded animate-pulse"></div>
                       ) : (
-                        appointments?.filter(a => a.status === 'booked').length
+                        appointments?.filter(a => a.status === 'pending').length
                       )}
                     </p>
                   </div>

@@ -85,6 +85,14 @@ export const GetDoctor = createAsyncThunk('/get/doctor', async (id) => {
     toast.error(error?.response?.data?.message)
   }
 })
+export const GetDoctorHospitalId = createAsyncThunk('/get/doctor/hospital', async (id) => {
+  try {
+    const response = axiosInstance.get(`/doctor/${id}/hospital`)
+    return (await response)?.data
+  } catch (error) {
+    toast.error(error?.response?.data?.message)
+  }
+})
 
 export const getAllDoctors = createAsyncThunk(
   "doctors/getAll", // Changed to match slice name

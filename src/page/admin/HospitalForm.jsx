@@ -166,7 +166,7 @@ const HospitalForm = () => {
   // --- Form Submission ---
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     if (!validateForm()) {
       // Determine which section has the first error and navigate to it
       const errorFields = Object.keys(errors);
@@ -193,28 +193,64 @@ const HospitalForm = () => {
       return
     }
     // Simulate API call
-    
-    
-   
-    
-    const hospitalData = new FormData();
-    hospitalData.append("name", formData.name);
-    hospitalData.append("address", formData.address);
-    hospitalData.append("city", formData.city);
-    hospitalData.append("state", formData.state);
-    hospitalData.append("pincode", formData.pincode);
-    hospitalData.append("phone", formData.phone);
-    hospitalData.append("email", formData.email);
-    hospitalData.append("password", formData.password);
-    hospitalData.append("website", formData.website);
-    hospitalData.append("image", formData.image);
-    hospitalData.append("rating", formData.rating);
-    hospitalData.append("specialties", formData.specialties);
-    hospitalData.append("facilities", formData.facilities);
-    hospitalData.append("currentSpecialty", formData.currentSpecialty);
-    hospitalData.append("facilities", formData.facilities);
 
-    
+
+
+
+    // const hospitalData = new FormData();
+    // hospitalData.append("name", formData.name);
+    // hospitalData.append("address", formData.address);
+    // hospitalData.append("city", formData.city);
+    // hospitalData.append("state", formData.state);
+    // hospitalData.append("pincode", formData.pincode);
+    // hospitalData.append("phone", formData.phone);
+    // hospitalData.append("email", formData.email);
+    // hospitalData.append("password", formData.password);
+    // hospitalData.append("website", formData.website);
+    // hospitalData.append("image", formData.image);
+    // hospitalData.append("rating", formData.rating);
+    // hospitalData.append("specialties[]", formData.specialties);
+    // hospitalData.append("facilities[]", formData.facilities);
+    // hospitalData.append("currentSpecialty", formData.currentSpecialty);
+    // hospitalData.append("facilities", formData.facilities);
+
+    const hospitalData = new FormData();
+
+    // Append simple fields
+    hospitalData.append("name", formData.name || "");
+    hospitalData.append("address", formData.address || "");
+    hospitalData.append("city", formData.city || "");
+    hospitalData.append("state", formData.state || "");
+    hospitalData.append("pincode", formData.pincode || "");
+    hospitalData.append("phone", formData.phone || "");
+    hospitalData.append("email", formData.email || "");
+    hospitalData.append("password", formData.password || "");
+    hospitalData.append("website", formData.website || "");
+    hospitalData.append("rating", formData.rating || "");
+
+    // Append image (if exists)
+    if (formData.image) {
+      hospitalData.append("image", formData.image);
+    }
+
+    // Append arrays (specialties and facilities)
+    if (Array.isArray(formData.specialties)) {
+      formData.specialties.forEach((specialty) => {
+        hospitalData.append("specialties[]", specialty);
+      });
+    }
+
+    if (Array.isArray(formData.facilities)) {
+      formData.facilities.forEach((facility) => {
+        hospitalData.append("facilities[]", facility);
+      });
+    }
+
+    // Append currentSpecialty (if needed)
+    if (formData.currentSpecialty) {
+      hospitalData.append("currentSpecialty", formData.currentSpecialty);
+    }
+
     const res = await dispatch(createHospital(hospitalData))
 
     // try {

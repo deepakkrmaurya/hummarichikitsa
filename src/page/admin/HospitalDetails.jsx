@@ -451,111 +451,136 @@ const HospitalDetails = () => {
                                                 </div>
 
                                                 {/* Doctors Grid */}
-                                                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                                                <div className="overflow-x-auto rounded-lg border" style={{ borderColor: `${colors.muted}20`, backgroundColor: colors.card }}>
                                                     {filteredDoctors.length > 0 ? (
-                                                        filteredDoctors.map((doc) => (
-                                                            <motion.div
-                                                                key={doc._id}
-                                                                initial={{ opacity: 0, y: 10 }}
-                                                                animate={{ opacity: 1, y: 0 }}
-                                                                exit={{ opacity: 0 }}
-                                                                transition={{ duration: 0.3 }}
-                                                                className="p-4 rounded-lg border hover:shadow-md transition-shadow"
-                                                                style={{
-                                                                    borderColor: `${colors.muted}20`,
-                                                                    backgroundColor: colors.card
-                                                                }}
-                                                                whileHover={{ y: -5 }}
-                                                            >
-                                                                <div className="flex items-center gap-3 mb-3">
-                                                                    <div className="w-12 h-12 rounded-full overflow-hidden bg-gray-100">
-                                                                        <img
-                                                                            className="h-full w-full object-cover"
-                                                                            src={doc.photo || 'https://via.placeholder.com/40'}
-                                                                            alt={doc.name}
-                                                                        />
-                                                                    </div>
-                                                                    <div>
-                                                                        <h4 className="font-medium" style={{ color: colors.text }}>{doc.name}</h4>
-                                                                        <p className="text-xs" style={{ color: colors.muted }}>{doc.specialty}</p>
-                                                                    </div>
-                                                                </div>
-                                                                <div className="grid grid-cols-2 gap-2 mb-3">
-                                                                    <div>
-                                                                        <p className="text-xs" style={{ color: colors.muted }}>Experience</p>
-                                                                        <p className="text-sm" style={{ color: colors.text }}>{doc.experience} years</p>
-                                                                    </div>
-                                                                    <div>
-                                                                        <p className="text-xs" style={{ color: colors.muted }}>Fee</p>
-                                                                        <p className="text-sm" style={{ color: colors.text }}>₹{doc.consultationFee}</p>
-                                                                    </div>
-                                                                </div>
-                                                                <div className="flex justify-between items-center mb-3">
-                                                                    <div className="flex items-center">
-                                                                        {[...Array(5)].map((_, i) => (
-                                                                            <svg
-                                                                                key={i}
-                                                                                className={`w-4 h-4 ${i < Math.floor(doc.rating) ? 'text-yellow-400' : 'text-gray-300'}`}
-                                                                                fill="currentColor"
-                                                                                viewBox="0 0 20 20"
-                                                                            >
-                                                                                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                                                                            </svg>
-                                                                        ))}
-                                                                        <span className="ml-1 text-xs" style={{ color: colors.muted }}>{doc.rating}</span>
-                                                                    </div>
-                                                                    <motion.span
-                                                                        className="px-2 py-0.5 text-xs rounded-full text-white"
-                                                                        animate={doc.status}
-                                                                        variants={statusBadgeVariants}
-                                                                    >
-                                                                        {doc.status}
-                                                                    </motion.span>
-                                                                </div>
-                                                                <div className="flex justify-end gap-2">
-                                                                    <Link to={`/doctor/${doc._id}`}>
-                                                                        <motion.button
-                                                                            whileHover={{ scale: 1.1 }}
-                                                                            whileTap={{ scale: 0.9 }}
-                                                                            className="text-sm px-3 py-1 rounded"
-                                                                            style={{
-                                                                                backgroundColor: `${colors.primary}10`,
-                                                                                color: colors.primary
-                                                                            }}
-                                                                        >
-                                                                            View
-                                                                        </motion.button>
-                                                                    </Link>
-                                                                    <Link to={`/doctor/update/${doc._id}`}>
-                                                                        <motion.button
-                                                                            whileHover={{ scale: 1.1 }}
-                                                                            whileTap={{ scale: 0.9 }}
-                                                                            className="text-sm px-3 py-1 rounded"
-                                                                            style={{
-                                                                                backgroundColor: `${colors.accent}10`,
-                                                                                color: colors.accent
-                                                                            }}
-                                                                        >
-                                                                            Edit
-                                                                        </motion.button>
-                                                                    </Link>
-                                                                    <motion.button
-                                                                        whileHover={{ scale: 1.1 }}
-                                                                        whileTap={{ scale: 0.9 }}
-                                                                        onClick={() => deleteDoctorHandler(doc._id)}
-                                                                        className="text-sm px-3 py-1 rounded"
+                                                        <motion.table
+                                                            initial={{ opacity: 0 }}
+                                                            animate={{ opacity: 1 }}
+                                                            transition={{ duration: 0.3 }}
+                                                            className="w-full"
+                                                        >
+                                                            <thead>
+                                                                <tr style={{ backgroundColor: `${colors.primary}05` }}>
+                                                                    <th className="p-3 text-left text-sm font-medium" style={{ color: colors.primary }}>Doctor</th>
+                                                                    <th className="p-3 text-left text-sm font-medium" style={{ color: colors.primary }}>Specialty</th>
+                                                                    <th className="p-3 text-left text-sm font-medium" style={{ color: colors.primary }}>Experience</th>
+                                                                    <th className="p-3 text-left text-sm font-medium" style={{ color: colors.primary }}>Fee</th>
+                                                                    <th className="p-3 text-left text-sm font-medium" style={{ color: colors.primary }}>Rating</th>
+                                                                    <th className="p-3 text-left text-sm font-medium" style={{ color: colors.primary }}>Status</th>
+                                                                    <th className="p-3 text-right text-sm font-medium" style={{ color: colors.primary }}>Actions</th>
+                                                                </tr>
+                                                            </thead>
+                                                            <tbody>
+                                                                {filteredDoctors.map((doc) => (
+                                                                    <motion.tr
+                                                                        key={doc._id}
+                                                                        initial={{ opacity: 0, y: 10 }}
+                                                                        animate={{ opacity: 1, y: 0 }}
+                                                                        transition={{ duration: 0.3 }}
+                                                                        className="border-b hover:bg-opacity-10"
                                                                         style={{
-                                                                            backgroundColor: `${colors.danger}10`,
-                                                                            color: colors.danger
+                                                                            borderColor: `${colors.muted}10`,
+                                                                            backgroundColor: doc._id % 2 === 0 ? `${colors.muted}03` : 'transparent'
                                                                         }}
+                                                                        whileHover={{ backgroundColor: `${colors.primary}05` }}
                                                                     >
-                                                                        Delete
-                                                                    </motion.button>
-                                                                </div>
-                                                            </motion.div>
-                                                        ))
+                                                                        <td className="p-3">
+                                                                            <div className="flex items-center gap-3">
+                                                                                <div className="w-10 h-10 rounded-full overflow-hidden bg-gray-100">
+                                                                                    <img
+                                                                                        className="h-full w-full object-cover"
+                                                                                        src={doc.photo || 'https://via.placeholder.com/40'}
+                                                                                        alt={doc.name}
+                                                                                    />
+                                                                                </div>
+                                                                                <span style={{ color: colors.text }}>{doc.name}</span>
+                                                                            </div>
+                                                                        </td>
+                                                                        <td className="p-3 text-sm" style={{ color: colors.muted }}>{doc.specialty}</td>
+                                                                        <td className="p-3 text-sm" style={{ color: colors.text }}>{doc.experience} years</td>
+                                                                        <td className="p-3 text-sm" style={{ color: colors.text }}>₹{doc.consultationFee}</td>
+                                                                        <td className="p-3">
+                                                                            <div className="flex items-center">
+                                                                                {[...Array(5)].map((_, i) => (
+                                                                                    <svg
+                                                                                        key={i}
+                                                                                        className={`w-4 h-4 ${i < Math.floor(doc.rating) ? 'text-yellow-400' : 'text-gray-300'}`}
+                                                                                        fill="currentColor"
+                                                                                        viewBox="0 0 20 20"
+                                                                                    >
+                                                                                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                                                                                    </svg>
+                                                                                ))}
+                                                                                <span className="ml-1 text-xs" style={{ color: colors.muted }}>{doc.rating}</span>
+                                                                            </div>
+                                                                        </td>
+                                                                        <td className="p-3">
+                                                                            <motion.span
+                                                                                className="px-2 py-1 text-xs rounded-full"
+                                                                                animate={doc.status}
+                                                                                variants={statusBadgeVariants}
+                                                                                style={{
+                                                                                    color: 'white',
+                                                                                    display: 'inline-block',
+                                                                                    minWidth: '70px',
+                                                                                    textAlign: 'center'
+                                                                                }}
+                                                                            >
+                                                                                {doc.status}
+                                                                            </motion.span>
+                                                                        </td>
+                                                                        <td className="p-3">
+                                                                            <div className="flex justify-end gap-2">
+                                                                                <Link to={`/doctor/${doc._id}`}>
+                                                                                    <motion.button
+                                                                                        whileHover={{ scale: 1.05 }}
+                                                                                        whileTap={{ scale: 0.95 }}
+                                                                                        className="text-sm px-3 py-1 rounded"
+                                                                                        style={{
+                                                                                            backgroundColor: `${colors.primary}10`,
+                                                                                            color: colors.primary
+                                                                                        }}
+                                                                                    >
+                                                                                        View
+                                                                                    </motion.button>
+                                                                                </Link>
+                                                                                <Link to={`/doctor/update/${doc._id}`}>
+                                                                                    <motion.button
+                                                                                        whileHover={{ scale: 1.05 }}
+                                                                                        whileTap={{ scale: 0.95 }}
+                                                                                        className="text-sm px-3 py-1 rounded"
+                                                                                        style={{
+                                                                                            backgroundColor: `${colors.accent}10`,
+                                                                                            color: colors.accent
+                                                                                        }}
+                                                                                    >
+                                                                                        Edit
+                                                                                    </motion.button>
+                                                                                </Link>
+                                                                                <motion.button
+                                                                                    whileHover={{ scale: 1.05 }}
+                                                                                    whileTap={{ scale: 0.95 }}
+                                                                                    onClick={() => {
+                                                                                        if (window.confirm('Are you sure you want to delete this doctor?')) {
+                                                                                            deleteDoctorHandler(doc._id);
+                                                                                        }
+                                                                                    }}
+                                                                                    className="text-sm px-3 py-1 rounded"
+                                                                                    style={{
+                                                                                        backgroundColor: `${colors.danger}10`,
+                                                                                        color: colors.danger
+                                                                                    }}
+                                                                                >
+                                                                                    Delete
+                                                                                </motion.button>
+                                                                            </div>
+                                                                        </td>
+                                                                    </motion.tr>
+                                                                ))}
+                                                            </tbody>
+                                                        </motion.table>
                                                     ) : (
-                                                        <div className="col-span-full p-8 text-center">
+                                                        <div className="p-8 text-center">
                                                             <div className="flex flex-col items-center justify-center">
                                                                 <div className="h-16 w-16 rounded-full flex items-center justify-center mb-4" style={{ backgroundColor: `${colors.primary}10` }}>
                                                                     <FaUserMd className="text-2xl" style={{ color: colors.primary }} />
