@@ -29,7 +29,6 @@ import DoctorDetailsPage from './page/doctors/DoctorDetails';
 import HospitalUpdateForm from './page/admin/UpdateHospita;';
 import StaffRegistrationForm from './page/admin/StaffRegister';
 import BookAppointment from './page/admin/BookAppointment';
-import { useState } from 'react';
 import { useSelector } from 'react-redux';
 import Payment from './page/Payment';
 function App() {
