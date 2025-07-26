@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Calendar, Clock, User, FileText, BarChart, Settings, Search, Calendar as CalendarIcon, CheckCircle, XCircle, Clock as ClockIcon } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { getAllAppointment, todayAppointment } from '../../Redux/appointment';
+import { AppointmentConferm, getAllAppointment, todayAppointment } from '../../Redux/appointment';
 import { getAllHospital } from '../../Redux/hospitalSlice';
 import { getAllDoctors } from '../../Redux/doctorSlice';
 import { useDispatch, useSelector } from 'react-redux';
@@ -10,16 +10,11 @@ import Dashboard from '../../components/Layout/Dashboard';
 import axiosInstance from '../../Helper/axiosInstance';
 
 const DoctorDashboard = () => {
-  const { isLoggedIn, role, data } = useSelector((state) => state.auth);
-  const navigate = useNavigate();
   const dispatch = useDispatch();
-
   const [appointment, setAppointment] = useState([]);
   const [activeTab, setActiveTab] = useState('appointments');
   const [searchTerm, setSearchTerm] = useState('');
   const [isLoading, setIsLoading] = useState(true);
-  const hospitals = useSelector((state) => state?.hospitals?.hospitals);
-  const { doctors } = useSelector((state) => state?.doctors);
   const appointments = useSelector((state) => state.appointment?.appointment);
 
   // Professional healthcare color scheme
@@ -36,7 +31,7 @@ const DoctorDashboard = () => {
   };
 
   const filteredAppointments = appointment?.filter(appointment =>
-    appointment?.token?.toLowerCase().includes(searchTerm.toLowerCase())||
+    appointment?.token?.toLowerCase().includes(searchTerm.toLowerCase()) ||
     appointment._id.toLowerCase().includes(searchTerm.toLowerCase()) ||
     appointment.patient?.name?.toLowerCase().includes(searchTerm.toLowerCase())
   );
@@ -51,6 +46,11 @@ const DoctorDashboard = () => {
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const ConfirmAppointment = async (appointment_id) => {
+    await dispatch(AppointmentConferm(appointment_id));
+    getAppointment();
   };
 
   useEffect(() => {
@@ -143,7 +143,9 @@ const DoctorDashboard = () => {
                       {isLoading ? (
                         <div className="h-8 w-12 bg-gray-200 rounded animate-pulse"></div>
                       ) : (
-                        appointments?.filter(a => a.status === 'Confirmed').length
+                        <div>
+                          {appointments?.filter(a => a.status === 'completed').length}
+                        </div>
                       )}
                     </p>
                   </div>
@@ -256,7 +258,7 @@ const DoctorDashboard = () => {
                                 <div className="text-sm" style={{ color: colors.muted }}>{appointment?.date}</div>
                               </td>
                               <td className="px-6 py-4 whitespace-nowrap">
-                                
+
                                 <div className="text-sm" style={{ color: colors.muted }}>{appointment?.token}</div>
                               </td>
                               <td className="px-6 py-4 whitespace-nowrap">
@@ -303,6 +305,26 @@ const DoctorDashboard = () => {
                                     View
                                   </motion.button>
                                 </Link>
+                                {
+                                  appointment.status !== 'completed' && (
+                                    <motion.button
+                                      onClick={() => {
+                                        if (window.confirm("Are you sure you want to mark this appointment as completed?")) {
+                                          ConfirmAppointment(appointment?._id);
+                                        }
+                                      }}
+                                      whileHover={{ scale: 1.05 }}
+                                      whileTap={{ scale: 0.95 }}
+                                      className="px-3 py-1 rounded-lg mr-2"
+                                      style={{
+                                        backgroundColor: `${colors.primary}20`,
+                                        color: colors.primary
+                                      }}
+                                    >
+                                      Complete
+                                    </motion.button>
+                                  )
+                                }
                               </td>
                             </motion.tr>
                           ))

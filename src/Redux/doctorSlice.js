@@ -25,6 +25,23 @@ export const RegisterDoctor = createAsyncThunk('/register/doctor', async (data) 
     toast.error(error?.response?.data?.message)
   }
 })
+export const RegisterDoctorUpdate = createAsyncThunk('/register/doctor/update', async (data) => {
+  try {
+    const {id,formData}=data;
+    
+    const response = axiosInstance.put(`/doctor/${id}`, formData)
+    toast.promise(response, {
+      loading: 'wait doctor update...',
+      success: (data) => {
+        return data?.data?.message
+      }
+    })
+    return (await response)?.data
+  } catch (error) {
+    console.log(error?.response)
+    toast.error(error?.response?.data?.message)
+  }
+})
 
 
 export const deleteDoctor = createAsyncThunk('delete/doctor', async (id) => {

@@ -1,17 +1,6 @@
-// import axios from "axios";
-// import { useSelector } from "react-redux";
-
-// const BASE_URL = "http://localhost:5000/api/v1";
-// // const BASE_URL = "https://doctor-appointment-backend-t00j.onrender.com/api/v1";
-// const axiosInstance = axios.create();
-// axiosInstance.defaults.baseURL = BASE_URL;
-// axiosInstance.defaults.withCredentials = true;
-// export default axiosInstance;
-
-// // const { token } = useSelector((state) => state.auth);
 
 import axios from "axios";
-import { useSelector } from "react-redux";
+
 
 // const BASE_URL = "http://localhost:5000/api/v1";
 const BASE_URL = "https://doctor-appointment-backend-t00j.onrender.com/api/v1";

@@ -5,6 +5,7 @@ import { GetDoctor } from '../../Redux/doctorSlice';
 import { useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FaArrowLeft, FaCalendarAlt, FaClock, FaStar, FaUserMd, FaGraduationCap, FaMoneyBillWave, FaCheckCircle } from 'react-icons/fa';
+import Dashboard from '../../components/Layout/Dashboard';
 
 const DoctorDetailsPage = () => {
   const { doctorId } = useParams();
@@ -53,7 +54,8 @@ const DoctorDetailsPage = () => {
   }, []);
 
   return (
-    <div className="min-h-screen" style={{ backgroundColor: colors.background }}>
+    <Dashboard>
+      <div className="min-h-screen" style={{ backgroundColor: colors.background }}>
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Back button */}
         <motion.button
@@ -259,6 +261,7 @@ const DoctorDetailsPage = () => {
         
       </div>
     </div>
+    </Dashboard>
   );
 };
 

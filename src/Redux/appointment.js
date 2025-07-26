@@ -35,10 +35,10 @@ export const AppointmentConferm = createAsyncThunk(
         try {
             
             const response = axiosInstance.patch(`/appointment/${data}/status`, {
-                "status":"confirmed"
+                "status":"completed"
             });
             toast.promise(response, {
-                loading: "Confirming your appointment...",
+                loading: "complete your appointment...",
                 success: (data) => {
                     return data?.data?.message;
                 },

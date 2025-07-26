@@ -12,7 +12,7 @@ import { useDispatch } from 'react-redux';
 import { deleteDoctor } from '../../Redux/doctorSlice';
 import { GetHospitalById } from '../../Redux/hospitalSlice';
 import { toast } from 'react-hot-toast';
-import { GetStaff, StaffDelete } from '../../Redux/staffSlice';
+import { GetStaff, getStaffByHospitalId, StaffDelete } from '../../Redux/staffSlice';
 
 const HospitalDetails = () => {
     const navigate = useNavigate();
@@ -49,9 +49,10 @@ const HospitalDetails = () => {
     };
     const getstaff = async () => {
         try {
-            const res = await dispatch(GetStaff())
+            "getStaffByHospitalId"
+            const res = await dispatch(getStaffByHospitalId(id))
             const data = res?.payload
-            setStaff(data?.staff)
+            setStaff(data)
 
         } catch (error) {
             console.error("Error fetching doctors:", error);
@@ -108,11 +109,11 @@ const HospitalDetails = () => {
     }, [id]);
 
     // Filter doctors based on search term
-    const filteredDoctors = doctor.filter(doc =>
+    const filteredDoctors = doctor?.filter(doc =>
         doc.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
         doc.specialty.toLowerCase().includes(searchTerm.toLowerCase())
     );
-    const filteredStaff = staff.filter(doc =>
+    const filteredStaff = staff?.filter(doc =>
         doc.name.toLowerCase().includes(searchTerm.toLowerCase())
     );
 
@@ -303,11 +304,11 @@ const HospitalDetails = () => {
                                 <div className="grid grid-cols-2 gap-3 mb-6">
                                     <div className="p-3 rounded-lg text-center" style={{ backgroundColor: `${colors.primary}05` }}>
                                         <div className="text-sm" style={{ color: colors.muted }}>Doctors</div>
-                                        <div className="text-xl font-bold" style={{ color: colors.primary }}>{doctor.length}</div>
+                                        <div className="text-xl font-bold" style={{ color: colors.primary }}>{doctor?.length}</div>
                                     </div>
                                     <div className="p-3 rounded-lg text-center" style={{ backgroundColor: `${colors.accent}05` }}>
                                         <div className="text-sm" style={{ color: colors.muted }}>Staff</div>
-                                        <div className="text-xl font-bold" style={{ color: colors.accent }}>{staff.length}</div>
+                                        <div className="text-xl font-bold" style={{ color: colors.accent }}>{staff?.length}</div>
                                     </div>
                                 </div>
 
@@ -544,7 +545,7 @@ const HospitalDetails = () => {
                                                                                         View
                                                                                     </motion.button>
                                                                                 </Link>
-                                                                                <Link to={`/doctor/update/${doc._id}`}>
+                                                                                <Link to={`/update/doctor/${doc._id}`}>
                                                                                     <motion.button
                                                                                         whileHover={{ scale: 1.05 }}
                                                                                         whileTap={{ scale: 0.95 }}
@@ -653,8 +654,8 @@ const HospitalDetails = () => {
                                                             </tr>
                                                         </thead>
                                                         <tbody className="bg-white divide-y divide-gray-200">
-                                                            {filteredStaff.length > 0 ? (
-                                                                filteredStaff.map((doc) => (
+                                                            {filteredStaff?.length > 0 ? (
+                                                                filteredStaff?.map((doc) => (
                                                                     <motion.tr
                                                                         key={doc._id}
                                                                         initial={{ opacity: 0, y: 10 }}
@@ -665,13 +666,7 @@ const HospitalDetails = () => {
                                                                     >
                                                                         <td className="px-6 py-4 whitespace-nowrap">
                                                                             <div className="flex items-center">
-                                                                                <div className="flex-shrink-0 h-10 w-10">
-                                                                                    <img
-                                                                                        className="h-10 w-10 rounded-full object-cover"
-                                                                                        src={doc.photo || 'https://via.placeholder.com/40'}
-                                                                                        alt={doc.name}
-                                                                                    />
-                                                                                </div>
+                                                                                
                                                                                 <div className="ml-4">
                                                                                     <div className="text-sm font-medium" style={{ color: colors.text }}>{doc.name}</div>
                                                                                     <div className="text-xs" style={{ color: colors.muted }}>{doc.role || 'Staff'}</div>

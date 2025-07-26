@@ -39,3 +39,12 @@ export const StaffDelete = createAsyncThunk('/staff/delete', async (id) => {
         toast.error(error?.response?.data?.message)
     }
 })
+export const getStaffByHospitalId = createAsyncThunk('/staff/get', async (id) => {
+    try {
+       
+        const response = axiosInstance.get(`/staff/${id}`)
+        return (await response)?.data
+    } catch (error) {
+        toast.error(error?.response?.data?.message)
+    }
+})

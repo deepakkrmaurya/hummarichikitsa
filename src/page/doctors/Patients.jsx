@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import Dashboard from '../../components/Layout/Dashboard';
 import { useDispatch, useSelector } from 'react-redux';
-import { getAllAppointment } from '../../Redux/appointment';
+import { AppointmentConferm, getAllAppointment } from '../../Redux/appointment';
 import { Calendar, Clock, User, Search, CheckCircle, XCircle, CircleCheck, ChevronLeft, ChevronRight } from 'lucide-react';
 import { format, isSameDay, isSameMonth, addMonths, subMonths } from 'date-fns';
 import { Link } from 'react-router-dom';
@@ -103,6 +103,11 @@ const Patients = () => {
         booked: { backgroundColor: colors.warning },
         cancelled: { backgroundColor: colors.danger },
         completed: { backgroundColor: colors.primary }
+    };
+
+    const ConfirmAppointment = async (appointment_id) => {
+        await dispatch(AppointmentConferm(appointment_id));
+        await dispatch(getAllAppointment());
     };
 
     return (
@@ -365,6 +370,27 @@ const Patients = () => {
                                                                 View Details
                                                             </motion.button>
                                                         </Link>
+
+                                                        {
+                                                            appointment.status !== 'completed' && (
+                                                                <motion.button
+                                                                    onClick={() => {
+                                                                        if (window.confirm("Are you sure you want to mark this appointment as completed?")) {
+                                                                            ConfirmAppointment(appointment?._id);
+                                                                        }
+                                                                    }}
+                                                                    whileHover={{ scale: 1.05 }}
+                                                                    whileTap={{ scale: 0.95 }}
+                                                                    className="px-3 py-1 rounded-lg mr-2"
+                                                                    style={{
+                                                                        backgroundColor: `${colors.primary}20`,
+                                                                        color: colors.primary
+                                                                    }}
+                                                                >
+                                                                    Complete
+                                                                </motion.button>
+                                                            )
+                                                        }
                                                     </td>
                                                 </motion.tr>
                                             ))

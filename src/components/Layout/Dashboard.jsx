@@ -83,6 +83,7 @@ const Dashboard = ({ children }) => {
                 {
                   role === 'doctor' &&(
                 <li>
+                  <Link to={`/schedule/${data?._id}`}>
                   <button
                     onClick={() => {
                       setActiveTab('schedule');
@@ -96,6 +97,7 @@ const Dashboard = ({ children }) => {
                     <Clock className="h-4 w-4 sm:h-5 sm:w-5 mr-2 sm:mr-3" />
                     <span className="font-medium">Schedule</span>
                   </button>
+                  </Link>
                 </li>
 
                   )

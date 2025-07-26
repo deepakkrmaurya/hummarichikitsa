@@ -31,6 +31,8 @@ import StaffRegistrationForm from './page/admin/StaffRegister';
 import BookAppointment from './page/admin/BookAppointment';
 import { useSelector } from 'react-redux';
 import Payment from './page/Payment';
+import UpdateDoctor from './page/admin/UpdateDoctor';
+import Schedule from './page/doctors/Schedule';
 function App() {
   const { isLoggedIn } = useSelector((state) => state?.auth)
 
@@ -54,7 +56,7 @@ function App() {
         <Route path="/appointment_details_page/:id" element={<AppointmentDetailsPage />} />
 
         <Route element={<RequireAuth allowedRoles={["doctor", 'hospital', 'admin', 'staff']} />}>
-
+          
           <Route path='/doctor/dashboard' element={<DoctorDashboard />} />
           <Route path='/patient' element={<Patients />} />
           <Route path='/book/appointment' element={<BookAppointment />} />
@@ -69,13 +71,19 @@ function App() {
 
         </Route>
 
+        <Route element={<RequireAuth allowedRoles={['doctor']} />}>
+          <Route path='/schedule/:id' element={<Schedule />} />
+        </Route>
+
         <Route element={<RequireAuth allowedRoles={['hospital', "admin"]} />}>
           <Route path="/staff/register/:hospitalid" element={<StaffRegistrationForm />} />
           <Route path='/doctor/list/:hospitalId' element={<DoctorList />} />
           <Route path='/doctor/create/:hospitalId' element={<DoctorForm />} />
           <Route path='/hospital' element={<MyHospital />} />
           <Route path='/hospital/:id' element={<HospitalDetails />} />
+          
           <Route path='/doctor/:doctorId' element={<DoctorDetailsPage />} />
+          <Route path='/update/doctor/:doctorid' element={<UpdateDoctor />} />
           <Route path='/hospital/update/:hospitalid' element={<HospitalUpdateForm />} />
 
         </Route>

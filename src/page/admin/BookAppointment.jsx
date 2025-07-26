@@ -468,10 +468,11 @@ function BookAppointment() {
               className="w-full px-4 py-2.5 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition duration-200 appearance-none"
               required
             >
-              <option value="Pending">Pending</option>
-              <option value="Cash">Complete (Cash)</option>
+              
+            
+              <option value="Cash" selected>Complete (Cash)</option>
               <option value="online">Complete (Online)</option>
-              <option value="Failed">Failed</option>
+            
             </select>
           </div>
         </div>
