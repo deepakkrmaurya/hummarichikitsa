@@ -7,6 +7,7 @@ import { useDispatch } from "react-redux";
 import { loginDoctor } from "../../Redux/doctorSlice";
 import { LoginHospital } from "../../Redux/hospitalSlice";
 import { StaffLogin } from "../../Redux/staffSlice";
+import { AdminLogin } from "../../Redux/admin.Slice";
 
 const DoctorLogin = () => {
   const [showPassword, setShowPassword] = useState(false);
@@ -45,6 +46,9 @@ const DoctorLogin = () => {
           const res = await dispatch(StaffLogin(values))
           response = res
           console.log(res)
+        }else if (activeTab === 'admin') {
+          const res = await dispatch(AdminLogin(values))
+          response = res
         }
         if (response?.payload?.success) {
           localStorage.setItem("data", JSON.stringify(response?.payload?.user));

@@ -46,7 +46,7 @@ const Dashboard = ({ children }) => {
         <div className={`${mobileMenuOpen ? 'block' : 'hidden'} lg:block lg:col-span-1`}>
           <div className="bg-white rounded-lg shadow-md overflow-hidden">
             {/* Profile Section */}
-            <div className="p-4 sm:p-6 bg-gradient-to-r from-blue-600 to-blue-700 text-white">
+            <div className="p-4 sm:p-6 bg-gradient-to-r from-[rgb(43,108,176)] to-[rgb(33,88,156)] text-white">
               <div className="flex items-center">
                 <img
                   src={'https://images.pexels.com/photos/4173239/pexels-photo-4173239.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2'}
