@@ -100,7 +100,7 @@ export const getAllAppointment = createAsyncThunk(
     "appointment/getAll", // Changed to match slice name "appointment"
     async (_, { rejectWithValue }) => {
         try {
-            const response = await axiosInstance.get("/appointment");
+            const response = await axiosInstance.get("/appointment/");
             // console.log("Appointment data from API:", response.data); // Log API response
             return response.data;
         } catch (error) {

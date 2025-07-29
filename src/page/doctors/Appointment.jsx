@@ -34,16 +34,7 @@ const AppointmentDetails = () => {
         setIsLoading(false);
     };
 
-    const ConfirmAppointment = async (appointment_id) => {
-        await dispatch(AppointmentConferm(appointment_id));
-        getAppointment();
-    };
-
-    const CancelledAppointment = async (appointment_id) => {
-        await dispatch(AppointmentCancelled(appointment_id));
-        getAppointment();
-    };
-
+    
     useEffect(() => {
         getAppointment();
     }, []);
@@ -266,59 +257,7 @@ const AppointmentDetails = () => {
                             </motion.div>
                         </div>
 
-                        {/* Action Buttons */}
-                        {
-                            (role === 'admin' || role === 'doctor' || role === 'hospital') && (
-
-                                <motion.div
-                                    initial={{ opacity: 0 }}
-                                    animate={{ opacity: 1 }}
-                                    transition={{ delay: 0.8 }}
-                                    className="p-6 sm:p-8 border-t"
-                                    style={{
-                                        borderColor: colors.border,
-                                        backgroundColor: colors.background
-                                    }}
-                                >
-                                    <div className="flex flex-wrap justify-center gap-4">
-                                        {appointment?.status !== "Confirmed" && (
-                                            <motion.button
-                                                whileHover={{ scale: 1.03 }}
-                                                whileTap={{ scale: 0.97 }}
-                                                onClick={() => ConfirmAppointment(appointment?._id)}
-                                                className="px-6 py-3 rounded-lg shadow-md flex items-center gap-2"
-                                                style={{
-                                                    backgroundColor: colors.success,
-                                                    color: 'white'
-                                                }}
-                                            >
-                                                <FaCheck />
-                                                Confirm Appointment
-                                            </motion.button>
-                                        )}
-
-                                        {appointment?.status != 'cancelled' && (
-                                            <motion.button
-                                                whileHover={{ scale: 1.03 }}
-                                                whileTap={{ scale: 0.97 }}
-                                                onClick={() => CancelledAppointment(appointment?._id)}
-                                                className="px-6 py-3 rounded-lg shadow-md flex items-center gap-2"
-                                                style={{
-                                                    border: `1px solid ${colors.error}`,
-                                                    color: colors.error,
-                                                    backgroundColor: `${colors.error}10`
-                                                }}
-                                            >
-                                                <FaTimes />
-                                                Cancel Appointment
-                                            </motion.button>
-
-                                        )}
-
-                                    </div>
-                                </motion.div>
-                            )
-                        }
+                        
                     </motion.div>
                 </AnimatePresence>
             </div>

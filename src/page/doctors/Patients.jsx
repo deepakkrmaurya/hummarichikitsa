@@ -4,7 +4,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { AppointmentConferm, getAllAppointment } from '../../Redux/appointment';
 import { Calendar, Clock, User, Search, CheckCircle, XCircle, CircleCheck, ChevronLeft, ChevronRight } from 'lucide-react';
 import { format, isSameDay, isSameMonth, addMonths, subMonths } from 'date-fns';
-import { Link } from 'react-router-dom';
+import { data, Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const Patients = () => {
@@ -14,7 +14,6 @@ const Patients = () => {
     const [selectedDate, setSelectedDate] = useState(null);
     const [appointmentsByDate, setAppointmentsByDate] = useState({});
     const [isLoading, setIsLoading] = useState(true);
-
     // Professional healthcare color scheme
     const colors = {
         primary: '#2B6CB0',      // Deep blue
@@ -29,7 +28,7 @@ const Patients = () => {
     };
 
     const appointments = useSelector((state) => state.appointment?.appointment);
-
+    // console.log(appointments)
     // Process appointments by date
     useEffect(() => {
         if (appointments?.length) {
@@ -56,18 +55,19 @@ const Patients = () => {
     }, [dispatch]);
 
     // Filter appointments based on search and selected date
-    // const filteredAppointments = appointments?.filter(appointment => {
-    //     const matchesSearch = appointment._id.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    //         (appointment.patientId?.name && appointment.patientId.name.toLowerCase().includes(searchTerm.toLowerCase()));
-    //     const matchesDate = selectedDate ? isSameDay(new Date(appointment.date), new Date(selectedDate)) : true;
-    //     return matchesSearch && matchesDate;
-    // });
-
-    const filteredAppointments = appointments?.filter(appointment =>
-        appointment?.token?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    const filteredAppointments = appointments?.filter(appointment => {
+    // Search term conditions from both filters
+    const matchesSearch = 
         appointment._id.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        appointment.patient?.name?.toLowerCase().includes(searchTerm.toLowerCase())
-    );
+        (appointment.patientId?.name && appointment.patientId.name.toLowerCase().includes(searchTerm.toLowerCase())) ||
+        appointment?.token?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        appointment.patient?.name?.toLowerCase().includes(searchTerm.toLowerCase());
+    
+    // Date condition from first filter
+    const matchesDate = selectedDate ? isSameDay(new Date(appointment.date), new Date(selectedDate)) : true;
+    
+    return matchesSearch && matchesDate;
+});
 
     // Get dates for current month view
     const getDaysInMonth = () => {
@@ -78,6 +78,7 @@ const Patients = () => {
         for (let date = startDate; date <= endDate; date.setDate(date.getDate() + 1)) {
             days.push(new Date(date));
         }
+
 
         return days;
     };
@@ -165,7 +166,6 @@ const Patients = () => {
                                 const hasAppointments = appointmentsByDate[dateStr] > 0;
                                 const isSelected = selectedDate && isSameDay(date, new Date(selectedDate));
                                 const isToday = isSameDay(date, new Date());
-
                                 return (
                                     <motion.button
                                         key={dateStr}

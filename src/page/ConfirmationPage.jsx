@@ -15,18 +15,18 @@ const ConfirmationPage = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const { appointmentId } = useParams();
-  
+
   // Redux state
   const hospitals = useSelector((state) => state?.hospitals?.hospitals);
   const { doctors, loading: doctorsLoading } = useSelector((state) => state?.doctors);
   const { appointment: appointments, loading: appointmentsLoading } = useSelector((state) => state.appointment);
   const { loading: hospitalsLoading } = useSelector((state) => state.hospitals);
-  
+
   // Find appointment, doctor, and hospital
   const appointment = appointments.find(a => a._id === appointmentId);
   const doctor = appointment ? doctors.find(d => d._id === appointment?.doctorId?._id) : null;
   const hospital = appointment ? hospitals.find(h => h._id === appointment?.hospitalId) : null;
-  
+
   // Format date for display
   const formatDate = (dateString) => {
     if (!dateString) return '';
@@ -63,7 +63,7 @@ const ConfirmationPage = () => {
         console.error("Error fetching data:", error);
       }
     };
-    
+
     fetchData();
   }, [dispatch]);
 
@@ -80,7 +80,7 @@ const ConfirmationPage = () => {
               <Skeleton width={300} height={20} className="mb-6 mx-auto" />
               <Skeleton width={200} height={30} className="mx-auto" />
             </div>
-            
+
             {/* Appointment Details Skeleton */}
             <div className="bg-white rounded-xl shadow-sm overflow-hidden mb-8 border border-teal-100">
               <Skeleton height={50} className="bg-teal-600 mb-0" />
@@ -93,7 +93,7 @@ const ConfirmationPage = () => {
                     <Skeleton width={120} height={14} />
                   </div>
                 </div>
-                
+
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
                   {[1, 2].map((i) => (
                     <div key={i} className="flex items-start">
@@ -105,9 +105,9 @@ const ConfirmationPage = () => {
                     </div>
                   ))}
                 </div>
-                
+
                 <Skeleton height={1} className="mb-6" />
-                
+
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
                   {[1, 2, 3, 4].map((i) => (
                     <div key={i}>
@@ -116,7 +116,7 @@ const ConfirmationPage = () => {
                     </div>
                   ))}
                 </div>
-                
+
                 <div className="flex justify-between">
                   <Skeleton width={120} height={40} />
                   <Skeleton width={80} height={40} />
@@ -170,36 +170,46 @@ const ConfirmationPage = () => {
               Your appointment with Dr. {doctor?.name} has been successfully booked.
             </p>
             <div className="inline-block bg-teal-50 text-teal-800 px-4 py-2 rounded-lg font-medium border border-teal-100">
-              Booking ID: {appointment?.razorpayOrderId?.slice(0,15).toUpperCase()}
+              Booking ID: {appointment?.token}
             </div>
           </div>
-          
+
           {/* Appointment Details Card */}
           <div className="bg-white rounded-xl shadow-sm overflow-hidden mb-8 border border-teal-100">
             {/* Card Header */}
             <div className="bg-gradient-to-r from-teal-600 to-teal-500 text-white p-4">
               <h2 className="text-xl font-semibold">Appointment Details</h2>
             </div>
-            
+
             <div className="p-6">
               {/* Doctor Info */}
               <div className="flex items-start mb-6">
-                <img
-                  src={doctor?.photo || '/default-doctor.jpg'}
-                  alt={doctor?.name}
-                  className="w-16 h-16 rounded-full object-cover mr-4 border-2 border-white shadow-sm"
-                  onError={(e) => {
-                    e.target.onerror = null;
-                    e.target.src = '/default-doctor.jpg';
-                  }}
-                />
+                {
+                  doctor?.image ? (
+                    <img
+                      src={doctor?.photo}
+                      alt={doctor?.name}
+                      className="w-16 h-16 rounded-full object-cover mr-4 border-2 border-white shadow-sm"
+
+                    />
+                  ) : (
+                    <img
+                      src='https://static.vecteezy.com/system/resources/previews/015/412/022/non_2x/doctor-round-avatar-medicine-flat-avatar-with-male-doctor-medical-clinic-team-round-icon-medical-collection-illustration-vector.jpg'
+                      alt={doctor?.name}
+                      className="w-16 h-16 rounded-full object-cover mr-4 border-2 border-white shadow-sm"
+
+                    />
+                  )
+                }
+
+
                 <div>
                   <h3 className="font-semibold text-gray-800 text-lg">Dr. {doctor?.name}</h3>
                   <p className="text-teal-600">{doctor?.specialty}</p>
                   <p className="text-gray-600 text-sm">{hospital?.name}</p>
                 </div>
               </div>
-              
+
               {/* Date & Location */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
                 <div className="flex items-start bg-teal-50 p-3 rounded-lg">
@@ -221,17 +231,17 @@ const ConfirmationPage = () => {
                   </div>
                 </div>
               </div>
-              
+
               {/* QR Code Section */}
               <div className="border-t border-gray-100 pt-4 mb-6">
                 <h4 className="font-medium text-gray-800 mb-3">Check-in QR Code</h4>
                 <div className="flex flex-col items-center p-4 bg-teal-50 rounded-lg">
-                  <QRCode 
-                    value={qrData} 
-                    size={128} 
-                    bgColor="#ffffff" 
-                    fgColor="#0d9488" 
-                    level="Q" 
+                  <QRCode
+                    value={qrData}
+                    size={128}
+                    bgColor="#ffffff"
+                    fgColor="#0d9488"
+                    level="Q"
                     className="mb-2"
                   />
                   <p className="text-xs text-gray-500 text-center">
@@ -239,7 +249,7 @@ const ConfirmationPage = () => {
                   </p>
                 </div>
               </div>
-              
+
               {/* Payment Information */}
               <div className="border-t border-gray-100 pt-4 mb-6">
                 <h4 className="font-medium text-gray-800 mb-3">Payment Information</h4>
@@ -268,10 +278,10 @@ const ConfirmationPage = () => {
                   </div>
                 </div>
               </div>
-              
+
               {/* Action Buttons */}
               <div className="flex flex-col sm:flex-row justify-between gap-3">
-                <button 
+                <button
                   className="flex items-center justify-center text-teal-600 hover:text-teal-800 transition font-medium py-2 px-4 bg-teal-50 rounded-lg hover:bg-teal-100"
                   onClick={() => {
                     // Implement download functionality
@@ -281,7 +291,7 @@ const ConfirmationPage = () => {
                   <Download className="h-5 w-5 mr-2" />
                   Download Receipt
                 </button>
-                <button 
+                <button
                   className="flex items-center justify-center text-teal-600 hover:text-teal-800 transition font-medium py-2 px-4 bg-teal-50 rounded-lg hover:bg-teal-100"
                   onClick={() => {
                     // Implement share functionality
@@ -294,7 +304,7 @@ const ConfirmationPage = () => {
               </div>
             </div>
           </div>
-          
+
           {/* Information Grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
             {/* Important Notes */}
@@ -324,7 +334,7 @@ const ConfirmationPage = () => {
                 </li>
               </ul>
             </div>
-            
+
             {/* Contact Information */}
             <div className="bg-white rounded-xl shadow-sm p-6 border border-teal-100">
               <h2 className="text-lg font-semibold text-gray-800 mb-3 flex items-center">
@@ -338,8 +348,8 @@ const ConfirmationPage = () => {
                   <Phone className="h-5 w-5 text-teal-600 mr-2 mt-0.5" />
                   <div>
                     <p className="text-sm text-gray-500">Hospital Phone</p>
-                    <a 
-                      href={`tel:${hospital?.phone}`} 
+                    <a
+                      href={`tel:${hospital?.phone}`}
                       className="font-medium text-gray-800 hover:text-teal-600 transition"
                     >
                       {hospital?.phone}
@@ -350,8 +360,8 @@ const ConfirmationPage = () => {
                   <Mail className="h-5 w-5 text-teal-600 mr-2 mt-0.5" />
                   <div>
                     <p className="text-sm text-gray-500">Email</p>
-                    <a 
-                      href={`mailto:${hospital?.email}`} 
+                    <a
+                      href={`mailto:${hospital?.email}`}
                       className="font-medium text-gray-800 hover:text-teal-600 transition"
                     >
                       {hospital?.email}
@@ -370,7 +380,7 @@ const ConfirmationPage = () => {
               </div>
             </div>
           </div>
-          
+
           {/* Action Buttons */}
           <div className="flex flex-col sm:flex-row justify-between gap-4">
             <button

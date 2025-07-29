@@ -7,8 +7,42 @@ import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { AppointmentCreate } from '../../Redux/appointment';
 import Dashboard from '../../components/Layout/Dashboard';
+import { date } from 'yup';
 
 function BookAppointment() {
+
+
+  const today = new Date().toISOString().split('T')[0];
+
+  // Tomorrow's Date
+  const tomorrow = new Date();
+  tomorrow.setDate(tomorrow.getDate() + 1);
+  const tomorrowFormatted = tomorrow.toISOString().split('T')[0];
+
+  const [selectDate, setSelectDate] = useState();
+
+  // Check which button is selected
+  const isTodaySelected = selectDate === today;
+  const isTomorrowSelected = selectDate === tomorrowFormatted;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
   const dispatch = useDispatch()
   const hospitals = useSelector((state) => state.hospitals.hospitals);
   const [formData, setFormData] = useState({
@@ -17,10 +51,10 @@ function BookAppointment() {
     dob: '',
     hospitalId: '',
     doctorId: '',
-    date: '',
-    slot: '',
+    // date: selectDate,
+    // date: '',
+    // slot: '',
     booking_amount: 0,
-    paymentStatus: 'Pending'
   });
 
   const [hospital, setHospital] = useState([]);
@@ -68,22 +102,22 @@ function BookAppointment() {
   }, [formData.hospitalId]);
 
   // Fetch available slots when doctor is selected
-  useEffect(() => {
-    const fetchAvailableSlots = async () => {
-      if (!formData.doctorId) return;
+  // useEffect(() => {
+  //   const fetchAvailableSlots = async () => {
+  //     if (!formData.doctorId) return;
 
-      try {
-        setLoading(prev => ({ ...prev, slots: true }));
-        const response = await dispatch(GetDoctor(formData.doctorId))
-        setAvailableSlots(response.payload.availableSlots || []);
-        setLoading(prev => ({ ...prev, slots: false }));
-      } catch (err) {
-        setError('Failed to load available slots');
-        setLoading(prev => ({ ...prev, slots: false }));
-      }
-    };
-    fetchAvailableSlots();
-  }, [formData.doctorId]);
+  //     try {
+  //       setLoading(prev => ({ ...prev, slots: true }));
+  //       const response = await dispatch(GetDoctor(formData.doctorId))
+  //       setAvailableSlots(response.payload.availableSlots || []);
+  //       setLoading(prev => ({ ...prev, slots: false }));
+  //     } catch (err) {
+  //       setError('Failed to load available slots');
+  //       setLoading(prev => ({ ...prev, slots: false }));
+  //     }
+  //   };
+  //   fetchAvailableSlots();
+  // }, [formData.doctorId]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -93,21 +127,26 @@ function BookAppointment() {
     }));
   };
 
-  const handleDateChange = (date) => {
-    setFormData(prev => ({
-      ...prev,
-      date: date ? date.toISOString().split('T')[0] : ''
-    }));
-  };
+  // const handleDateChange = (date) => {
+  //   setFormData(prev => ({
+  //     ...prev,
+  //     date: date ? date.toISOString().split('T')[0] : ''
+  //   }));
+  // };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
     setSuccess('');
 
-    try {
-      // const response = await axiosInstance.post('/api/appointments', formData);
-      const response = await dispatch(AppointmentCreate(formData))
+    try {  
+     const  data = {
+          ...formData,
+          date:selectDate
+        }
+      const response = await dispatch(AppointmentCreate(
+        data
+      ))
       if (response.payload.success) {
 
         setSuccess(`Appointment booked successfully! Token: ${response.payload.savedAppointment.token}`);
@@ -145,66 +184,75 @@ function BookAppointment() {
   return (
     <Dashboard>
       <div className="max-w-4xl mx-auto p-6 bg-white rounded-xl shadow-lg">
-      <h2 className="text-3xl font-bold text-gray-800 mb-6 text-center">Book Appointment</h2>
+        <h2 className="text-3xl font-bold text-gray-800 mb-6 text-center">Book Appointment</h2>
 
-      {error && (
-        <div className="mb-6 p-4 bg-red-50 border-l-4 border-red-500 text-red-700 rounded">
-          <div className="flex items-center">
-            <svg className="h-5 w-5 mr-3" fill="currentColor" viewBox="0 0 20 20">
-              <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
-            </svg>
-            <span>{error}</span>
-          </div>
-        </div>
-      )}
-
-      {success && (
-        <div className="mb-6 p-4 bg-green-50 border-l-4 border-green-500 text-green-700 rounded">
-          <div className="flex items-center">
-            <svg className="h-5 w-5 mr-3" fill="currentColor" viewBox="0 0 20 20">
-              <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-            </svg>
-            <span>{success}</span>
-          </div>
-        </div>
-      )}
-
-      <form onSubmit={handleSubmit} className="space-y-6">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {/* Patient Information */}
-          <div className="space-y-4 bg-gray-50 p-5 rounded-lg">
-            <h3 className="text-lg font-medium text-gray-900 border-b pb-2">Patient Details</h3>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Full Name</label>
-              <input
-                type="text"
-                name="patient"
-                value={formData.patient}
-                onChange={handleChange}
-                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition duration-200"
-                required
-                placeholder="John Doe"
-              />
+        {error && (
+          <div className="mb-6 p-4 bg-red-50 border-l-4 border-red-500 text-red-700 rounded">
+            <div className="flex items-center">
+              <svg className="h-5 w-5 mr-3" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+              </svg>
+              <span>{error}</span>
             </div>
+          </div>
+        )}
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Mobile Number</label>
-              <input
-                type="tel"
-                name="mobile"
-                value={formData.mobile}
-                onChange={handleChange}
-                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition duration-200"
-                required
-                pattern="[0-9]{10}"
-                placeholder="9876543210"
-              />
+        {success && (
+          <div className="mb-6 p-4 bg-green-50 border-l-4 border-green-500 text-green-700 rounded">
+            <div className="flex items-center">
+              <svg className="h-5 w-5 mr-3" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+              </svg>
+              <span>{success}</span>
             </div>
+          </div>
+        )}
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Date of Birth (Optional)</label>
-              <DatePicker
+        <form onSubmit={handleSubmit} className="space-y-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* Patient Information */}
+            <div className="space-y-4 bg-gray-50 p-5 rounded-lg">
+              <h3 className="text-lg font-medium text-gray-900 border-b pb-2">Patient Details</h3>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Full Name</label>
+                <input
+                  type="text"
+                  name="patient"
+                  value={formData.patient}
+                  onChange={handleChange}
+                  className="w-full px-4 py-2.5 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition duration-200"
+                  required
+                  placeholder="John Doe"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Mobile Number</label>
+                <input
+                  type="tel"
+                  name="mobile"
+                  value={formData.mobile}
+                  onChange={handleChange}
+                  className="w-full px-4 py-2.5 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition duration-200"
+                  required
+                  pattern="[0-9]{10}"
+                  placeholder="9876543210"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Date of Birth (Optional)</label>
+                <input
+                  type="text"
+                  name='dob'
+                  className="w-full px-4 py-2.5 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition duration-200"
+                  placeholder='age'
+                  value={formData.dob}
+                  // onChange={(date) => handleChange({ target: { name: "dob", value: date ? date.toISOString().split('T')[0] : '' } })}
+                  onChange={handleChange}
+                />
+                {/* <DatePicker
                 selected={formData.dob ? new Date(formData.dob) : null}
                 onChange={(date) => handleChange({ target: { name: "dob", value: date ? date.toISOString().split('T')[0] : '' } })}
                 className="w-full px-4 py-2.5 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition duration-200"
@@ -212,78 +260,96 @@ function BookAppointment() {
                 maxDate={new Date()}
                 showYearDropdown
                 dropdownMode="select"
-              />
+              /> */}
+              </div>
+            </div>
+
+            {/* Hospital & Doctor Selection */}
+            <div className="space-y-4 bg-gray-50 p-5 rounded-lg">
+              <h3 className="text-lg font-medium text-gray-900 border-b pb-2">Appointment Details</h3>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Hospital</label>
+                <select
+                  name="hospitalId"
+                  value={formData.hospitalId}
+                  onChange={handleChange}
+                  className="w-full px-4 py-2.5 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition duration-200 appearance-none"
+                  required
+                  disabled={loading.hospitals}
+                >
+                  <option value="">Select Hospital</option>
+                  {hospitals.map(h => (
+                    <option key={h._id} value={h._id}>
+                      {h.name}
+                    </option>
+                  ))}
+                </select>
+                {loading.hospitals && (
+                  <div className="mt-2 text-sm text-gray-500 flex items-center">
+                    <svg className="animate-spin h-4 w-4 mr-2 text-gray-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    Loading hospitals...
+                  </div>
+                )}
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Doctor</label>
+                <select
+                  name="doctorId"
+                  value={formData.doctorId}
+                  onChange={handleChange}
+                  className="w-full px-4 py-2.5 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition duration-200 appearance-none"
+                  required
+                  disabled={!formData.hospitalId || loading.doctors}
+                >
+                  <option value="">Select Doctor</option>
+                  {doctors?.map(doctor => (
+                    <option key={doctor._id} value={doctor._id}>
+                      {doctor.name} ({doctor.specialty})
+                    </option>
+                  ))}
+                </select>
+                {loading.doctors && (
+                  <div className="mt-2 text-sm text-gray-500 flex items-center">
+                    <svg className="animate-spin h-4 w-4 mr-2 text-gray-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    Loading doctors...
+                  </div>
+                )}
+              </div>
             </div>
           </div>
 
-          {/* Hospital & Doctor Selection */}
-          <div className="space-y-4 bg-gray-50 p-5 rounded-lg">
-            <h3 className="text-lg font-medium text-gray-900 border-b pb-2">Appointment Details</h3>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Hospital</label>
-              <select
-                name="hospitalId"
-                value={formData.hospitalId}
-                onChange={handleChange}
-                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition duration-200 appearance-none"
-                required
-                disabled={loading.hospitals}
-              >
-                <option value="">Select Hospital</option>
-                {hospitals.map(h => (
-                  <option key={h._id} value={h._id}>
-                    {h.name}
-                  </option>
-                ))}
-              </select>
-              {loading.hospitals && (
-                <div className="mt-2 text-sm text-gray-500 flex items-center">
-                  <svg className="animate-spin h-4 w-4 mr-2 text-gray-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                  </svg>
-                  Loading hospitals...
-                </div>
-              )}
+          <>
+            <div
+              onClick={() => { setSelectDate(today); }}
+              className={`flex justify-center items-center w-full p-3 rounded-lg text-white font-medium shadow-md transition-all duration-300 active:scale-95 focus:outline-none focus:ring-2 focus:ring-green-400 focus:ring-opacity-75 ${isTodaySelected ? 'bg-green-700 hover:bg-green-700' : 'bg-green-500 hover:bg-green-600'
+                }`}
+            >
+              Today
             </div>
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Doctor</label>
-              <select
-                name="doctorId"
-                value={formData.doctorId}
-                onChange={handleChange}
-                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition duration-200 appearance-none"
-                required
-                disabled={!formData.hospitalId || loading.doctors}
-              >
-                <option value="">Select Doctor</option>
-                {doctors?.map(doctor => (
-                  <option key={doctor._id} value={doctor._id}>
-                    {doctor.name} ({doctor.specialty})
-                  </option>
-                ))}
-              </select>
-              {loading.doctors && (
-                <div className="mt-2 text-sm text-gray-500 flex items-center">
-                  <svg className="animate-spin h-4 w-4 mr-2 text-gray-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                  </svg>
-                  Loading doctors...
-                </div>
-              )}
+            <div
+              onClick={() => { setSelectDate(tomorrowFormatted); }}
+              className={`flex justify-center items-center w-full p-3 rounded-lg text-white font-medium shadow-md transition-all duration-300 active:scale-95 focus:outline-none focus:ring-2 focus:ring-green-400 focus:ring-opacity-75 mt-2 ${isTomorrowSelected ? 'bg-green-700 hover:bg-green-700' : 'bg-green-500 hover:bg-green-600'
+                }`}
+            >
+              Tomorrow
             </div>
-          </div>
-        </div>
+          </>
 
-        {/* Date and Time Selection */}
-        <div className="bg-gray-50 p-5 rounded-lg">
+          {/* Date and Time Selection */}
+          {/* <div className="bg-gray-50 p-5 rounded-lg">
           <h3 className="text-lg font-medium text-gray-900 border-b pb-2 mb-4">Schedule Appointment</h3>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {/* Date Selection */}
+         
             <div className="space-y-2">
               <label className="block text-sm font-medium text-gray-700">
                 Appointment Date <span className="text-red-500">*</span>
@@ -359,7 +425,7 @@ function BookAppointment() {
               )}
             </div>
 
-            {/* Time Slot Selection */}
+           
             <div className="space-y-2">
               <label className="block text-sm font-medium text-gray-700">
                 Time Slot <span className="text-red-500">*</span>
@@ -406,7 +472,7 @@ function BookAppointment() {
                 </div>
               </div>
 
-              {/* Status indicators */}
+            
               <div className="min-h-5 mt-2">
                 {loading.slots ? (
                   <div className="flex items-center text-sm text-blue-600 bg-blue-50 px-3 py-1.5 rounded-md">
@@ -434,75 +500,75 @@ function BookAppointment() {
               </div>
             </div>
           </div>
-        </div>
+        </div> */}
 
-        {/* Payment Information */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 bg-gray-50 p-5 rounded-lg">
-          <h3 className="text-lg font-medium text-gray-900 border-b pb-2 col-span-full">Payment Information</h3>
+          {/* Payment Information */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 bg-gray-50 p-5 rounded-lg">
+            <h3 className="text-lg font-medium text-gray-900 border-b pb-2 col-span-full">Payment Information</h3>
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Booking Amount</label>
-            <div className="relative">
-              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <span className="text-gray-500">₹</span>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Booking Amount</label>
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <span className="text-gray-500">₹</span>
+                </div>
+                <input
+                  type="number"
+                  name="booking_amount"
+                  value={formData.booking_amount}
+                  onChange={handleChange}
+                  className="w-full pl-8 pr-4 py-2.5 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition duration-200"
+                  required
+                  min="0"
+                  step="0.01"
+                />
               </div>
-              <input
-                type="number"
-                name="booking_amount"
-                value={formData.booking_amount}
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Payment Status</label>
+              <select
+                name="paymentStatus"
+                value={formData.paymentStatus}
                 onChange={handleChange}
-                className="w-full pl-8 pr-4 py-2.5 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition duration-200"
+                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition duration-200 appearance-none"
                 required
-                min="0"
-                step="0.01"
-              />
+              >
+
+
+                <option value="Cash" selected>Complete (Cash)</option>
+                <option value="online">Complete (Online)</option>
+
+              </select>
             </div>
           </div>
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Payment Status</label>
-            <select
-              name="paymentStatus"
-              value={formData.paymentStatus}
-              onChange={handleChange}
-              className="w-full px-4 py-2.5 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition duration-200 appearance-none"
-              required
+          <div className="flex justify-end pt-4">
+            <button
+              type="submit"
+              className="px-6 py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition duration-200 shadow-md hover:shadow-lg disabled:opacity-70 disabled:cursor-not-allowed"
+              disabled={Object.values(loading).some(v => v)}
             >
-              
-            
-              <option value="Cash" selected>Complete (Cash)</option>
-              <option value="online">Complete (Online)</option>
-            
-            </select>
+              {Object.values(loading).some(v => v) ? (
+                <span className="flex items-center">
+                  <svg className="animate-spin -ml-1 mr-2 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                  Processing...
+                </span>
+              ) : (
+                <span className="flex items-center">
+                  <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z"></path>
+                  </svg>
+                  Book Appointment
+                </span>
+              )}
+            </button>
           </div>
-        </div>
-
-        <div className="flex justify-end pt-4">
-          <button
-            type="submit"
-            className="px-6 py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition duration-200 shadow-md hover:shadow-lg disabled:opacity-70 disabled:cursor-not-allowed"
-            disabled={Object.values(loading).some(v => v)}
-          >
-            {Object.values(loading).some(v => v) ? (
-              <span className="flex items-center">
-                <svg className="animate-spin -ml-1 mr-2 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                </svg>
-                Processing...
-              </span>
-            ) : (
-              <span className="flex items-center">
-                <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z"></path>
-                </svg>
-                Book Appointment
-              </span>
-            )}
-          </button>
-        </div>
-      </form>
-    </div>
+        </form>
+      </div>
     </Dashboard>
   )
 }

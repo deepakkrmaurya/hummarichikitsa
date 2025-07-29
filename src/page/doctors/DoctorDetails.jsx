@@ -152,6 +152,8 @@ const DoctorDetailsPage = () => {
               <div className="mt-6">
                 <h3 className="text-lg font-medium mb-2" style={{ color: colors.text }}>About</h3>
                 <p className="text-gray-600" style={{ color: colors.lightText }}>{doctor?.bio}</p>
+                <h3 className="text-lg font-medium mb-2" style={{ color: colors.text }}>Email</h3>
+                <p className="text-green-600" >{doctor?.email}</p>
               </div>
               
               <div className="mt-6">

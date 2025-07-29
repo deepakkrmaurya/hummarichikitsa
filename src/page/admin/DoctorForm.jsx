@@ -223,6 +223,7 @@ const DoctorForm = ({ doctorData }) => {
       await dispatch(RegisterDoctor(formData));
       setSubmitSuccess(true);
       setTimeout(() => setSubmitSuccess(false), 3000);
+      navigate(-1)
     } catch (error) {
       console.error("Error submitting form:", error);
     } finally {
@@ -340,7 +341,7 @@ const DoctorForm = ({ doctorData }) => {
                   <FaBriefcaseMedical className="mr-2" />
                   Professional Details
                 </motion.button>
-                <motion.button
+                {/* <motion.button
                   whileHover={{ y: -2 }}
                   whileTap={{ scale: 0.98 }}
                   onClick={() => setActiveTab('availability')}
@@ -351,7 +352,7 @@ const DoctorForm = ({ doctorData }) => {
                 >
                   <FaCalendarCheck className="mr-2" />
                   Availability
-                </motion.button>
+                </motion.button> */}
               </nav>
             </div>
 
@@ -684,7 +685,7 @@ const DoctorForm = ({ doctorData }) => {
                   </motion.div>
                 )}
 
-                {activeTab === 'availability' && (
+                {/* {activeTab === 'availability' && (
                   <motion.div
                     key="availability"
                     initial={{ opacity: 0, x: -20 }}
@@ -963,7 +964,7 @@ const DoctorForm = ({ doctorData }) => {
                       </div>
                     </div>
                   </motion.div>
-                )}
+                )} */}
               </AnimatePresence>
 
               {/* Form Actions */}

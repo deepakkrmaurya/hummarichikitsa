@@ -18,6 +18,27 @@ import { useRef } from 'react';
 import axiosInstance from '../Helper/axiosInstance';
 
 const DoctorDetailPage = () => {
+    const today = new Date().toISOString().split('T')[0];
+
+    // Tomorrow's Date
+    const tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    const tomorrowFormatted = tomorrow.toISOString().split('T')[0];
+
+    const [selectDate, setSelectDate] = useState(null);
+
+    // Check which button is selected
+    const isTodaySelected = selectDate === today;
+    const isTomorrowSelected = selectDate === tomorrowFormatted;
+
+
+
+
+
+
+
+
+
     const rzpInstanceRef = useRef(null);
     const [currentMonth, setCurrentMonth] = useState(new Date());
     const dispatch = useDispatch();
@@ -26,15 +47,15 @@ const DoctorDetailPage = () => {
     const { doctorId } = useParams();
     const navigate = useNavigate();
     const getDaysInMonth = (date) => {
-  const year = date.getFullYear();
-  const month = date.getMonth();
-  const daysInMonth = new Date(year, month + 1, 0).getDate();
-  
-  return Array.from({ length: daysInMonth }, (_, i) => {
-    const day = i + 1;
-    return new Date(year, month, day);
-  });
-};
+        const year = date.getFullYear();
+        const month = date.getMonth();
+        const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+        return Array.from({ length: daysInMonth }, (_, i) => {
+            const day = i + 1;
+            return new Date(year, month, day);
+        });
+    };
     // Redux state
     const hospitals = useSelector((state) => state.hospitals.hospitals);
     const { doctors, loading: doctorsLoading } = useSelector((state) => state.doctors);
@@ -96,10 +117,10 @@ const DoctorDetailPage = () => {
             return;
         }
 
-        if (!selectedDate || !selectedSlot) {
-            toast.error('Please select a date and time slot');
-            return;
-        }
+        // if (!selectedDate || !selectedSlot) {
+        //     toast.error('Please select a date and time slot');
+        //     return;
+        // }
 
         if (!patient) {
             toast.error('Patient name is required');
@@ -118,112 +139,112 @@ const DoctorDetailPage = () => {
             patientId: currentUser?._id,
             doctorId: doctor?._id,
             hospitalId: hospital?._id,
-            date: selectedDate,
-            slot: selectedSlot,
+            // date: selectedDate,
+            date: selectDate,
+            // slot: selectedSlot,
             amount: doctor?.consultationFee,
             booking_amount: doctor?.consultationFee,
             createdAt: new Date().toISOString()
         };
 
         const res = await dispatch(AppointmentCreate(newAppointment));
-         
+
         if (res?.payload?.success) {
-            const orderData = res?.payload;
-            if (!orderData || !orderData.orderId) {
-                console.error('Invalid order data:', orderData);
-                navigate('/');
+            if (res.payload?.savedAppointment) {
+
+                navigate(`/confirmation/${res.payload?.savedAppointment?._id}`);
                 return;
             }
 
-            const loadRazorpayScript = () => {
-                return new Promise((resolve) => {
-                    if (window.Razorpay) {
-                        resolve(true);
-                        return;
-                    }
+            // const loadRazorpayScript = () => {
+            //     return new Promise((resolve) => {
+            //         if (window.Razorpay) {
+            //             resolve(true);
+            //             return;
+            //         }
 
-                    const script = document.createElement('script');
-                    script.src = 'https://checkout.razorpay.com/v1/checkout.js';
-                    script.onload = () => {
-                        console.log('Razorpay SDK loaded successfully');
-                        resolve(true);
-                    };
-                    script.onerror = () => {
-                        console.error('Failed to load Razorpay SDK');
-                        resolve(false);
-                    };
-                    document.body.appendChild(script);
-                });
-            };
+            //         const script = document.createElement('script');
+            //         script.src = 'https://checkout.razorpay.com/v1/checkout.js';
+            //         script.onload = () => {
+            //             console.log('Razorpay SDK loaded successfully');
+            //             resolve(true);
+            //         };
+            //         script.onerror = () => {
+            //             console.error('Failed to load Razorpay SDK');
+            //             resolve(false);
+            //         };
+            //         document.body.appendChild(script);
+            //     });
+            // };
 
-            const displayRazorpay = async () => {
-                try {
-                    const res = await loadRazorpayScript();
-                    if (!res) {
-                        alert('Razorpay SDK failed to load. Are you online?');
-                        return;
-                    }
+            // const displayRazorpay = async () => {
+            //     try {
+            //         const res = await loadRazorpayScript();
+            //         if (!res) {
+            //             alert('Razorpay SDK failed to load. Are you online?');
+            //             return;
+            //         }
 
-                    const options = {
-                        key: 'rzp_test_jzJYbDuU9u8Jnh',
-                        amount: orderData.amount,
-                        currency: orderData.currency || 'INR',
-                        name: 'Appointment Booking',
-                        description: 'Service Appointment',
-                        order_id: orderData.orderId,
-                        handler: async function (response) {
-                            try {
-                                const result = await axiosInstance.post('/appointment/verify', {
-                                    razorpay_order_id: response.razorpay_order_id,
-                                    razorpay_payment_id: response.razorpay_payment_id,
-                                    razorpay_signature: response.razorpay_signature
-                                });
+            //         const options = {
+            //             key: 'rzp_test_jzJYbDuU9u8Jnh',
+            //             amount: orderData.amount,
+            //             currency: orderData.currency || 'INR',
+            //             name: 'Appointment Booking',
+            //             description: 'Service Appointment',
+            //             order_id: orderData.orderId,
+            //             handler: async function (response) {
+            //                 try {
+            //                     const result = await axiosInstance.post('/appointment/verify', {
+            //                         razorpay_order_id: response.razorpay_order_id,
+            //                         razorpay_payment_id: response.razorpay_payment_id,
+            //                         razorpay_signature: response.razorpay_signature
+            //                     });
 
-                                const res = result.data;
+            //                     const res = result.data;
 
-                                if (res?.success) {
-                                    navigate(`/confirmation/${res?.appointment?._id}`);
-                                } else {
-                                    alert('Payment verification failed');
-                                }
-                            } catch (error) {
-                                console.error('Verification error:', error);
-                                alert('Payment verification error. Please contact support.');
-                            }
-                        },
-                        prefill: {
-                            name: orderData.customerName || '',
-                            email: orderData.customerEmail || '',
-                            contact: orderData.customerPhone || ''
-                        },
-                        theme: {
-                            color: '#3399c1'
-                        },
-                        modal: {
-                            ondismiss: function () {
-                                alert('Payment was not completed');
-                                navigate('/');
-                            }
-                        }
-                    };
+            //                     if (res?.success) {
+            //                         navigate(`/confirmation/${res?.appointment?._id}`);
+            //                     } else {
+            //                         alert('Payment verification failed');
+            //                     }
+            //                 } catch (error) {
+            //                     console.error('Verification error:', error);
+            //                     alert('Payment verification error. Please contact support.');
+            //                 }
+            //             },
+            //             prefill: {
+            //                 name: orderData.customerName || '',
+            //                 email: orderData.customerEmail || '',
+            //                 contact: orderData.customerPhone || ''
+            //             },
+            //             theme: {
+            //                 color: '#3399c1'
+            //             },
+            //             modal: {
+            //                 ondismiss: function () {
+            //                     alert('Payment was not completed');
+            //                     navigate('/');
+            //                 }
+            //             }
+            //         };
 
-                    rzpInstanceRef.current = new window.Razorpay(options);
-                    rzpInstanceRef.current.open();
+            //         rzpInstanceRef.current = new window.Razorpay(options);
+            //         rzpInstanceRef.current.open();
 
-                } catch (error) {
-                    console.error('Payment processing error:', error);
-                    alert('Error processing payment. Please try again.');
-                    navigate('/');
-                }
-            };
+            //     } catch (error) {
+            //         console.error('Payment processing error:', error);
+            //         alert('Error processing payment. Please try again.');
+            //         navigate('/');
+            //     }
+            // };
 
-            displayRazorpay();
+            // displayRazorpay();
 
-            return () => {
-                if (rzpInstanceRef.current) {
-                    rzpInstanceRef.current.close();
-                }
-            };
+            // return () => {
+            //     if (rzpInstanceRef.current) {
+            //         rzpInstanceRef.current.close();
+            //     }
+            // };
         }
     };
 
@@ -360,126 +381,143 @@ const DoctorDetailPage = () => {
                                 </label>
 
                                 <div className="bg-white rounded-lg border border-gray-100 shadow-[0px_2px_8px_rgba(0,0,0,0.05)] overflow-hidden">
-  {/* Month Navigation */}
-  <div className="flex justify-between items-center p-3 bg-gradient-to-r from-teal-50 to-teal-50/30">
-    <button
-      className="p-1.5 rounded-lg hover:bg-white/50 transition"
-      onClick={() => {
-        const prevMonth = new Date(currentMonth);
-        prevMonth.setMonth(prevMonth.getMonth() - 1);
-        setCurrentMonth(prevMonth);
-      }}
-    >
-      <ChevronLeft className="h-5 w-5 text-teal-600" />
-    </button>
-    <h3 className="font-semibold text-teal-800">
-      {currentMonth.toLocaleDateString('en-US', {
-        month: 'long',
-        year: 'numeric'
-      })}
-    </h3>
-    <button
-      className="p-1.5 rounded-lg hover:bg-white/50 transition"
-      onClick={() => {
-        const nextMonth = new Date(currentMonth);
-        nextMonth.setMonth(nextMonth.getMonth() + 1);
-        setCurrentMonth(nextMonth);
-      }}
-    >
-      <ChevronRight className="h-5 w-5 text-teal-600" />
-    </button>
-  </div>
+                                    {/* Month Navigation */}
+                                    {/* <div className="flex justify-between items-center p-3 bg-gradient-to-r from-teal-50 to-teal-50/30">
+                                        <button
+                                            className="p-1.5 rounded-lg hover:bg-white/50 transition"
+                                            onClick={() => {
+                                                const prevMonth = new Date(currentMonth);
+                                                prevMonth.setMonth(prevMonth.getMonth() - 1);
+                                                setCurrentMonth(prevMonth);
+                                            }}
+                                        >
+                                            <ChevronLeft className="h-5 w-5 text-teal-600" />
+                                        </button>
+                                        <h3 className="font-semibold text-teal-800">
+                                            {currentMonth.toLocaleDateString('en-US', {
+                                                month: 'long',
+                                                year: 'numeric'
+                                            })}
+                                        </h3>
+                                        <button
+                                            className="p-1.5 rounded-lg hover:bg-white/50 transition"
+                                            onClick={() => {
+                                                const nextMonth = new Date(currentMonth);
+                                                nextMonth.setMonth(nextMonth.getMonth() + 1);
+                                                setCurrentMonth(nextMonth);
+                                            }}
+                                        >
+                                            <ChevronRight className="h-5 w-5 text-teal-600" />
+                                        </button>
+                                    </div> */}
 
-  {/* Day Headers */}
-  <div className="grid grid-cols-7 px-2 pt-2">
-    {['S', 'M', 'T', 'W', 'T', 'F', 'S'].map((day) => (
-      <div key={day} className="text-center text-xs font-medium text-gray-400 py-2">
-        {day}
-      </div>
-    ))}
-  </div>
+                                    {/* Day Headers */}
+                                    {/* <div className="grid grid-cols-7 px-2 pt-2">
+                                        {['S', 'M', 'T', 'W', 'T', 'F', 'S'].map((day) => (
+                                            <div key={day} className="text-center text-xs font-medium text-gray-400 py-2">
+                                                {day}
+                                            </div>
+                                        ))}
+                                    </div> */}
 
-  {/* Dates Grid */}
-  <div className="grid grid-cols-7 p-2">
-    {getDaysInMonth(currentMonth).map((date) => {
-      const day = date.getDate();
-      const dateString = date.toISOString().split('T')[0];
-      const slotData = doctor?.availableSlots?.find(s => s.date === dateString);
-      const isSelected = selectedDate === dateString;
-      const isToday = isSameDay(new Date(), date);
-      const isDisabled = isDisabledDate(dateString) || !slotData;
+                                    {/* Dates Grid */}
+                                    {/* <div className="grid grid-cols-7 p-2">
+                                        {getDaysInMonth(currentMonth).map((date) => {
+                                            const day = date.getDate();
+                                            const dateString = date.toISOString().split('T')[0];
+                                            const slotData = doctor?.availableSlots?.find(s => s.date === dateString);
+                                            const isSelected = selectedDate === dateString;
+                                            const isToday = isSameDay(new Date(), date);
+                                            const isDisabled = isDisabledDate(dateString) || !slotData;
 
-      return (
-        <button
-          key={dateString}
-          onClick={() => {
-            if (!isDisabled) {
-              setSelectedDate(dateString);
-              setSelectedSlot('');
-            }
-          }}
-          disabled={isDisabled}
-          className={`
+                                            return (
+                                                <button
+                                                    key={dateString}
+                                                    onClick={() => {
+                                                        if (!isDisabled) {
+                                                            setSelectedDate(dateString);
+                                                            setSelectedSlot('');
+                                                        }
+                                                    }}
+                                                    disabled={isDisabled}
+                                                    className={`
             relative h-12 flex flex-col items-center justify-center
             transition-all duration-200
             ${isSelected
-              ? 'bg-teal-600 text-white rounded-xl'
-              : isDisabled
-                ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                : 'hover:bg-teal-50/50 rounded-lg'
-            }
+                                                            ? 'bg-teal-600 text-white rounded-xl'
+                                                            : isDisabled
+                                                                ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                                                                : 'hover:bg-teal-50/50 rounded-lg'
+                                                        }
             ${isToday && !isSelected && !isDisabled ? 'border border-teal-300' : ''}
           `}
-        >
-          <span className={`
+                                                >
+                                                    <span className={`
             text-sm font-medium
             ${isSelected ? 'text-white' :
-              isDisabled ? 'text-gray-400' :
-                isToday ? 'text-teal-600' : 'text-gray-700'}
+                                                            isDisabled ? 'text-gray-400' :
+                                                                isToday ? 'text-teal-600' : 'text-gray-700'}
           `}>
-            {day}
-          </span>
+                                                        {day}
+                                                    </span>
 
-          {slotData?.slots?.length > 0 && !isDisabled && (
-            <span className={`
+                                                    {slotData?.slots?.length > 0 && !isDisabled && (
+                                                        <span className={`
               absolute bottom-2 w-1.5 h-1.5 rounded-full
               ${isSelected ? 'bg-white/90' : 'bg-teal-500'}
             `} />
-          )}
+                                                    )}
 
-          {isDisabled && (
-            <div className="absolute inset-0 bg-white bg-opacity-70 rounded-lg flex items-center justify-center">
-              <span className="text-xs text-gray-500">{day}</span>
-            </div>
-          )}
-        </button>
-      );
-    })}
-  </div>
+                                                    {isDisabled && (
+                                                        <div className="absolute inset-0 bg-white bg-opacity-70 rounded-lg flex items-center justify-center">
+                                                            <span className="text-xs text-gray-500">{day}</span>
+                                                        </div>
+                                                    )}
+                                                </button>
+                                            );
+                                        })}
+                                    </div> */}
 
-  {/* Selected Date Card */}
-  {selectedDate && (
-    <div className="px-4 pb-3">
-      <div className="bg-teal-50/70 rounded-lg p-3 flex items-center gap-2">
-        <CalendarCheck className="h-4 w-4 text-teal-600" />
-        <span className="text-sm font-medium text-gray-700">
-          {new Date(selectedDate).toLocaleDateString('en-US', {
-            weekday: 'short',
-            month: 'short',
-            day: 'numeric'
-          })}
-        </span>
-        <span className="ml-auto text-xs bg-teal-100 text-teal-800 px-2 py-1 rounded-full">
-          {availableSlots.length} slots available
-        </span>
-      </div>
-    </div>
-  )}
-</div>
+                                    {/* Selected Date Card */}
+                                    {/* {selectedDate && (
+                                        <div className="px-4 pb-3">
+                                            <div className="bg-teal-50/70 rounded-lg p-3 flex items-center gap-2">
+                                                <CalendarCheck className="h-4 w-4 text-teal-600" />
+                                                <span className="text-sm font-medium text-gray-700">
+                                                    {new Date(selectedDate).toLocaleDateString('en-US', {
+                                                        weekday: 'short',
+                                                        month: 'short',
+                                                        day: 'numeric'
+                                                    })}
+                                                </span>
+                                                <span className="ml-auto text-xs bg-teal-100 text-teal-800 px-2 py-1 rounded-full">
+                                                    {availableSlots.length} slots available
+                                                </span>
+                                            </div>
+                                        </div>
+                                    )} */}
+                                    <>
+                                        <button
+                                            onClick={() => { setSelectDate(today); }}
+                                            className={`flex justify-center items-center w-full p-3 rounded-lg text-white font-medium shadow-md transition-all duration-300 active:scale-95 focus:outline-none focus:ring-2 focus:ring-green-400 focus:ring-opacity-75 ${isTodaySelected ? 'bg-green-700 hover:bg-green-700' : 'bg-green-500 hover:bg-green-600'
+                                                }`}
+                                        >
+                                            Today
+                                        </button>
+
+                                        <button
+                                            onClick={() => { setSelectDate(tomorrowFormatted); }}
+                                            className={`flex justify-center items-center w-full p-3 rounded-lg text-white font-medium shadow-md transition-all duration-300 active:scale-95 focus:outline-none focus:ring-2 focus:ring-green-400 focus:ring-opacity-75 mt-2 ${isTomorrowSelected ? 'bg-green-700 hover:bg-green-700' : 'bg-green-500 hover:bg-green-600'
+                                                }`}
+                                        >
+                                            Tomorrow
+                                        </button>
+                                    </>
+                                </div>
                             </div>
 
                             {/* Time Slot Selection */}
-                            <div className="mb-8">
+                            {/* <div className="mb-8">
                                 <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-3">
                                     <Clock className="h-4 w-4 text-teal-600" />
                                     <span>Select Time Slot</span>
@@ -531,7 +569,7 @@ const DoctorDetailPage = () => {
                                         <p className="text-sm text-gray-500">Please select a date first</p>
                                     </div>
                                 )}
-                            </div>
+                            </div> */}
 
                             {/* Patient Information Form */}
                             <div className="space-y-4 bg-white p-6 rounded-xl border border-gray-100 shadow-sm mb-6">
@@ -583,10 +621,10 @@ const DoctorDetailPage = () => {
                                 <div className="space-y-1">
                                     <label className="text-sm font-medium text-gray-700 flex items-center gap-1">
                                         <Calendar className="h-4 w-4 text-teal-600" />
-                                        Date of Birth (Optional)
+                                        Age
                                     </label>
                                     <input
-                                        type="date"
+                                        type="text"
                                         value={dob}
                                         onChange={(e) => setDob(e.target.value)}
                                         className="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:border-teal-500 focus:ring-2 focus:ring-teal-200 transition-all text-gray-700"
@@ -613,9 +651,10 @@ const DoctorDetailPage = () => {
                             {/* Book Button */}
                             <button
                                 onClick={handleBooking}
-                                disabled={!selectedDate || !selectedSlot || !patient || !mobile || mobile.length !== 10}
+                                // !selectedDate || !selectedSlot ||
+                                disabled={!patient || !mobile || mobile.length !== 10}
                                 className={`w-full py-3 rounded-lg font-medium flex items-center justify-center transition
-                                    ${!selectedDate || !selectedSlot || !patient || !mobile || mobile.length !== 10
+                                    ${!patient || !mobile || mobile.length !== 10
                                         ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
                                         : 'bg-gradient-to-r from-teal-600 to-teal-500 text-white hover:from-teal-700 hover:to-teal-600 shadow-md'
                                     }

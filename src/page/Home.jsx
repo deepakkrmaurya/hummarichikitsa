@@ -139,7 +139,7 @@ const Home = () => {
                       <div className="p-5">
                         <div className="flex items-start space-x-4">
                           <img
-                            src={doctor?.image || 'https://img.icons8.com/fluency/96/000000/doctor-male.png'}
+                            src={doctor?.image || 'https://cdn-icons-png.flaticon.com/512/6596/6596121.png'}
                             alt={doctor?.name}
                             className="w-14 h-14 rounded-full object-cover border-2 border-blue-100"
                           />
