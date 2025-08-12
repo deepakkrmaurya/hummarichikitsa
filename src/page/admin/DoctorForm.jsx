@@ -6,7 +6,7 @@ import { RegisterDoctor } from '../../Redux/doctorSlice';
 import { useNavigate, useParams } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FaArrowLeft, FaCalendarAlt, FaClock, FaStar, FaUserMd, FaGraduationCap, FaMoneyBillWave, FaCheckCircle, FaPlus, FaTimes, FaUser, FaEnvelope, FaLock, FaStethoscope, FaBriefcaseMedical, FaCalendarCheck } from 'react-icons/fa';
-
+import avatar from '../../../src/assets/logo-def.png';
 const DoctorForm = ({ doctorData }) => {
   // Professional healthcare color palette
   const colors = {
@@ -39,6 +39,7 @@ const DoctorForm = ({ doctorData }) => {
     experience: 0,
     photo: '',
     bio: '',
+    gender: '',
     rating: 0,
     consultationFee: 0,
     availableSlots: [],
@@ -55,10 +56,22 @@ const DoctorForm = ({ doctorData }) => {
   const [recurringSlots, setRecurringSlots] = useState([]);
   const [submitSuccess, setSubmitSuccess] = useState(false);
 
-  const specialties = [
-    "Cardiology", "Neurology", "Orthopedics", "Pediatrics",
+  // const specialties = [
+  //   "Cardiology", "Neurology", "Orthopedics", "Pediatrics",
+  //   "Dermatology", "Oncology", "Psychiatry", "General Medicine"
+  // ];
+
+  const [newSpecialty, setNewSpecialty] = useState('');
+  const [specialties, setSpecialties] = useState([
+      "Cardiology", "Neurology", "Orthopedics", "Pediatrics",
     "Dermatology", "Oncology", "Psychiatry", "General Medicine"
-  ];
+  ]);
+  const handleAddSpecialty = () => {
+    if (newSpecialty.trim() && !specialties.includes(newSpecialty)) {
+      setSpecialties([...specialties, newSpecialty.trim()]);
+      setNewSpecialty('');
+    }
+  };
 
   const timeSlots = [
     '9:00 AM', '10:00 AM', '11:00 AM', '12:00 PM',
@@ -197,7 +210,7 @@ const DoctorForm = ({ doctorData }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
-    
+
     const formData = new FormData();
     formData.append('id', doctor.id);
     formData.append('hospitalId', doctor.hospitalId);
@@ -212,7 +225,8 @@ const DoctorForm = ({ doctorData }) => {
     formData.append('consultationFee', doctor.consultationFee.toString());
     formData.append('status', doctor.status);
     formData.append('photo', doctor.photo);
-    
+    formData.append('gender', doctor.gender);
+
     if (doctor.availableSlots && Array.isArray(doctor.availableSlots)) {
       doctor.availableSlots.forEach((slot, index) => {
         formData.append(`availableSlots[${index}]`, JSON.stringify(slot));
@@ -220,6 +234,7 @@ const DoctorForm = ({ doctorData }) => {
     }
 
     try {
+
       await dispatch(RegisterDoctor(formData));
       setSubmitSuccess(true);
       setTimeout(() => setSubmitSuccess(false), 3000);
@@ -277,20 +292,20 @@ const DoctorForm = ({ doctorData }) => {
           </AnimatePresence>
 
           {/* Form Container */}
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.4 }}
-            className="bg-white rounded-xl shadow-lg overflow-hidden border" 
-            style={{ 
+            className="bg-white rounded-xl shadow-lg overflow-hidden border"
+            style={{
               borderColor: colors.border,
               boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)'
             }}
           >
             {/* Form Header */}
-            <div 
-              className="px-6 py-4 flex justify-between items-center" 
-              style={{ 
+            <div
+              className="px-6 py-4 flex justify-between items-center"
+              style={{
                 backgroundColor: '#2B6CB0',
                 backgroundImage: ''
               }}
@@ -304,7 +319,7 @@ const DoctorForm = ({ doctorData }) => {
                 </p>
               </div>
               <motion.button
-                onClick={()=>navigate(-1)}
+                onClick={() => navigate(-1)}
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 className=" bg-opacity-20 hover:bg-opacity-30 text-white px-4 py-2 rounded-lg text-sm font-medium transition duration-200 flex items-center"
@@ -375,17 +390,17 @@ const DoctorForm = ({ doctorData }) => {
                           Profile Photo
                         </label>
                         <div className="flex items-center">
-                          <motion.div 
+                          <motion.div
                             whileHover={{ scale: 1.03 }}
                             className="relative"
                           >
                             <img
                               className="h-40 w-40 rounded-full object-cover border-4 shadow-md"
-                              style={{ 
+                              style={{
                                 borderColor: colors.primary,
                                 boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)'
                               }}
-                              src={previewImage || 'https://via.placeholder.com/150'}
+                              src={previewImage || avatar}
                               alt="profile"
                             />
                             <input
@@ -400,7 +415,7 @@ const DoctorForm = ({ doctorData }) => {
                               whileTap={{ scale: 0.9 }}
                               htmlFor="file"
                               className="absolute bottom-0 right-0 bg-white p-2 rounded-full shadow-sm cursor-pointer"
-                              style={{ 
+                              style={{
                                 color: colors.primary,
                                 boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)'
                               }}
@@ -428,10 +443,10 @@ const DoctorForm = ({ doctorData }) => {
                               value={doctor.name}
                               onChange={handleChange}
                               className="pl-10 w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:border-transparent"
-                              style={{ 
+                              style={{
                                 borderColor: colors.border,
                                 backgroundColor: colors.inputBg,
-                                focusRing: colors.primary 
+                                focusRing: colors.primary
                               }}
                               placeholder="Dr. Full Name"
                               required
@@ -455,10 +470,10 @@ const DoctorForm = ({ doctorData }) => {
                                 value={doctor.email}
                                 onChange={handleChange}
                                 className="pl-10 w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:border-transparent"
-                                style={{ 
+                                style={{
                                   borderColor: colors.border,
                                   backgroundColor: colors.inputBg,
-                                  focusRing: colors.primary 
+                                  focusRing: colors.primary
                                 }}
                                 placeholder="doctor@example.com"
                                 required
@@ -480,10 +495,10 @@ const DoctorForm = ({ doctorData }) => {
                                 value={doctor.password}
                                 onChange={handleChange}
                                 className="pl-10 w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:border-transparent"
-                                style={{ 
+                                style={{
                                   borderColor: colors.border,
                                   backgroundColor: colors.inputBg,
-                                  focusRing: colors.primary 
+                                  focusRing: colors.primary
                                 }}
                                 placeholder="••••••••"
                                 required
@@ -502,15 +517,36 @@ const DoctorForm = ({ doctorData }) => {
                             value={doctor.status}
                             onChange={handleChange}
                             className="w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:border-transparent"
-                            style={{ 
+                            style={{
                               borderColor: colors.border,
                               backgroundColor: colors.inputBg,
-                              focusRing: colors.primary 
+                              focusRing: colors.primary
                             }}
                           >
                             <option value="active">Active</option>
                             <option value="inactive">Inactive</option>
                             <option value="onleave">On Leave</option>
+                          </select>
+                        </div>
+                        <div>
+                          <label htmlFor="gender" className="block text-sm font-medium mb-1" style={{ color: colors.text }}>
+                            Gender
+                          </label>
+                          <select
+                            id="gender"
+                            name="gender"
+                            value={doctor.gender}
+                            onChange={handleChange}
+                            className="w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:border-transparent"
+                            style={{
+                              borderColor: colors.border,
+                              backgroundColor: colors.inputBg,
+                              focusRing: colors.primary
+                            }}
+                          >
+                            <option value="male">Male</option>
+                            <option value="female">Female</option>
+
                           </select>
                         </div>
 
@@ -525,10 +561,10 @@ const DoctorForm = ({ doctorData }) => {
                             value={doctor.bio}
                             onChange={handleChange}
                             className="w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:border-transparent"
-                            style={{ 
+                            style={{
                               borderColor: colors.border,
                               backgroundColor: colors.inputBg,
-                              focusRing: colors.primary 
+                              focusRing: colors.primary
                             }}
                             placeholder="Brief professional bio..."
                           />
@@ -562,10 +598,10 @@ const DoctorForm = ({ doctorData }) => {
                             value={doctor.specialty}
                             onChange={handleChange}
                             className="pl-10 w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:border-transparent"
-                            style={{ 
+                            style={{
                               borderColor: colors.border,
                               backgroundColor: colors.inputBg,
-                              focusRing: colors.primary 
+                              focusRing: colors.primary
                             }}
                             required
                           >
@@ -573,6 +609,32 @@ const DoctorForm = ({ doctorData }) => {
                               <option key={spec} value={spec}>{spec}</option>
                             ))}
                           </select>
+                        </div>
+
+                        {/* Add new specialty input */}
+                        <div className="mt-2 flex">
+                          <input
+                            type="text"
+                            value={newSpecialty}
+                            onChange={(e) => setNewSpecialty(e.target.value)}
+                            placeholder="Add new specialty"
+                            className="flex-1 px-3 py-2 border rounded-l-md shadow-sm focus:outline-none focus:ring-2 focus:border-transparent"
+                            style={{
+                              borderColor: colors.border,
+                              backgroundColor: colors.inputBg,
+                              focusRing: colors.primary
+                            }}
+                          />
+                          <motion.button
+                            whileHover={{ scale: 1.05 }}
+                            whileTap={{ scale: 0.95 }}
+                            type="button"
+                            onClick={handleAddSpecialty}
+                            disabled={!newSpecialty.trim()}
+                            className="px-3 py-2 bg-indigo-600 text-white rounded-r-md shadow-sm disabled:opacity-50"
+                          >
+                            <FaPlus />
+                          </motion.button>
                         </div>
                       </div>
 
@@ -591,10 +653,10 @@ const DoctorForm = ({ doctorData }) => {
                             value={doctor.qualification}
                             onChange={handleChange}
                             className="pl-10 w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:border-transparent"
-                            style={{ 
+                            style={{
                               borderColor: colors.border,
                               backgroundColor: colors.inputBg,
-                              focusRing: colors.primary 
+                              focusRing: colors.primary
                             }}
                             placeholder="MD, PhD, etc."
                             required
@@ -615,10 +677,10 @@ const DoctorForm = ({ doctorData }) => {
                           value={doctor.experience}
                           onChange={handleChange}
                           className="w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:border-transparent"
-                          style={{ 
+                          style={{
                             borderColor: colors.border,
                             backgroundColor: colors.inputBg,
-                            focusRing: colors.primary 
+                            focusRing: colors.primary
                           }}
                           required
                         />
@@ -640,10 +702,10 @@ const DoctorForm = ({ doctorData }) => {
                             value={doctor.consultationFee}
                             onChange={handleChange}
                             className="pl-10 w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:border-transparent"
-                            style={{ 
+                            style={{
                               borderColor: colors.border,
                               backgroundColor: colors.inputBg,
-                              focusRing: colors.primary 
+                              focusRing: colors.primary
                             }}
                             required
                           />
@@ -665,10 +727,10 @@ const DoctorForm = ({ doctorData }) => {
                             value={doctor.rating}
                             onChange={handleChange}
                             className="w-20 px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:border-transparent"
-                            style={{ 
+                            style={{
                               borderColor: colors.border,
                               backgroundColor: colors.inputBg,
-                              focusRing: colors.primary 
+                              focusRing: colors.primary
                             }}
                           />
                           <div className="ml-3 flex">
@@ -975,7 +1037,7 @@ const DoctorForm = ({ doctorData }) => {
                   type="button"
                   onClick={() => setActiveTab(activeTab === 'basic' ? 'basic' : activeTab === 'professional' ? 'basic' : 'professional')}
                   className="px-4 py-2 border rounded-md shadow-sm text-sm font-medium flex items-center"
-                  style={{ 
+                  style={{
                     borderColor: colors.border,
                     color: colors.text,
                     backgroundColor: colors.inputBg
@@ -992,7 +1054,7 @@ const DoctorForm = ({ doctorData }) => {
                     type="button"
                     onClick={() => setActiveTab(activeTab === 'basic' ? 'professional' : 'availability')}
                     className="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white flex items-center"
-                    style={{ 
+                    style={{
                       backgroundColor: colors.primary,
                       hoverBackgroundColor: colors.secondary
                     }}
@@ -1007,7 +1069,7 @@ const DoctorForm = ({ doctorData }) => {
                     type="submit"
                     disabled={isSubmitting}
                     className="px-6 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white flex items-center"
-                    style={{ 
+                    style={{
                       backgroundColor: isSubmitting ? colors.lightText : colors.accent,
                       hoverBackgroundColor: colors.success
                     }}

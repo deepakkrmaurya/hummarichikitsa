@@ -5,7 +5,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { getAllHospital } from '../Redux/hospitalSlice';
 import { getAllDoctors } from '../Redux/doctorSlice';
 import Layout from '../components/Layout/Layout';
-
+import hospital_img from '../../src/assets/hospital_image.png';
 const HospitalListPage = () => {
     const navigate = useNavigate();
     const hospitals = useSelector((state) => state.hospitals.hospitals);
@@ -117,80 +117,82 @@ const HospitalListPage = () => {
                     {/* Results Section */}
                     <div className="grid grid-cols-1 gap-6">
                         {filteredHospitals.length > 0 ? (
-                            filteredHospitals.map((hospital) => {
-                                const doctorCount = doctors.filter(d => d?.hospitalId?._id === hospital?._id).length;
-                                
-                                return (
-                                    <div
-                                        key={hospital._id}
-                                        className="bg-white rounded-xl shadow-sm overflow-hidden border border-gray-100 hover:shadow-md transition-all duration-300"
-                                    >
-                                        <div className="md:flex">
-                                            <div className="md:w-1/3 h-64 md:h-auto">
-                                                <img
-                                                    src={hospital.image || 'https://images.unsplash.com/photo-1579684385127-1ef15d508118?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80'}
-                                                    alt={hospital.name}
-                                                    className="h-full w-full object-cover"
-                                                />
-                                            </div>
-                                            <div className="p-6 md:w-2/3">
-                                                <div className="flex flex-col md:flex-row md:justify-between md:items-start gap-4">
-                                                    <div>
-                                                        <div className="flex items-center mb-1">
-                                                            <h2 className="text-2xl font-bold text-gray-800">{hospital.name}</h2>
-                                                            <div className="ml-3 flex items-center bg-blue-50 px-3 py-1 rounded-full">
-                                                                <Star className="h-4 w-4 text-yellow-500 mr-1" />
-                                                                <span className="font-medium text-gray-800 text-sm">{hospital.rating}</span>
+                            filteredHospitals
+                                .filter(hospital => hospital.status === 'active')
+                                .map((hospital) => {
+                                    const doctorCount = doctors.filter(d => d?.hospitalId?._id === hospital?._id).length;
+
+                                    return (
+                                        <div
+                                            key={hospital._id}
+                                            className="bg-white rounded-xl shadow-sm overflow-hidden border border-gray-100 hover:shadow-md transition-all duration-300"
+                                        >
+                                            <div className="md:flex">
+                                                <div className="md:w-1/3 h-64 md:h-auto">
+                                                    <img
+                                                        src={hospital.image || hospital_img}
+                                                        alt={hospital.name}
+                                                        className="h-full w-full object-cover"
+                                                    />
+                                                </div>
+                                                <div className="p-6 md:w-2/3">
+                                                    <div className="flex flex-col md:flex-row md:justify-between md:items-start gap-4">
+                                                        <div>
+                                                            <div className="flex items-center mb-1">
+                                                                <h2 className="text-2xl font-bold text-gray-800">{hospital.name}</h2>
+                                                                <div className="ml-3 flex items-center bg-blue-50 px-3 py-1 rounded-full">
+                                                                    <Star className="h-4 w-4 text-yellow-500 mr-1" />
+                                                                    <span className="font-medium text-gray-800 text-sm">{hospital.rating}</span>
+                                                                </div>
+                                                            </div>
+
+                                                            <div className="flex items-center text-gray-600 mb-3">
+                                                                <MapPin className="h-5 w-5 text-blue-500 mr-2" />
+                                                                <span>{hospital.address}, {hospital.city}</span>
+                                                            </div>
+
+                                                            <div className="flex items-center text-gray-600 mb-4">
+                                                                <Phone className="h-5 w-5 text-blue-500 mr-2" />
+                                                                <span>{hospital.phone || 'Contact not available'}</span>
                                                             </div>
                                                         </div>
-                                                        
-                                                        <div className="flex items-center text-gray-600 mb-3">
-                                                            <MapPin className="h-5 w-5 text-blue-500 mr-2" />
-                                                            <span>{hospital.address}, {hospital.city}</span>
-                                                        </div>
-                                                        
-                                                        <div className="flex items-center text-gray-600 mb-4">
-                                                            <Phone className="h-5 w-5 text-blue-500 mr-2" />
-                                                            <span>{hospital.phone || 'Contact not available'}</span>
-                                                        </div>
                                                     </div>
-                                                </div>
 
-                                                <div className="mb-4">
-                                                    <h3 className="text-lg font-semibold text-gray-800 mb-2">Specialties Available</h3>
-                                                    <div className="flex flex-wrap gap-2">
-                                                        {hospital.specialties.slice(0, 5).map((specialty, index) => (
-                                                            <span
-                                                                key={index}
-                                                                className="px-3 py-1 bg-blue-50 text-blue-700 text-sm font-medium rounded-full"
-                                                            >
-                                                                {specialty}
-                                                            </span>
-                                                        ))}
-                                                        {hospital.specialties.length > 5 && (
-                                                            <span className="px-3 py-1 bg-gray-100 text-gray-600 text-sm font-medium rounded-full">
-                                                                +{hospital.specialties.length - 5} more
-                                                            </span>
-                                                        )}
+                                                    <div className="mb-4">
+                                                        <h3 className="text-lg font-semibold text-gray-800 mb-2">Specialties Available</h3>
+                                                        <div className="flex flex-wrap gap-2">
+                                                            {hospital.specialties.slice(0, 5).map((specialty, index) => (
+                                                                <span
+                                                                    key={index}
+                                                                    className="px-3 py-1 bg-blue-50 text-blue-700 text-sm font-medium rounded-full"
+                                                                >
+                                                                    {specialty}
+                                                                </span>
+                                                            ))}
+                                                            {hospital.specialties.length > 5 && (
+                                                                <span className="px-3 py-1 bg-gray-100 text-gray-600 text-sm font-medium rounded-full">
+                                                                    +{hospital.specialties.length - 5} more
+                                                                </span>
+                                                            )}
+                                                        </div>
                                                     </div>
-                                                </div>
 
-                                                <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mt-6">
-                                                    <div className="text-gray-700">
-                                                        <span className="font-semibold text-gray-800">{doctorCount}</span> {doctorCount === 1 ? 'Doctor' : 'Doctors'} available
+                                                    <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mt-6">
+                                                        <div className="text-gray-700">
+                                                            <span className="font-semibold text-gray-800">{doctorCount}</span> {doctorCount === 1 ? 'Doctor' : 'Doctors'} available
+                                                        </div>
+                                                        <button
+                                                            onClick={() => navigate(`/hospitals/${hospital._id}/doctors`)}
+                                                            className="flex items-center justify-center bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg transition"
+                                                        >
+                                                            View Doctors <ChevronRight className="ml-2 h-4 w-4" />
+                                                        </button>
                                                     </div>
-                                                    <button
-                                                        onClick={() => navigate(`/hospitals/${hospital._id}/doctors`)}
-                                                        className="flex items-center justify-center bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg transition"
-                                                    >
-                                                        View Doctors <ChevronRight className="ml-2 h-4 w-4" />
-                                                    </button>
                                                 </div>
                                             </div>
                                         </div>
-                                    </div>
-                                );
-                            })
+                                    );
+                                })
                         ) : (
                             <div className="bg-white rounded-xl p-8 text-center shadow-sm border border-gray-100">
                                 <div className="mx-auto w-24 h-24 bg-blue-50 rounded-full flex items-center justify-center mb-6">

@@ -33,6 +33,7 @@ import { useSelector } from 'react-redux';
 import Payment from './page/Payment';
 import UpdateDoctor from './page/admin/UpdateDoctor';
 import Schedule from './page/doctors/Schedule';
+import NotFoundPage from './components/NotFoundPage';
 function App() {
   const { isLoggedIn } = useSelector((state) => state?.auth)
 
@@ -90,7 +91,7 @@ function App() {
 
 
         {/* admin */}
-        <Route path="*" element={<div>404 Not Found</div>} />
+        <Route path="*" element={<NotFoundPage/>} />
         <Route path="/denied" element={<Denied />} />
       </Routes >
     </>

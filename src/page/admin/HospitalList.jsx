@@ -7,7 +7,7 @@ import axiosInstance from '../../Helper/axiosInstance';
 import toast from 'react-hot-toast';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Search, Plus, ChevronLeft, ChevronRight, Eye, Trash2, Filter } from 'lucide-react';
-
+import hospital_img from '../../../src/assets/hospital_image.png';
 const HospitalList = () => {
     const navigate = useNavigate();
     const dispatch = useDispatch();
@@ -255,7 +255,7 @@ const HospitalList = () => {
                                                                 <div className="h-10 w-10 flex-shrink-0 rounded-full overflow-hidden bg-gray-100 flex items-center justify-center">
                                                                     <img
                                                                         className="h-full w-full object-cover"
-                                                                        src={hospital.image || 'https://via.placeholder.com/40'}
+                                                                        src={hospital.image || hospital_img}
                                                                         alt={hospital.name}
                                                                     />
                                                                 </div>

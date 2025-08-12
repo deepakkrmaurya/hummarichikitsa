@@ -7,7 +7,8 @@ import { getAllDoctors } from '../Redux/doctorSlice';
 import Layout from '../components/Layout/Layout';
 import Skeleton from 'react-loading-skeleton';
 import 'react-loading-skeleton/dist/skeleton.css';
-
+import hospital_img from '../../src/assets/hospital_image.png';
+import avatar from '../../src/assets/logo-def.png';
 const DoctorListPage = () => {
   const navigate = useNavigate();
   const { hospitalId } = useParams();
@@ -161,7 +162,7 @@ const DoctorListPage = () => {
           <div className="flex flex-col md:flex-row items-start">
             <div className="md:w-1/4 mb-4 md:mb-0 md:mr-6">
               <img
-                src={hospital.image}
+                src={hospital.image || hospital_img}
                 alt={hospital.name}
                 className="w-full h-auto rounded-lg object-cover"
                 style={{ maxHeight: '150px' }}
@@ -266,7 +267,7 @@ const DoctorListPage = () => {
                 <div className="md:flex">
                   <div className="md:w-1/4 bg-gray-50 flex items-center justify-center p-6">
                     <img
-                      src={doctor.photo}
+                      src={doctor.photo || avatar}
                       alt={doctor.name}
                       className="w-32 h-32 md:w-40 md:h-40 rounded-full object-cover border-4 border-white shadow-md"
                       

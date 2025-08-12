@@ -3,25 +3,13 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { FaUser, FaEnvelope, FaPhone, FaLock, FaUserShield, FaHospital, FaCheckCircle, FaTimes } from 'react-icons/fa';
 import Dashboard from '../../components/Layout/Dashboard';
 import axiosInstance from '../../Helper/axiosInstance';
-import { useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import toast from 'react-hot-toast';
 
 const StaffRegistrationForm = () => {
-  // Professional healthcare color palette
-  const colors = {
-    primary: '#1976d2',       // Blue (trust, professionalism)
-    secondary: '#2196f3',     // Lighter blue
-    accent: '#4caf50',        // Green (health, success)
-    background: '#f5f9fd',    // Very light blue
-    text: '#2d3748',          // Dark gray
-    lightText: '#718096',     // Gray
-    border: '#e2e8f0',        // Light border
-    success: '#4caf50',       // Green for success states
-    warning: '#ff9800',       // Orange for warnings
-    error: '#f44336',         // Red for errors
-    cardBg: '#ffffff',        // White for cards
-    inputBg: '#f8fafc'       // Light gray for inputs
-  };
+   
+
+const navigate = useNavigate();
 
   const [formData, setFormData] = useState({
     name: '',
@@ -40,6 +28,7 @@ const StaffRegistrationForm = () => {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
+
     setFormData(prev => ({
       ...prev,
       [name]: value
@@ -50,9 +39,26 @@ const StaffRegistrationForm = () => {
     }
   };
 
+  const numberHandel = (e) => {
+    const { name, value } = e.target;
+
+    // Only allow numbers and limit to 10 digits
+    const numericValue = value.replace(/\D/g, '').slice(0, 10);
+
+    setFormData(prev => ({
+      ...prev,
+      [name]: numericValue
+    }));
+
+    // Clear error when user starts typing
+    if (errors[name]) {
+      setErrors(prev => ({ ...prev, [name]: '' }));
+    }
+  };
+
   const validate = () => {
     const newErrors = {};
-    
+
     if (!formData.name.trim()) newErrors.name = 'Full name is required';
     if (!formData.email) {
       newErrors.email = 'Email is required';
@@ -76,10 +82,10 @@ const StaffRegistrationForm = () => {
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
-   const {hospitalid}=useParams()
+  const { hospitalid } = useParams()
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     // if (!validate()) return;
 
     // setLoading(true);
@@ -88,32 +94,34 @@ const StaffRegistrationForm = () => {
 
     try {
 
-      const response = axiosInstance.post('/staff/register',{
-          name: formData.name,
-          email: formData.email,
-          password: formData.password,
-          number: formData.contactNumber,
-          hospitalId:hospitalid
-        })
+      const response = axiosInstance.post('/staff/register', {
+        name: formData.name,
+        email: formData.email,
+        password: formData.password,
+        number: formData.contactNumber,
+        hospitalId: hospitalid
+      })
 
       const data = (await response).data;
-        console.log(data)
-      if(data.success){
+      console.log(data)
+      if (data.success) {
         toast.success(data.message)
-         setFormData({
-        name: '',
-        email: '',
-        password: '',
-        confirmPassword: '',
-        role: '',
-        department: '',
-        contactNumber: ''
-      });
-      }else{
+        setFormData({
+          name: '',
+          email: '',
+          password: '',
+          confirmPassword: '',
+          role: '',
+          department: '',
+          contactNumber: ''
+        });
+        navigate(-1)
+      
+      } else {
         toast.error(data.message)
       }
-       
-     
+
+
     } catch (err) {
       console.log()
       setError(err.response.data.message || 'Registration failed. Please try again.');
@@ -123,9 +131,9 @@ const StaffRegistrationForm = () => {
   };
 
   return (
-     <Dashboard>
+    <Dashboard>
       <div className=" mx-auto my-10 p-4 rounded-xl shadow-lg bg-white">
-        <motion.div 
+        <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.4 }}
@@ -191,7 +199,7 @@ const StaffRegistrationForm = () => {
               />
             </div>
             {errors.name && (
-              <motion.p 
+              <motion.p
                 initial={{ opacity: 0, y: -5 }}
                 animate={{ opacity: 1, y: 0 }}
                 className="text-red-500 text-xs mt-1"
@@ -220,7 +228,7 @@ const StaffRegistrationForm = () => {
                 />
               </div>
               {errors.email && (
-                <motion.p 
+                <motion.p
                   initial={{ opacity: 0, y: -5 }}
                   animate={{ opacity: 1, y: 0 }}
                   className="text-red-500 text-xs mt-1"
@@ -242,13 +250,14 @@ const StaffRegistrationForm = () => {
                   type="tel"
                   name="contactNumber"
                   value={formData.contactNumber}
-                  onChange={handleChange}
+                  onChange={numberHandel}
+                  maxLength={10}
                   className={`w-full pl-10 pr-4 py-3 border ${errors.contactNumber ? 'border-red-500' : 'border-gray-300'} rounded-lg bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors`}
                   placeholder="9876543210"
                 />
               </div>
               {errors.contactNumber && (
-                <motion.p 
+                <motion.p
                   initial={{ opacity: 0, y: -5 }}
                   animate={{ opacity: 1, y: 0 }}
                   className="text-red-500 text-xs mt-1"
@@ -277,7 +286,7 @@ const StaffRegistrationForm = () => {
                 />
               </div>
               {errors.password && (
-                <motion.p 
+                <motion.p
                   initial={{ opacity: 0, y: -5 }}
                   animate={{ opacity: 1, y: 0 }}
                   className="text-red-500 text-xs mt-1"
@@ -304,7 +313,7 @@ const StaffRegistrationForm = () => {
                 />
               </div>
               {errors.confirmPassword && (
-                <motion.p 
+                <motion.p
                   initial={{ opacity: 0, y: -5 }}
                   animate={{ opacity: 1, y: 0 }}
                   className="text-red-500 text-xs mt-1"

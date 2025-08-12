@@ -13,7 +13,7 @@ import { deleteDoctor } from '../../Redux/doctorSlice';
 import { GetHospitalById } from '../../Redux/hospitalSlice';
 import { toast } from 'react-hot-toast';
 import { GetStaff, getStaffByHospitalId, StaffDelete } from '../../Redux/staffSlice';
-
+import avatar from '../../../src/assets/logo-def.png';
 const HospitalDetails = () => {
     const navigate = useNavigate();
     const [hospital, setHospital] = useState(null);
@@ -490,7 +490,7 @@ const HospitalDetails = () => {
                                                                                 <div className="w-10 h-10 rounded-full overflow-hidden bg-gray-100">
                                                                                     <img
                                                                                         className="h-full w-full object-cover"
-                                                                                        src={doc.photo || 'https://via.placeholder.com/40'}
+                                                                                        src={doc.photo || avatar}
                                                                                         alt={doc.name}
                                                                                     />
                                                                                 </div>

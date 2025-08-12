@@ -4,6 +4,7 @@ import Dashboard from '../../components/Layout/Dashboard';
 import { useDispatch } from 'react-redux';
 import { createHospital } from '../../Redux/hospitalSlice';
 import toast from 'react-hot-toast';
+import { useNavigate } from 'react-router-dom';
 
 // Default App component to make this runnable in a preview
 export default function App() {
@@ -14,6 +15,7 @@ export default function App() {
   );
 }
 const HospitalForm = () => {
+  const navigate = useNavigate()
   const [previewImage, setImagePreview] = useState("");
   const [formData, setFormData] = useState({
     name: '',
@@ -252,7 +254,11 @@ const HospitalForm = () => {
     }
 
     const res = await dispatch(createHospital(hospitalData))
-
+       if(res.payload.success){
+         setIsSubmitting(false);
+         navigate('/hospital/list')
+         
+       }
     // try {
     //   // Replace with your actual API endpoint
     //   // const response = await axios.post('/api/hospitals', formData);
@@ -284,10 +290,10 @@ const HospitalForm = () => {
     //   }
     //   setErrors(prev => ({ ...prev, general: errorMessage }));
     //   window.scrollTo({ top: 0, behavior: 'smooth' });
+    
     // } finally {
     //   setIsSubmitting(false);
     // }
-    setIsSubmitting(false);
   };
 
   // Helper to create input props

@@ -3,14 +3,30 @@ import { Calendar, Clock, User, FileText, BarChart, Settings } from 'lucide-reac
 import { useDispatch, useSelector } from 'react-redux';
 import { Link, useNavigate } from 'react-router-dom';
 import { Logout } from '../../Redux/doctorSlice';
-
+import avatar from '../../../src/assets/logo-def.png';
+import { useEffect } from 'react';
+import axiosInstance from '../../Helper/axiosInstance';
 const Dashboard = ({ children }) => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  const { isLoggedIn, role, data } = useSelector((state) => state.auth);
+  const [data,setData]=useState();
+  const { isLoggedIn } = useSelector((state) => state.auth);
   const [activeTab, setActiveTab] = useState('appointments');
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  // alert(role);
+  var role  = data?.role
+  useEffect(() => {
+    async function fetchData() {
+      try {
+        const response = await axiosInstance.get("/user/me");
+        // console.log(response.data.role);
+        setData(response.data);
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      }
+    }
+    fetchData();
+  }, []);
+
     const handleLogout = async () => {
             
            const res = await dispatch(Logout())
@@ -49,13 +65,15 @@ const Dashboard = ({ children }) => {
             <div className="p-4 sm:p-6 bg-gradient-to-r from-[rgb(43,108,176)] to-[rgb(33,88,156)] text-white">
               <div className="flex items-center">
                 <img
-                  src={'https://images.pexels.com/photos/4173239/pexels-photo-4173239.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2'}
+                  src={avatar}
                   alt={"currentUser.name"}
                   className="w-12 h-12 sm:w-16 sm:h-16 rounded-full object-cover border-2 border-white mr-3 sm:mr-4"
                 />
                 <div>
-                  <h2 className="font-semibold text-sm sm:text-lg">{data?.name}</h2>
-                  <p className="text-blue-100 text-xs sm:text-sm">{data?.role || 'Doctor'}</p>
+                  <h2 className="font-semibold text-sm sm:text-lg">{data?.user?.name}</h2>
+                  <p className="text-blue-100 text-xs sm:text-sm">{data?.user?.role || 'Doctor'}</p>
+                  <p className="text-blue-100 text-xs sm:text-sm">{data?.hospital?.name || ''}</p>
+
                 </div>
               </div>
             </div>

@@ -131,6 +131,10 @@ const DoctorDetailPage = () => {
             toast.error('Please enter a valid 10-digit mobile number');
             return;
         }
+        if (!selectDate) {
+            // toast.error('Please enter a valid 10-digit mobile number');
+            return;
+        }
 
         const newAppointment = {
             patient,
@@ -496,7 +500,7 @@ const DoctorDetailPage = () => {
                                             </div>
                                         </div>
                                     )} */}
-                                    <>
+                                    {/* <div>
                                         <button
                                             onClick={() => { setSelectDate(today); }}
                                             className={`flex justify-center items-center w-full p-3 rounded-lg text-white font-medium shadow-md transition-all duration-300 active:scale-95 focus:outline-none focus:ring-2 focus:ring-green-400 focus:ring-opacity-75 ${isTodaySelected ? 'bg-green-700 hover:bg-green-700' : 'bg-green-500 hover:bg-green-600'
@@ -512,7 +516,57 @@ const DoctorDetailPage = () => {
                                         >
                                             Tomorrow
                                         </button>
-                                    </>
+                                    </div> */}
+                                    <div className="space-y-1">
+                                        {/* Date Selection Buttons */}
+                                        <div className="flex items-center gap-2">
+                                            <button
+                                                type="button"
+                                                onClick={() => setSelectDate(today)}
+                                                className={`flex-1 py-2.5 px-4 rounded-lg font-medium transition-all duration-200 ${isTodaySelected
+                                                        ? 'bg-blue-600 text-white shadow-sm'
+                                                        : selectDate
+                                                            ? 'bg-blue-50 text-blue-600 hover:bg-blue-100 border border-blue-100'
+                                                            : 'bg-gray-100 text-gray-400 cursor-not-allowed border border-gray-200'
+                                                    }`}
+                                            >
+                                                Today
+                                            </button>
+
+                                            <button
+                                                type="button"
+                                                onClick={() => setSelectDate(tomorrowFormatted)}
+                                                className={`flex-1 py-2.5 px-4 rounded-lg font-medium transition-all duration-200 ${isTomorrowSelected
+                                                        ? 'bg-blue-600 text-white shadow-sm'
+                                                        : selectDate
+                                                            ? 'bg-blue-50 text-blue-600 hover:bg-blue-100 border border-blue-100'
+                                                            : 'bg-gray-100 text-gray-400 cursor-not-allowed border border-gray-200'
+                                                    }`}
+                                            >
+                                                Tomorrow
+                                            </button>
+                                        </div>
+
+                                        {/* Error Message */}
+                                        {!selectDate && (
+                                            <div className="flex items-center text-red-500 text-xs mt-1 ml-1">
+                                                <svg
+                                                    xmlns="http://www.w3.org/2000/svg"
+                                                    className="h-3.5 w-3.5 mr-1"
+                                                    viewBox="0 0 20 20"
+                                                    fill="currentColor"
+                                                >
+                                                    <path
+                                                        fillRule="evenodd"
+                                                        d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"
+                                                        clipRule="evenodd"
+                                                    />
+                                                </svg>
+                                                Please select a date
+                                            </div>
+                                        )}
+                                    </div>
+
                                 </div>
                             </div>
 

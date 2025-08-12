@@ -95,6 +95,7 @@ const DoctorDashboard = () => {
   };
 
   return (
+    <>
     <Dashboard>
       <div className="min-h-screen" style={{ backgroundColor: colors.background }}>
         {activeTab === 'appointments' && (
@@ -387,6 +388,7 @@ const DoctorDashboard = () => {
         )}
       </div>
     </Dashboard>
+    </>
   );
 };
 
