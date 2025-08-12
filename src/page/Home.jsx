@@ -174,7 +174,7 @@ const Home = () => {
                           </div>
                           <div className="flex items-center text-sm text-gray-600">
                             <CreditCard className="w-4 h-4 mr-2 text-blue-500" />
-                            ₹{appointment.amount} • {appointment.paymentStatus}
+                            ₹{appointment.booking_amount} • {appointment.paymentMethod}
                           </div>
                         </div>
 

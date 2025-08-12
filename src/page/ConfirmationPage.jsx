@@ -8,9 +8,10 @@ import { useDispatch, useSelector } from 'react-redux';
 import Layout from '../components/Layout/Layout';
 import Skeleton from 'react-loading-skeleton';
 import 'react-loading-skeleton/dist/skeleton.css';
-import QRCode from 'react-qr-code';
+import { jsPDF } from 'jspdf';
 import { toast } from 'react-toastify';
-
+import hospital_img from '../../src/assets/hospital_image.png';
+import avatar from '../../src/assets/logo-def.png';
 const ConfirmationPage = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -40,15 +41,7 @@ const ConfirmationPage = () => {
     return slot.replace(/(\d+)([ap]m)/i, '$1 $2').toUpperCase();
   };
 
-  // Generate QR code data
-  const qrData = JSON.stringify({
-    appointmentId: appointment?._id,
-    patientName: appointment?.patient,
-    doctorName: doctor?.name,
-    date: appointment?.date,
-    time: appointment?.slot,
-    hospital: hospital?.name
-  });
+
 
   // Fetch data on component mount
   useEffect(() => {
@@ -66,6 +59,85 @@ const ConfirmationPage = () => {
 
     fetchData();
   }, [dispatch]);
+
+
+  const hospitalLogo = 'data:image/png;base64,...';
+
+  const downloadPdfReceipt = () => {
+    const doc = new jsPDF();
+
+    // Header Section: Logo + Title
+    // if (hospitalLogo) {
+    //   doc.addImage(hospitalLogo, 'PNG', 20, 10, 30, 30); // Position and size as needed
+    // }
+    doc.setFontSize(22);
+    doc.setTextColor(13, 148, 136); // Teal color
+    doc.setFont('helvetica', 'bold');
+    doc.text('Appointment Receipt', 60, 25);
+
+    // Hospital Info Box
+    doc.setDrawColor(222, 222, 222);
+    doc.setFillColor(238, 242, 255); // Light background
+    doc.roundedRect(150, 14, 45, 20, 3, 3, 'F'); // Rounded info box
+    doc.setFontSize(11);
+    doc.setTextColor(13, 148, 136);
+    doc.text(hospital?.name || '', 153, 22);
+    doc.setFontSize(9);
+    doc.setTextColor(81, 86, 102);  // Greyish text
+    doc.text(`${hospital?.address || ''}, ${hospital?.city || ''}`, 153, 29);
+
+    // Divider Line
+    doc.setDrawColor(13, 148, 136);
+    doc.setLineWidth(0.5);
+    doc.line(20, 42, 190, 42);
+
+    // Appointment Details Section
+    doc.setFontSize(15);
+    doc.setTextColor(13, 148, 136);
+    doc.text('Appointment Details', 20, 54);
+    doc.setLineWidth(0.2);
+    doc.setDrawColor(221, 221, 221);
+    doc.line(20, 57, 80, 57);
+
+    doc.setFontSize(12);
+    doc.setTextColor(0, 0, 0);
+    doc.setFont('helvetica', 'normal');
+    doc.text(`Patient: ${appointment?.patient}`, 22, 65);
+    doc.text(`Doctor: Dr. ${doctor?.name} (${doctor?.specialty})`, 22, 72);
+    doc.text(`Date: ${formatDate(appointment?.date)}`, 22, 79);
+    doc.text(`Time: ${formatTimeSlot(appointment?.slot)}`, 22, 86);
+    doc.text(`Token No: ${appointment?.token}`, 22, 93);
+
+    // Payment Details Section
+    doc.setFontSize(15);
+    doc.setTextColor(13, 148, 136);
+    doc.text('Payment Details', 20, 110);
+    doc.setLineWidth(0.2);
+    doc.setDrawColor(221, 221, 221);
+    doc.line(20, 113, 80, 113);
+
+    doc.setFontSize(12);
+    doc.setFont('helvetica', 'normal');
+    doc.setTextColor(0, 0, 0);
+    doc.text(`Amount Paid: ₹${appointment?.amount}`, 22, 122);
+    doc.text(`Payment Method: ${appointment?.paymentMethod || 'Online Payment'}`, 22, 129);
+    doc.text(`Transaction ID: ${appointment?.razorpayPaymentId || 'N/A'}`, 22, 136);
+    doc.text(`Status: ${appointment?.status || 'N/A'}`, 22, 143);
+
+    // Add a second divider line before footer
+    doc.setDrawColor(221, 221, 221);
+    doc.line(20, 260, 190, 260);
+
+    // Footer
+    doc.setFontSize(10);
+    doc.setTextColor(100, 100, 100);
+    doc.setFont('helvetica', 'italic');
+    doc.text('Thank you for choosing our service!', 105, 270, { align: 'center' });
+
+    // Save the PDF
+    doc.save(`Receipt_${appointment?.token || 'Appointment'}.pdf`);
+    toast.success('PDF receipt downloaded');
+  };
 
   // Loading state
   if (appointmentsLoading || hospitalsLoading || doctorsLoading) {
@@ -185,7 +257,7 @@ const ConfirmationPage = () => {
               {/* Doctor Info */}
               <div className="flex items-start mb-6">
                 {
-                  doctor?.image ? (
+                  doctor?.photo ? (
                     <img
                       src={doctor?.photo}
                       alt={doctor?.name}
@@ -194,7 +266,7 @@ const ConfirmationPage = () => {
                     />
                   ) : (
                     <img
-                      src='https://static.vecteezy.com/system/resources/previews/015/412/022/non_2x/doctor-round-avatar-medicine-flat-avatar-with-male-doctor-medical-clinic-team-round-icon-medical-collection-illustration-vector.jpg'
+                      src={avatar}
                       alt={doctor?.name}
                       className="w-16 h-16 rounded-full object-cover mr-4 border-2 border-white shadow-sm"
 
@@ -233,7 +305,7 @@ const ConfirmationPage = () => {
               </div>
 
               {/* QR Code Section */}
-              <div className="border-t border-gray-100 pt-4 mb-6">
+              {/* <div className="border-t border-gray-100 pt-4 mb-6">
                 <h4 className="font-medium text-gray-800 mb-3">Check-in QR Code</h4>
                 <div className="flex flex-col items-center p-4 bg-teal-50 rounded-lg">
                   <QRCode
@@ -248,7 +320,7 @@ const ConfirmationPage = () => {
                     Show this code at the reception for quick check-in
                   </p>
                 </div>
-              </div>
+              </div> */}
 
               {/* Payment Information */}
               <div className="border-t border-gray-100 pt-4 mb-6">
@@ -273,7 +345,7 @@ const ConfirmationPage = () => {
                   <div className="bg-gray-50 p-3 rounded-lg">
                     <p className="text-sm text-gray-500">Status</p>
                     <p className="text-teal-600 font-medium">
-                      {appointment?.paymentStatus === 'Complete' ? 'Paid' : 'Pending'}
+                      {appointment?.status}
                     </p>
                   </div>
                 </div>
@@ -283,10 +355,7 @@ const ConfirmationPage = () => {
               <div className="flex flex-col sm:flex-row justify-between gap-3">
                 <button
                   className="flex items-center justify-center text-teal-600 hover:text-teal-800 transition font-medium py-2 px-4 bg-teal-50 rounded-lg hover:bg-teal-100"
-                  onClick={() => {
-                    // Implement download functionality
-                    toast.success('Receipt download started');
-                  }}
+                  onClick={downloadPdfReceipt}
                 >
                   <Download className="h-5 w-5 mr-2" />
                   Download Receipt
