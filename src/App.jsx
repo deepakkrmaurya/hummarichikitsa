@@ -34,6 +34,8 @@ import Payment from './page/Payment';
 import UpdateDoctor from './page/admin/UpdateDoctor';
 import Schedule from './page/doctors/Schedule';
 import NotFoundPage from './components/NotFoundPage';
+import Appointment from './page/Appointment';
+import Contact from './page/Contact';
 function App() {
   const { isLoggedIn } = useSelector((state) => state?.auth)
 
@@ -49,9 +51,11 @@ function App() {
 
         <Route path='/payment'element={<Payment/>}/>
         <Route path="/" element={<Home />} />
+        <Route path="/contact" element={<Contact />} />
         <Route path="/hospitals/:hospitalId/doctors" element={<DoctorListPage />} />
         <Route path="/hospitals" element={<HospitalListPage />} />
         <Route path="/doctors/:doctorId" element={<DoctorDetailPage />} />
+        <Route path="/appointments" element={<Appointment />} />
         <Route path="/payment/:appointmentId" element={<PaymentPage />} />
         <Route path="/confirmation/:appointmentId" element={<ConfirmationPage />} />
         <Route path="/appointment_details_page/:id" element={<AppointmentDetailsPage />} />

@@ -197,7 +197,7 @@ function BookAppointment() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Date of Birth (Optional)</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Age*</label>
                 <input
                   type="text"
                   name="dob"
@@ -205,6 +205,7 @@ function BookAppointment() {
                   onChange={handleChange}
                   className="w-full px-4 py-2.5 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 transition duration-200"
                   placeholder="Age or DOB"
+                  required
                 />
               </div>
             </div>

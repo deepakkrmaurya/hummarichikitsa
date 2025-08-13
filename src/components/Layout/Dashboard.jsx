@@ -9,23 +9,23 @@ import axiosInstance from '../../Helper/axiosInstance';
 const Dashboard = ({ children }) => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  const [data,setData]=useState();
-  const { isLoggedIn } = useSelector((state) => state.auth);
+  // const [data,setData]=useState();
+  const { isLoggedIn,role,data } = useSelector((state) => state.auth);
   const [activeTab, setActiveTab] = useState('appointments');
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  var role  = data?.role
-  useEffect(() => {
-    async function fetchData() {
-      try {
-        const response = await axiosInstance.get("/user/me");
-        // console.log(response.data.role);
-        setData(response.data);
-      } catch (error) {
-        console.error("Error fetching data:", error);
-      }
-    }
-    fetchData();
-  }, []);
+  // var role  = data?.role
+  // useEffect(() => {
+  //   async function fetchData() {
+  //     try {
+  //       const response = await axiosInstance.get("/user/me");
+  //       // console.log(response.data.role);
+  //       setData(response.data);
+  //     } catch (error) {
+  //       console.error("Error fetching data:", error);
+  //     }
+  //   }
+  //   fetchData();
+  // }, []);
 
     const handleLogout = async () => {
             
@@ -121,7 +121,9 @@ const Dashboard = ({ children }) => {
                   )
                 }
 
-                <li>
+                {
+                  role !== 'admin' &&(
+                    <li>
                   <Link to={`/book/appointment`}>
                   <button
                     onClick={() => {
@@ -138,6 +140,8 @@ const Dashboard = ({ children }) => {
                   </button>
                   </Link>
                 </li>
+                  )
+                }
                 <li>
                   <Link className=' cursor-pointer' to='/patient'>
                     <button
