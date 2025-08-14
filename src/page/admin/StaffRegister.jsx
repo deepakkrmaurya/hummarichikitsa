@@ -132,7 +132,7 @@ const navigate = useNavigate();
 
   return (
     <Dashboard>
-      <div className=" mx-auto my-10 p-4 rounded-xl shadow-lg bg-white">
+      <div className=" mx-auto rounded-xl shadow-lg bg-white">
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}

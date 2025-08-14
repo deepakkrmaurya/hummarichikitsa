@@ -40,7 +40,12 @@ function BookAppointment() {
       try {
         setLoading(prev => ({ ...prev, doctors: true }));
         const response = await axiosInstance.get("/user/me");
-        const hospitalId = response?.data?.hospital?._id;
+        
+        var hospitalId = response?.data?.hospital?._id;
+        // console.log(hospitalId)
+        if(hospitalId===undefined){
+          hospitalId=response?.data?.user?._id
+        }
         setHospitalId(hospitalId);
 
         const doctorsResponse = await dispatch(GetDoctorHospitalId(hospitalId));
@@ -134,8 +139,8 @@ function BookAppointment() {
 
   return (
     <Dashboard>
-      <div className="max-w-4xl mx-auto p-6 bg-white rounded-xl shadow-lg">
-        <h2 className="text-3xl font-bold text-gray-800 mb-6 text-center">Book Appointment</h2>
+      <div className=" mx-auto  bg-white rounded-xl shadow-lg">
+        <h2 className="text-3xl font-bold text-gray-800 mb-1 text-center">Book Appointment</h2>
 
         {/* Error and Success Messages */}
         {errors.form && (

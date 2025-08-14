@@ -39,7 +39,7 @@ const Dashboard = ({ children }) => {
            }
        };
   return (
-    <div className="container sticky top-0 mx-auto px-2 sm:px-4 py-4">
+    <div className="container sticky top-0 mx-auto">
       {/* Mobile Header */}
       <div className="lg:hidden flex justify-between items-center mb-4">
         <h1 className="text-xl font-bold text-gray-800">Doctor Dashboard</h1>
@@ -98,7 +98,7 @@ const Dashboard = ({ children }) => {
                     </button>
                   </Link>
                 </li>
-                {
+                {/* {
                   role === 'doctor' &&(
                 <li>
                   <Link to={`/schedule/${data?._id}`}>
@@ -119,7 +119,7 @@ const Dashboard = ({ children }) => {
                 </li>
 
                   )
-                }
+                } */}
 
                 {
                   role !== 'admin' &&(

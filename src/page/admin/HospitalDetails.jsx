@@ -156,7 +156,7 @@ const HospitalDetails = () => {
     if (!hospital) {
         return (
             <Dashboard>
-                <div className="flex flex-col items-center justify-center h-screen p-6">
+                <div className="flex flex-col items-center justify-center h-screen">
                     <div className="bg-red-100 p-4 rounded-full mb-4">
                         <FaHospital className="text-red-500 text-4xl" />
                     </div>
@@ -186,7 +186,7 @@ const HospitalDetails = () => {
                 initial="hidden"
                 animate="show"
                 variants={containerVariants}
-                className="min-h-screen p-4 md:p-6"
+                className="min-h-screen"
                 style={{ backgroundColor: colors.background }}
             >
                 {/* Header Section */}

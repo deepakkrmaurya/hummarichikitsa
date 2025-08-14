@@ -53,7 +53,7 @@ const Header = () => {
                                 Dashboard
                             </Link>
                         ) : (
-                            <Link to="/" className="text-gray-700 hover:text-blue-600 transition">
+                            <Link to="/appointments" className="text-gray-700 hover:text-blue-600 transition">
                                 My Appointments
                             </Link>
                         )}
@@ -123,7 +123,7 @@ const Header = () => {
                                 </Link>
                             ) : (
                                 <Link
-                                    to="/"
+                                    to="/appointments"
                                     className="text-gray-700 hover:text-blue-600 transition"
                                     onClick={() => setIsMenuOpen(false)}
                                 >

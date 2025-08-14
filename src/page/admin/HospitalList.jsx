@@ -113,7 +113,7 @@ const HospitalList = () => {
                 initial="hidden"
                 animate="show"
                 variants={containerVariants}
-                className="p-6"
+                
                 style={{ backgroundColor: colors.background, minHeight: '100vh' }}
             >
                 {/* Header Section */}

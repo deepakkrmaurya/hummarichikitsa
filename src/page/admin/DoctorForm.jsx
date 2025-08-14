@@ -274,7 +274,7 @@ const DoctorForm = ({ doctorData }) => {
   return (
     <Dashboard>
       <div className="min-h-screen" style={{ backgroundColor: colors.background }}>
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className=" mx-auto">
           {/* Success Notification */}
           <AnimatePresence>
             {submitSuccess && (
