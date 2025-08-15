@@ -25,6 +25,7 @@ const ConfirmationPage = () => {
 
   // Find appointment, doctor, and hospital
   const appointment = appointments.find(a => a._id === appointmentId);
+
   const doctor = appointment ? doctors.find(d => d._id === appointment?.doctorId?._id) : null;
   const hospital = appointment ? hospitals.find(h => h._id === appointment?.hospitalId) : null;
 
@@ -202,22 +203,22 @@ const ConfirmationPage = () => {
   }
 
   // Appointment not found state
-  if (!appointment || !doctor || !hospital) {
-    return (
-      <Layout>
-        <div className="container mx-auto px-4 py-16 text-center">
-          <h2 className="text-2xl font-bold text-gray-800 mb-4">Appointment not found</h2>
-          <button
-            onClick={() => navigate('/')}
-            className="flex items-center justify-center mx-auto px-6 py-2 bg-teal-600 text-white rounded-lg hover:bg-teal-700 transition shadow-sm"
-          >
-            <ChevronLeft className="h-5 w-5 mr-1" />
-            Back to Home
-          </button>
-        </div>
-      </Layout>
-    );
-  }
+  // if (!appointment || !doctor || !hospital) {
+  //   return (
+  //     <Layout>
+  //       <div className="container mx-auto px-4 py-16 text-center">
+  //         <h2 className="text-2xl font-bold text-gray-800 mb-4">Appointment not found</h2>
+  //         <button
+  //           onClick={() => navigate('/')}
+  //           className="flex items-center justify-center mx-auto px-6 py-2 bg-teal-600 text-white rounded-lg hover:bg-teal-700 transition shadow-sm"
+  //         >
+  //           <ChevronLeft className="h-5 w-5 mr-1" />
+  //           Back to Home
+  //         </button>
+  //       </div>
+  //     </Layout>
+  //   );
+  // }
 
   return (
     <Layout>
