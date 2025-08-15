@@ -131,7 +131,7 @@ const Home = () => {
 
             {appointments.length > 0 ? (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {appointments?.map((appointment) => {
+                {appointments?.slice(0,3)?.map((appointment) => {
                   const doctor = doctors.find(d => d._id === appointment.doctorId);
                   const hospitals = hospital.find(h => h._id === appointment.hospitalId);
 
