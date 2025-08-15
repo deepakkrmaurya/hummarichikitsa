@@ -71,7 +71,7 @@ const Dashboard = ({ children }) => {
                 />
                 <div>
                   <h2 className="font-semibold text-sm sm:text-lg">{data?.user?.name}</h2>
-                  <p className="text-blue-100 text-xs sm:text-sm">{data?.user?.role || 'Doctor'}</p>
+                  <p className="text-blue-100 text-xs sm:text-sm">{role || 'Doctor'}</p>
                   <p className="text-blue-100 text-xs sm:text-sm">{data?.hospital?.name || ''}</p>
 
                 </div>
