@@ -39,7 +39,7 @@ const Dashboard = ({ children }) => {
            }
        };
   return (
-    <div className="container sticky top-0 mx-auto">
+    <div className=" sticky top-0 mx-auto">
       {/* Mobile Header */}
       <div className="lg:hidden flex justify-between items-center mb-4">
         <h1 className="text-xl font-bold text-gray-800">Doctor Dashboard</h1>
