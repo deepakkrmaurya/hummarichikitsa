@@ -4,8 +4,6 @@ import { useDispatch, useSelector } from 'react-redux';
 import { Link, useNavigate } from 'react-router-dom';
 import { Logout } from '../../Redux/doctorSlice';
 import avatar from '../../../src/assets/logo-def.png';
-import { useEffect } from 'react';
-import axiosInstance from '../../Helper/axiosInstance';
 const Dashboard = ({ children }) => {
   const navigate = useNavigate();
   const dispatch = useDispatch();

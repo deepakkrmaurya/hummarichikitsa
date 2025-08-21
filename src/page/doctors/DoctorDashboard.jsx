@@ -117,7 +117,7 @@ const DoctorDashboard = () => {
                     <CalendarIcon className="h-6 w-6" style={{ color: colors.primary }} />
                   </div>
                   <div>
-                    <p className="text-sm font-medium" style={{ color: colors.muted }}>Today's Appointments</p>
+                    <p className="text-sm font-medium" style={{ color: colors.muted }}>Appointments</p>
                     <p className="text-2xl font-semibold mt-1" style={{ color: colors.text }}>
                       {isLoading ? (
                         <div className="h-8 w-12 bg-gray-200 rounded animate-pulse"></div>

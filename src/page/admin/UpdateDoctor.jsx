@@ -45,7 +45,8 @@ const UpdateDoctor = () => {
         bio: '',
         rating: 0,
         consultationFee: 0,
-        status: 'active'
+        status: 'active',
+        gender: ""
     });
 
     const [activeTab, setActiveTab] = useState('basic');
@@ -100,6 +101,7 @@ const UpdateDoctor = () => {
         formData.append('rating', doctor.rating.toString());
         formData.append('consultationFee', doctor.consultationFee.toString());
         formData.append('status', doctor.status);
+        formData.append('gender', doctor.gender);
 
         // Only append photo if it's a new file
         if (doctor.photo instanceof File) {
@@ -110,10 +112,10 @@ const UpdateDoctor = () => {
 
             if (doctorid) {
                 await dispatch(RegisterDoctorUpdate({
-                    id:doctorid,
-                    formData:formData
+                    id: doctorid,
+                    formData: formData
                 }));
-               getDoctorById()
+                getDoctorById()
             }
             // setSubmitSuccess(true);
             // setTimeout(() => {
@@ -148,7 +150,7 @@ const UpdateDoctor = () => {
     return (
         <Dashboard>
             <div className="min-h-screen" style={{ backgroundColor: colors.background }}>
-                <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+                <div className="">
                     {/* Success Notification */}
                     <AnimatePresence>
                         {submitSuccess && (
@@ -389,6 +391,28 @@ const UpdateDoctor = () => {
                                                         <option value="inactive">Inactive</option>
                                                         <option value="onleave">On Leave</option>
                                                     </select>
+                                                </div>
+                                                <div>
+                                                    <label htmlFor="gender" className="block text-sm font-medium mb-1" style={{ color: colors.text }}>
+                                                        Gender
+                                                    </label>
+                                                    <select
+                                                        id="gender"
+                                                        name="gender"
+                                                        value={doctor.gender}
+                                                        onChange={handleChange}
+                                                        className={`w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:border-transparent 
+    ${doctor.gender === 'male' ? 'select' : ''}`}
+                                                        style={{
+                                                            borderColor: colors.border,
+                                                            backgroundColor: colors.inputBg,
+                                                            focusRing: colors.primary,
+                                                        }}
+                                                    >
+                                                        <option value="male">Male</option>
+                                                        <option value="female">Female</option>
+                                                    </select>
+
                                                 </div>
 
                                                 <div>

@@ -40,11 +40,11 @@ function BookAppointment() {
       try {
         setLoading(prev => ({ ...prev, doctors: true }));
         const response = await axiosInstance.get("/user/me");
-        
+
         var hospitalId = response?.data?.hospital?._id;
         // console.log(hospitalId)
-        if(hospitalId===undefined){
-          hospitalId=response?.data?.user?._id
+        if (hospitalId === undefined) {
+          hospitalId = response?.data?.user?._id
         }
         setHospitalId(hospitalId);
 
@@ -67,7 +67,7 @@ function BookAppointment() {
       ...prev,
       [name]: value
     }));
-    
+
     // Clear error when field is edited
     if (errors[name]) {
       setErrors(prev => ({ ...prev, [name]: '' }));
@@ -77,14 +77,14 @@ function BookAppointment() {
   // Form validation
   const validateForm = () => {
     const newErrors = {};
-    
+
     if (!formData.patient.trim()) newErrors.patient = 'Patient name is required';
     if (!formData.mobile.trim()) newErrors.mobile = 'Mobile number is required';
     if (!/^\d{10}$/.test(formData.mobile)) newErrors.mobile = 'Invalid mobile number';
     if (!formData.doctorId) newErrors.doctorId = 'Please select a doctor';
     if (!selectedDate) newErrors.date = 'Please select a date';
     if (formData.booking_amount <= 0) newErrors.booking_amount = 'Invalid amount';
-    
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -92,12 +92,12 @@ function BookAppointment() {
   // Form submission
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     if (!validateForm()) return;
-    
+
     try {
       setLoading(prev => ({ ...prev, submitting: true }));
-      
+
       const appointmentData = {
         ...formData,
         hospitalId,
@@ -105,10 +105,10 @@ function BookAppointment() {
       };
 
       const response = await dispatch(AppointmentCreate(appointmentData));
-      
+
       if (response.payload?.success) {
         setSuccess(`Appointment booked successfully! Token: ${response.payload.savedAppointment.token}`);
-        
+
         // Reset form
         setFormData({
           patient: '',
@@ -178,9 +178,8 @@ function BookAppointment() {
                   name="patient"
                   value={formData.patient}
                   onChange={handleChange}
-                  className={`w-full px-4 py-2.5 border rounded-lg shadow-sm focus:outline-none focus:ring-2 transition duration-200 ${
-                    errors.patient ? 'border-red-300 focus:ring-red-500' : 'border-gray-300 focus:ring-indigo-500'
-                  }`}
+                  className={`w-full px-4 py-2.5 border rounded-lg shadow-sm focus:outline-none focus:ring-2 transition duration-200 ${errors.patient ? 'border-red-300 focus:ring-red-500' : 'border-gray-300 focus:ring-indigo-500'
+                    }`}
                   placeholder="John Doe"
                 />
                 {errors.patient && <p className="mt-1 text-sm text-red-600">{errors.patient}</p>}
@@ -189,14 +188,19 @@ function BookAppointment() {
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Mobile Number *</label>
                 <input
-                  type="tel"
+                  type="text"
                   name="mobile"
                   value={formData.mobile}
-                  onChange={handleChange}
-                  className={`w-full px-4 py-2.5 border rounded-lg shadow-sm focus:outline-none focus:ring-2 transition duration-200 ${
-                    errors.mobile ? 'border-red-300 focus:ring-red-500' : 'border-gray-300 focus:ring-indigo-500'
-                  }`}
+                  className={`w-full px-4 py-2.5 border rounded-lg shadow-sm focus:outline-none focus:ring-2 transition duration-200 ${errors.mobile ? 'border-red-300 focus:ring-red-500' : 'border-gray-300 focus:ring-indigo-500'
+                    }`}
                   placeholder="9876543210"
+                  onChange={(e) => {
+
+                    const value = e.target.value;
+                    if (/^\d{0,10}$/.test(value)) {
+                      handleChange(e);
+                    }
+                  }}
                 />
                 {errors.mobile && <p className="mt-1 text-sm text-red-600">{errors.mobile}</p>}
               </div>
@@ -207,10 +211,17 @@ function BookAppointment() {
                   type="text"
                   name="dob"
                   value={formData.dob}
-                  onChange={handleChange}
+
                   className="w-full px-4 py-2.5 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 transition duration-200"
                   placeholder="Age or DOB"
                   required
+                  onChange={(e) => {
+
+                    const value = e.target.value;
+                    if (/^\d*$/.test(value)) {
+                      handleChange(e);
+                    }
+                  }}
                 />
               </div>
             </div>
@@ -225,9 +236,8 @@ function BookAppointment() {
                   name="doctorId"
                   value={formData.doctorId}
                   onChange={handleChange}
-                  className={`w-full px-4 py-2.5 border rounded-lg shadow-sm focus:outline-none focus:ring-2 transition duration-200 appearance-none ${
-                    errors.doctorId ? 'border-red-300 focus:ring-red-500' : 'border-gray-300 focus:ring-indigo-500'
-                  }`}
+                  className={`w-full px-4 py-2.5 border rounded-lg shadow-sm focus:outline-none focus:ring-2 transition duration-200 appearance-none ${errors.doctorId ? 'border-red-300 focus:ring-red-500' : 'border-gray-300 focus:ring-indigo-500'
+                    }`}
                   disabled={loading.doctors}
                 >
                   <option value="">Select Doctor</option>
@@ -246,22 +256,20 @@ function BookAppointment() {
                   <button
                     type="button"
                     onClick={() => setSelectedDate(today)}
-                    className={`flex-1 p-3 rounded-lg font-medium shadow-md transition-all ${
-                      selectedDate === today 
-                        ? 'bg-blue-700 text-white hover:bg-blue-800' 
-                        : 'bg-blue-100 text-blue-700 hover:bg-blue-200'
-                    }`}
+                    className={`flex-1 p-3 rounded-lg font-medium shadow-md transition-all ${selectedDate === today
+                      ? 'bg-blue-700 text-white hover:bg-blue-800'
+                      : 'bg-blue-100 text-blue-700 hover:bg-blue-200'
+                      }`}
                   >
                     Today
                   </button>
                   <button
                     type="button"
                     onClick={() => setSelectedDate(tomorrowFormatted)}
-                    className={`flex-1 p-3 rounded-lg font-medium shadow-md transition-all ${
-                      selectedDate === tomorrowFormatted 
-                        ? 'bg-blue-700 text-white hover:bg-blue-800' 
-                        : 'bg-blue-100 text-blue-700 hover:bg-blue-200'
-                    }`}
+                    className={`flex-1 p-3 rounded-lg font-medium shadow-md transition-all ${selectedDate === tomorrowFormatted
+                      ? 'bg-blue-700 text-white hover:bg-blue-800'
+                      : 'bg-blue-100 text-blue-700 hover:bg-blue-200'
+                      }`}
                   >
                     Tomorrow
                   </button>
@@ -282,13 +290,17 @@ function BookAppointment() {
                   <span className="text-gray-500">₹</span>
                 </div>
                 <input
-                  type="number"
+                  type="text"
                   name="booking_amount"
                   value={formData.booking_amount}
-                  onChange={handleChange}
-                  className={`w-full pl-8 pr-4 py-2.5 border rounded-lg shadow-sm focus:outline-none focus:ring-2 transition duration-200 ${
-                    errors.booking_amount ? 'border-red-300 focus:ring-red-500' : 'border-gray-300 focus:ring-indigo-500'
-                  }`}
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    if (/^\d*$/.test(value)) {
+                      handleChange(e);
+                    }
+                  }}
+                  className={`w-full pl-8 pr-4 py-2.5 border rounded-lg shadow-sm focus:outline-none focus:ring-2 transition duration-200 ${errors.booking_amount ? 'border-red-300 focus:ring-red-500' : 'border-gray-300 focus:ring-indigo-500'
+                    }`}
                   min="0"
                   step="0.01"
                 />
