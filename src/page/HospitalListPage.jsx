@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Search, MapPin, Phone, Star, Filter, ChevronRight } from 'lucide-react';
@@ -6,24 +7,47 @@ import { getAllHospital } from '../Redux/hospitalSlice';
 import { getAllDoctors } from '../Redux/doctorSlice';
 import Layout from '../components/Layout/Layout';
 import hospital_img from '../../src/assets/hospital_image.png';
+
 const HospitalListPage = () => {
     const navigate = useNavigate();
     const hospitals = useSelector((state) => state.hospitals.hospitals);
     const { doctors } = useSelector((state) => state?.doctors);
+
     const [searchTerm, setSearchTerm] = useState('');
     const [selectedCity, setSelectedCity] = useState('');
     const [selectedSpecialty, setSelectedSpecialty] = useState('');
     const [isFilterOpen, setIsFilterOpen] = useState(false);
+    const [loading, setLoading] = useState(true); // ✅ Loader state
 
-    // Get unique cities and specialties for filters
+    const dispatch = useDispatch();
+
+    // ✅ Scroll to top smoothly when page loads
+    useEffect(() => {
+        window.scrollTo({ top: 0, behavior: "smooth" });
+    }, []);
+
+    // Fetch hospitals & doctors
+    useEffect(() => {
+        (async () => {
+            setLoading(true);
+            await dispatch(getAllDoctors());
+            await dispatch(getAllHospital());
+            setLoading(false);
+        })();
+    }, [dispatch]);
+
+    // Unique cities & specialties for filters
     const cities = Array.from(new Set(hospitals.map(hospital => hospital.city)));
     const specialties = Array.from(
         new Set(hospitals.flatMap(hospital => hospital.specialties))
     ).sort();
 
+    // Filtering hospitals
     const filteredHospitals = hospitals.filter(hospital => {
-        const matchesSearch = hospital.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        const matchesSearch =
+            hospital.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
             hospital.address.toLowerCase().includes(searchTerm.toLowerCase());
+
         const matchesCity = selectedCity ? hospital.city === selectedCity : true;
         const matchesSpecialty = selectedSpecialty
             ? hospital.specialties.includes(selectedSpecialty)
@@ -32,13 +56,28 @@ const HospitalListPage = () => {
         return matchesSearch && matchesCity && matchesSpecialty;
     });
 
-    const dispatch = useDispatch();
-    useEffect(() => {
-        (async () => {
-            await dispatch(getAllDoctors())
-            await dispatch(getAllHospital())
-        })()
-    }, [])
+    // ✅ Skeleton Loader Component
+    const SkeletonCard = () => (
+        <div className="bg-white rounded-xl shadow-sm overflow-hidden border border-gray-100 animate-pulse">
+            <div className="md:flex">
+                <div className="md:w-1/3 h-64 bg-gray-200" />
+                <div className="p-6 md:w-2/3 space-y-4">
+                    <div className="h-6 bg-gray-200 rounded w-1/2" />
+                    <div className="h-4 bg-gray-200 rounded w-1/3" />
+                    <div className="h-4 bg-gray-200 rounded w-2/3" />
+                    <div className="flex gap-2 mt-4">
+                        <div className="h-6 w-20 bg-gray-200 rounded-full" />
+                        <div className="h-6 w-20 bg-gray-200 rounded-full" />
+                        <div className="h-6 w-20 bg-gray-200 rounded-full" />
+                    </div>
+                    <div className="flex justify-between mt-6">
+                        <div className="h-4 bg-gray-200 rounded w-24" />
+                        <div className="h-10 w-32 bg-gray-200 rounded" />
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
 
     return (
         <Layout>
@@ -76,47 +115,18 @@ const HospitalListPage = () => {
                                 Filters
                             </button>
                         </div>
-
-                        {/* Filter Dropdown */}
-                        {isFilterOpen && (
-                            <div className="mt-6 pt-6 border-t border-gray-100 grid grid-cols-1 md:grid-cols-2 gap-6">
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-2">City</label>
-                                    <select
-                                        value={selectedCity}
-                                        onChange={(e) => setSelectedCity(e.target.value)}
-                                        className="w-full border border-gray-200 rounded-lg py-3 px-4 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
-                                    >
-                                        <option value="">All Cities</option>
-                                        {cities.map((city) => (
-                                            <option key={city} value={city}>
-                                                {city}
-                                            </option>
-                                        ))}
-                                    </select>
-                                </div>
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-2">Specialty</label>
-                                    <select
-                                        value={selectedSpecialty}
-                                        onChange={(e) => setSelectedSpecialty(e.target.value)}
-                                        className="w-full border border-gray-200 rounded-lg py-3 px-4 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
-                                    >
-                                        <option value="">All Specialties</option>
-                                        {specialties.map((specialty) => (
-                                            <option key={specialty} value={specialty}>
-                                                {specialty}
-                                            </option>
-                                        ))}
-                                    </select>
-                                </div>
-                            </div>
-                        )}
                     </div>
 
                     {/* Results Section */}
                     <div className="grid grid-cols-1 gap-6">
-                        {filteredHospitals.length > 0 ? (
+                        {loading ? (
+                            // ✅ Show 3 Skeleton Cards while loading
+                            <>
+                                <SkeletonCard />
+                                <SkeletonCard />
+                                <SkeletonCard />
+                            </>
+                        ) : filteredHospitals.length > 0 ? (
                             filteredHospitals
                                 .filter(hospital => hospital.status === 'active')
                                 .map((hospital) => {

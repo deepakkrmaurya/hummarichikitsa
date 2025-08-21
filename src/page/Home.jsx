@@ -1,3 +1,6 @@
+
+
+
 import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { getAllHospital } from "../Redux/hospitalSlice";
@@ -9,6 +12,88 @@ import Layout from "../components/Layout/Layout";
 import { useState } from "react";
 import hospital_img from '../../src/assets/hospital_image.png';
 import avatar from '../../src/assets/logo-def.png';
+
+// Skeleton Components
+const StatsSkeleton = () => (
+  <div className="bg-white rounded-xl shadow-2xl p-6 grid grid-cols-2 md:grid-cols-4 gap-4">
+    {[...Array(4)].map((_, index) => (
+      <div key={index} className="flex items-center p-3 rounded-lg bg-gray-50">
+        <div className="p-3 rounded-full bg-gray-200 shadow-md mr-4 animate-pulse">
+          <div className="w-6 h-6"></div>
+        </div>
+        <div>
+          <div className="h-6 w-12 bg-gray-300 rounded mb-2 animate-pulse"></div>
+          <div className="h-4 w-16 bg-gray-200 rounded animate-pulse"></div>
+        </div>
+      </div>
+    ))}
+  </div>
+);
+
+const AppointmentSkeleton = () => (
+  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    {[...Array(3)].map((_, index) => (
+      <div key={index} className="bg-white rounded-lg shadow-md overflow-hidden border border-gray-100">
+        <div className="p-5">
+          <div className="flex items-start space-x-4">
+            <div className="w-14 h-14 rounded-full bg-gray-200 animate-pulse"></div>
+            <div className="flex-1">
+              <div className="flex justify-between items-start">
+                <div>
+                  <div className="h-5 w-32 bg-gray-300 rounded mb-2 animate-pulse"></div>
+                  <div className="h-4 w-24 bg-gray-200 rounded animate-pulse"></div>
+                </div>
+                <div className="h-6 w-20 bg-gray-200 rounded-full animate-pulse"></div>
+              </div>
+              <div className="mt-3 flex items-center">
+                <div className="w-4 h-4 bg-gray-200 rounded mr-1 animate-pulse"></div>
+                <div className="h-4 w-32 bg-gray-200 rounded animate-pulse"></div>
+              </div>
+            </div>
+          </div>
+
+          <div className="mt-4 pt-4 border-t border-gray-100 space-y-2">
+            <div className="flex items-center">
+              <div className="w-4 h-4 bg-gray-200 rounded mr-2 animate-pulse"></div>
+              <div className="h-4 w-32 bg-gray-200 rounded animate-pulse"></div>
+            </div>
+            <div className="flex items-center">
+              <div className="w-4 h-4 bg-gray-200 rounded mr-2 animate-pulse"></div>
+              <div className="h-4 w-40 bg-gray-200 rounded animate-pulse"></div>
+            </div>
+          </div>
+
+          <div className="mt-5 flex justify-between">
+            <div className="h-4 w-20 bg-gray-200 rounded animate-pulse"></div>
+            <div className="h-4 w-16 bg-gray-200 rounded animate-pulse"></div>
+          </div>
+        </div>
+      </div>
+    ))}
+  </div>
+);
+
+const HospitalSkeleton = () => (
+  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    {[...Array(3)].map((_, index) => (
+      <div key={index} className="bg-white rounded-lg shadow-md overflow-hidden border border-gray-100">
+        <div className="relative h-48 bg-gray-300 animate-pulse"></div>
+        <div className="p-5">
+          <div className="flex flex-wrap gap-2 mb-4">
+            <div className="h-6 w-20 bg-gray-200 rounded-full animate-pulse"></div>
+            <div className="h-6 w-16 bg-gray-200 rounded-full animate-pulse"></div>
+            <div className="h-6 w-24 bg-gray-200 rounded-full animate-pulse"></div>
+          </div>
+          <div className="flex justify-between items-center">
+            <div className="h-4 w-32 bg-gray-200 rounded animate-pulse"></div>
+            <div className="h-8 w-28 bg-gray-300 rounded-lg animate-pulse"></div>
+          </div>
+        </div>
+      </div>
+    ))}
+  </div>
+);
+
 const Home = () => {
   const navigate = useNavigate();
   const hospital = useSelector((state) => state.hospitals.hospitals);
@@ -17,26 +102,42 @@ const Home = () => {
   const { doctors } = useSelector((state) => state?.doctors);
   const appointments = useSelector((state) => state.appointment?.appointment);
   const dispatch = useDispatch();
+  
+  // Loading states
+  const [hospitalsLoading, setHospitalsLoading] = useState(true);
+  const [doctorsLoading, setDoctorsLoading] = useState(true);
+  const [appointmentsLoading, setAppointmentsLoading] = useState(true);
 
   const CancledAppointment = async (id) => {
     await dispatch(AppointmentCancelled(id))
     await dispatch(getAllAppointment())
   }
   const backgroundImages = [
-    'https://images.unsplash.com/photo-1576091160550-2173dba999ef?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80', // Doctor with clipboard
-    'https://images.unsplash.com/photo-1530026186672-2cd00ffc50fe?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80', // Modern hospital corridor
-    'https://images.unsplash.com/photo-1579684385127-1ef15d508118?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80', // Doctor consulting patient
-    'https://images.unsplash.com/photo-1581595219315-a187dd40c322?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80', // Medical equipment
-    'https://images.unsplash.com/photo-1505751172876-fa1923c5c528?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80', // Nurse with patient
-    'https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80'  // Surgeon in operation theater
+    'https://images.unsplash.com/photo-1576091160550-2173dba999ef?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80',
+    'https://images.unsplash.com/photo-1530026186672-2cd00ffc50fe?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80',
+    'https://images.unsplash.com/photo-1579684385127-1ef15d508118?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80',
+    'https://images.unsplash.com/photo-1581595219315-a187dd40c322?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80',
+    'https://images.unsplash.com/photo-1505751172876-fa1923c5c528?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80',
+    'https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80'
   ];
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  
   useEffect(() => {
     (async () => {
-      await dispatch(getAllAppointment())
-      await dispatch(getAllHospital())
-      await dispatch(getAllDoctors())
-    })()
+      setAppointmentsLoading(true);
+      setHospitalsLoading(true);
+      setDoctorsLoading(true);
+      
+      await dispatch(getAllAppointment());
+      setAppointmentsLoading(false);
+      
+      await dispatch(getAllHospital());
+      setHospitalsLoading(false);
+      
+      await dispatch(getAllDoctors());
+      setDoctorsLoading(false);
+    })();
+    
     const interval = setInterval(() => {
       setCurrentImageIndex((prevIndex) =>
         (prevIndex + 1) % backgroundImages.length
@@ -44,7 +145,7 @@ const Home = () => {
     }, 5000);
 
     return () => clearInterval(interval);
-  }, [])
+  }, []);
 
   return (
     <Layout>
@@ -62,7 +163,6 @@ const Home = () => {
               ></div>
             </div>
           ))}
-          {/* <div className="absolute inset-0 bg-[url('https://img.freepik.com/free-vector/blue-medical-cross-pattern-background_53876-116726.jpg')] bg-cover bg-center"></div> */}
         </div>
         <div className="container mx-auto px-4 relative z-10">
           <div className="max-w-2xl">
@@ -80,7 +180,6 @@ const Home = () => {
                 <Stethoscope className="mr-2" size={20} />
                 Find a Doctor
               </button>
-
             </div>
           </div>
         </div>
@@ -88,24 +187,28 @@ const Home = () => {
 
       {/* Stats Bar */}
       <div className="container mx-auto px-4 -mt-12 relative z-20">
-        <div className="bg-white rounded-xl shadow-2xl p-6 grid grid-cols-2 md:grid-cols-4 gap-4">
-          {[
-            { icon: <Stethoscope size={24} className="text-blue-600" />, value: "250+", label: "Specialists" },
-            { icon: <HeartPulse size={24} className="text-teal-600" />, value: "50+", label: "Hospitals" },
-            { icon: <CheckCircle size={24} className="text-green-600" />, value: "10K+", label: "Patients" },
-            { icon: <Shield size={24} className="text-amber-600" />, value: "24/7", label: "Support" }
-          ].map((stat, index) => (
-            <div key={index} className="flex items-center p-3 rounded-lg bg-gray-50">
-              <div className="p-3 rounded-full bg-white shadow-md mr-4">
-                {stat.icon}
+        {hospitalsLoading ? (
+          <StatsSkeleton />
+        ) : (
+          <div className="bg-white rounded-xl shadow-2xl p-6 grid grid-cols-2 md:grid-cols-4 gap-4">
+            {[
+              { icon: <Stethoscope size={24} className="text-blue-600" />, value: "250+", label: "Specialists" },
+              { icon: <HeartPulse size={24} className="text-teal-600" />, value: "50+", label: "Hospitals" },
+              { icon: <CheckCircle size={24} className="text-green-600" />, value: "10K+", label: "Patients" },
+              { icon: <Shield size={24} className="text-amber-600" />, value: "24/7", label: "Support" }
+            ].map((stat, index) => (
+              <div key={index} className="flex items-center p-3 rounded-lg bg-gray-50">
+                <div className="p-3 rounded-full bg-white shadow-md mr-4">
+                  {stat.icon}
+                </div>
+                <div>
+                  <div className="text-2xl font-bold text-gray-800">{stat.value}</div>
+                  <div className="text-sm text-gray-600">{stat.label}</div>
+                </div>
               </div>
-              <div>
-                <div className="text-2xl font-bold text-gray-800">{stat.value}</div>
-                <div className="text-sm text-gray-600">{stat.label}</div>
-              </div>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        )}
       </div>
 
       {/* User Appointments Section */}
@@ -129,7 +232,9 @@ const Home = () => {
               )}
             </div>
 
-            {appointments.length > 0 ? (
+            {appointmentsLoading || doctorsLoading ? (
+              <AppointmentSkeleton />
+            ) : appointments.length > 0 ? (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {appointments?.slice(0,3)?.map((appointment) => {
                   const doctor = doctors.find(d => d._id === appointment.doctorId);
@@ -141,7 +246,6 @@ const Home = () => {
                         <div className="flex items-start space-x-4">
                           <img
                             src={avatar}
-                            
                             className="w-14 h-14 rounded-full object-cover border-2 border-blue-100"
                           />
                           <div className="flex-1">
@@ -188,17 +292,6 @@ const Home = () => {
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7"></path>
                             </svg>
                           </Link>
-                          {/* {appointment.status !== 'cancelled' && (
-                            <button 
-                              onClick={() => CancledAppointment(appointment?._id)} 
-                              className="text-red-600 hover:text-red-800 text-sm font-medium flex items-center"
-                            >
-                              Cancel
-                              <svg className="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path>
-                              </svg>
-                            </button>
-                          )} */}
                         </div>
                       </div>
                     </div>
@@ -248,7 +341,6 @@ const Home = () => {
             ].map((specialty, index) => (
               <div
                 key={index}
-
                 className={`${specialty.color} rounded-lg p-4 text-center cursor-pointer transition-all hover:shadow-md hover:-translate-y-1 flex flex-col items-center`}
               >
                 <span className="text-3xl mb-2">{specialty.icon}</span>
@@ -291,7 +383,6 @@ const Home = () => {
               }
             ].map((step, index) => (
               <div key={index} className="bg-white p-6 rounded-lg shadow-sm flex-1 flex flex-col items-center text-center">
-
                 <div className="w-12 h-12 rounded-full bg-blue-50 flex items-center justify-center mb-4">
                   {step.icon}
                 </div>
@@ -322,67 +413,71 @@ const Home = () => {
             </button>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {hospital
-              .filter(hospital => hospital.status === 'active') 
-              .slice(0, 3) // Take first 3 active hospitals
-              .map((hospital) => (
-                <div
-                  key={hospital._id}
-                  className="bg-white rounded-lg shadow-md overflow-hidden border border-gray-100 transition-all duration-200 hover:shadow-lg"
-                >
-                  <div className="relative h-48 overflow-hidden">
-                    <img
-                      src={hospital.image || hospital_img}
-                      alt={hospital.name}
-                      className="w-full h-full object-cover transition-transform duration-500 hover:scale-105"
-                    />
-                    <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-4">
-                      <h3 className="text-xl font-semibold text-white">{hospital.name}</h3>
-                      <div className="flex items-center text-white/90 text-sm">
-                        <MapPin className="w-4 h-4 mr-1" />
-                        {hospital.city}
-                      </div>
-                    </div>
-                    <div className="absolute top-3 right-3 bg-white/90 px-2 py-1 rounded-full text-xs font-medium flex items-center">
-                      <Star className="w-3 h-3 text-yellow-500 mr-1" />
-                      {hospital.rating || '4.8'}
-                    </div>
-                  </div>
-
-                  <div className="p-5">
-                    <div className="flex flex-wrap gap-2 mb-4">
-                      {hospital.specialties.slice(0, 3).map((specialty, index) => (
-                        <div
-                          key={index}
-                          className="px-2 sm:px-3 py-1 bg-blue-50 text-blue-800 text-xs sm:text-sm font-medium rounded-full whitespace-nowrap"
-                        >
-                          {specialty}
+          {hospitalsLoading ? (
+            <HospitalSkeleton />
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {hospital
+                .filter(hospital => hospital.status === 'active') 
+                .slice(0, 3)
+                .map((hospital) => (
+                  <div
+                    key={hospital._id}
+                    className="bg-white rounded-lg shadow-md overflow-hidden border border-gray-100 transition-all duration-200 hover:shadow-lg"
+                  >
+                    <div className="relative h-48 overflow-hidden">
+                      <img
+                        src={hospital.image || hospital_img}
+                        alt={hospital.name}
+                        className="w-full h-full object-cover transition-transform duration-500 hover:scale-105"
+                      />
+                      <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-4">
+                        <h3 className="text-xl font-semibold text-white">{hospital.name}</h3>
+                        <div className="flex items-center text-white/90 text-sm">
+                          <MapPin className="w-4 h-4 mr-1" />
+                          {hospital.city}
                         </div>
-                      ))}
-                      {hospital.specialties.length > 3 && (
-                        <span className="px-2 py-1 bg-gray-100 text-gray-800 text-xs sm:text-sm font-medium rounded-full">
-                          +{hospital.specialties.length - 3} more
-                        </span>
-                      )}
+                      </div>
+                      <div className="absolute top-3 right-3 bg-white/90 px-2 py-1 rounded-full text-xs font-medium flex items-center">
+                        <Star className="w-3 h-3 text-yellow-500 mr-1" />
+                        {hospital.rating || '4.8'}
+                      </div>
                     </div>
 
-                    <div className="flex justify-between items-center">
-                      <div className="flex items-center text-gray-600 text-sm">
-                        <Phone className="w-4 h-4 mr-2 text-blue-500" />
-                        {hospital.phone || 'Contact'}
+                    <div className="p-5">
+                      <div className="flex flex-wrap gap-2 mb-4">
+                        {hospital.specialties.slice(0, 3).map((specialty, index) => (
+                          <div
+                            key={index}
+                            className="px-2 sm:px-3 py-1 bg-blue-50 text-blue-800 text-xs sm:text-sm font-medium rounded-full whitespace-nowrap"
+                          >
+                            {specialty}
+                          </div>
+                        ))}
+                        {hospital.specialties.length > 3 && (
+                          <span className="px-2 py-1 bg-gray-100 text-gray-800 text-xs sm:text-sm font-medium rounded-full">
+                            +{hospital.specialties.length - 3} more
+                          </span>
+                        )}
                       </div>
-                      <button
-                        onClick={() => navigate(`/hospitals/${hospital._id}/doctors`)}
-                        className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium"
-                      >
-                        View Doctors
-                      </button>
+
+                      <div className="flex justify-between items-center">
+                        <div className="flex items-center text-gray-600 text-sm">
+                          <Phone className="w-4 h-4 mr-2 text-blue-500" />
+                          {hospital.phone || 'Contact'}
+                        </div>
+                        <button
+                          onClick={() => navigate(`/hospitals/${hospital._id}/doctors`)}
+                          className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium"
+                        >
+                          View Doctors
+                        </button>
+                      </div>
                     </div>
                   </div>
-                </div>
-              ))}
-          </div>
+                ))}
+            </div>
+          )}
         </div>
       </section>
 
@@ -446,32 +541,6 @@ const Home = () => {
           </div>
         </div>
       </section>
-
-      {/* Emergency CTA */}
-      {/* <section className="bg-gradient-to-r from-red-600 to-red-700 text-white py-12">
-        <div className="container mx-auto px-4">
-          <div className="flex flex-col md:flex-row items-center justify-between">
-            <div className="mb-6 md:mb-0">
-              <h2 className="text-2xl font-bold mb-2 flex items-center">
-                <Ambulance className="mr-3" size={24} />
-                Emergency Medical Assistance
-              </h2>
-              <p className="text-red-100 max-w-2xl">
-                Immediate 24/7 emergency care available. Call our hotline for urgent medical needs.
-              </p>
-            </div>
-            <div className="bg-white/10 p-4 rounded-lg flex items-center">
-              <div className="bg-white/20 p-3 rounded-full mr-4">
-                <Phone className="w-6 h-6" />
-              </div>
-              <div>
-                <div className="text-sm text-red-100">Emergency Hotline</div>
-                <div className="text-xl font-bold">108 / +91-XXXXXXXXXX</div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section> */}
 
       {/* Final CTA */}
       <section className="py-16 bg-gradient-to-r from-blue-800 to-blue-900 text-white">
