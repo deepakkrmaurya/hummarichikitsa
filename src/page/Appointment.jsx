@@ -14,7 +14,8 @@ function Appointment() {
     const dispatch = useDispatch();
     const { doctors } = useSelector((state) => state?.doctors);
     const isLoading = useSelector((state) => state.appointment?.loading);
-    
+
+
     useEffect(() => {
         (async () => {
             await dispatch(getAllAppointment())
@@ -29,13 +30,13 @@ function Appointment() {
         const day = date.getDate();
         const month = date.toLocaleString('default', { month: 'short' });
         const weekday = date.toLocaleString('default', { weekday: 'short' });
-        
+
         // Add ordinal suffix
         let suffix = 'th';
         if (day % 10 === 1 && day !== 11) suffix = 'st';
         else if (day % 10 === 2 && day !== 12) suffix = 'nd';
         else if (day % 10 === 3 && day !== 13) suffix = 'rd';
-        
+
         return `${weekday}, ${month} ${day}${suffix}`;
     }
 
@@ -54,8 +55,8 @@ function Appointment() {
             <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
                 <div className="flex justify-between items-center mb-8">
                     <h1 className="text-2xl font-bold text-gray-900">My Appointments</h1>
-                    <Link 
-                        to="/hospitals" 
+                    <Link
+                        to="/hospitals"
                         className="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-md shadow-sm transition-colors duration-150"
                     >
                         <PlusCircle className="w-5 h-5 mr-2" />
@@ -85,8 +86,22 @@ function Appointment() {
                 ) : (
                     <div className="space-y-6">
                         {appointments?.map((appointment, index) => {
+                            let finalStatus;
                             const doctor = doctors.find(d => d._id === appointment.doctorId);
                             const hospitals = hospital.find(h => h._id === appointment.hospitalId);
+
+
+                            if (appointment.status === "completed") {
+                                finalStatus = "Completed";
+                            } else {
+                                const today = new Date();
+                                today.setHours(0, 0, 0, 0);
+
+                                const appointmentDate = new Date(appointment.date);
+                                appointmentDate.setHours(0, 0, 0, 0);
+
+                                finalStatus = appointmentDate >= today ? "Active" : "Inactive";
+                            }
 
                             return (
                                 <div key={index} className="bg-white rounded-xl shadow-sm overflow-hidden border border-gray-100 transition-all duration-200 hover:shadow-md">
@@ -94,19 +109,13 @@ function Appointment() {
                                         <div className="flex items-start space-x-4">
                                             <div className="relative">
                                                 <img
-                                                    src={doctor?.image || avatar}
+                                                    src={doctor?.photo || avatar}
                                                     className="w-16 h-16 rounded-lg object-cover border-2 border-blue-50"
                                                     alt={`${doctor?.name}'s profile`}
                                                 />
-                                                {appointment.status === 'confirmed' && (
-                                                    <div className="absolute -bottom-1 -right-1 bg-green-500 rounded-full p-1">
-                                                        <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
-                                                            <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                                                        </svg>
-                                                    </div>
-                                                )}
+
                                             </div>
-                                            
+
                                             <div className="flex-1 min-w-0">
                                                 <div className="flex justify-between items-start space-x-2">
                                                     <div className="truncate">
@@ -117,10 +126,10 @@ function Appointment() {
                                                         appointment.status === 'cancelled' ? 'bg-gray-100 text-gray-800' :
                                                             'bg-blue-100 text-blue-800'
                                                         }`}>
-                                                        {appointment.status.charAt(0).toUpperCase() + appointment.status.slice(1)}
+                                                        {finalStatus.charAt(0).toUpperCase() + finalStatus.slice(1)}
                                                     </span>
                                                 </div>
-                                                
+
                                                 <div className="mt-3 flex items-center text-sm text-gray-600">
                                                     <MapPin className="flex-shrink-0 w-4 h-4 text-blue-500" />
                                                     <span className="ml-2 truncate">{hospitals?.name}</span>
@@ -138,7 +147,7 @@ function Appointment() {
                                                     <p className="font-medium text-gray-900">{formatDate(appointment.date)}</p>
                                                 </div>
                                             </div>
-                                            
+
                                             <div className="flex items-start">
                                                 <div className="bg-blue-50 p-2 rounded-lg">
                                                     <Clock className="w-5 h-5 text-blue-600" />
@@ -148,7 +157,7 @@ function Appointment() {
                                                     <p className="font-medium text-gray-900">{appointment.slot}</p>
                                                 </div>
                                             </div>
-                                            
+
                                             <div className="flex items-start">
                                                 <div className="bg-blue-50 p-2 rounded-lg">
                                                     <CreditCard className="w-5 h-5 text-blue-600" />
@@ -158,7 +167,7 @@ function Appointment() {
                                                     <p className="font-medium text-gray-900">₹{appointment.booking_amount} • {appointment.paymentMethod}</p>
                                                 </div>
                                             </div>
-                                            
+
                                             <div className="flex items-start">
                                                 <div className="bg-blue-50 p-2 rounded-lg">
                                                     <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">

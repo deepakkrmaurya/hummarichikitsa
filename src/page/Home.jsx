@@ -147,15 +147,15 @@ const Home = () => {
     return () => clearInterval(interval);
   }, []);
 
-   useEffect(() => {
-    
-      if (!hospital || hospital.length === 0) {
-        dispatch(getAllHospital());
-        setHospitalsLoading(false);
-      }else{
-           setHospitalsLoading(false);
-      }
-    }, [dispatch, hospital]);
+  useEffect(() => {
+
+    if (!hospital || hospital.length === 0) {
+      dispatch(getAllHospital());
+      setHospitalsLoading(false);
+    } else {
+      setHospitalsLoading(false);
+    }
+  }, [dispatch, hospital]);
 
   return (
     <Layout>
@@ -247,9 +247,20 @@ const Home = () => {
             ) : appointments.length > 0 ? (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {appointments?.slice(0, 3)?.map((appointment) => {
+                  let finalStatus;
                   const doctor = doctors.find(d => d._id === appointment.doctorId);
                   const hospitals = hospital.find(h => h._id === appointment.hospitalId);
+                  if (appointment.status === "completed") {
+                    finalStatus = "Completed";
+                  } else {
+                    const today = new Date();
+                    today.setHours(0, 0, 0, 0);
 
+                    const appointmentDate = new Date(appointment.date);
+                    appointmentDate.setHours(0, 0, 0, 0);
+
+                    finalStatus = appointmentDate >= today ? "Active" : "Inactive";
+                  }
                   return (
                     <div key={appointment.id} className="bg-white rounded-lg shadow-md overflow-hidden border border-gray-100 transition-all duration-200 hover:shadow-lg">
                       <div className="p-5">
@@ -264,11 +275,11 @@ const Home = () => {
                                 <h3 className="font-semibold text-gray-800">{doctor?.name}</h3>
                                 <p className="text-sm text-gray-600">{doctor?.specialty}</p>
                               </div>
-                              <span className={`px-2 py-1 text-xs rounded-full ${appointment.status === 'confirmed' ? 'bg-green-100 text-green-800' :
-                                appointment.status === 'cancelled' ? 'bg-gray-100 text-gray-800' :
+                              <span className={`px-2 py-1 text-xs rounded-full ${finalStatus === 'Active' ? 'bg-green-100 text-green-800' :
+                                finalStatus === 'Inactive' ? 'bg-gray-100 text-gray-800' :
                                   'bg-blue-100 text-blue-800'
                                 }`}>
-                                {appointment.status}
+                                {finalStatus}
                               </span>
                             </div>
                             <div className="mt-3 text-sm text-gray-600 flex items-center">
