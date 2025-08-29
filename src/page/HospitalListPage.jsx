@@ -31,10 +31,19 @@ const HospitalListPage = () => {
         (async () => {
             setLoading(true);
             await dispatch(getAllDoctors());
-            await dispatch(getAllHospital());
+            // await dispatch(getAllHospital());
             setLoading(false);
         })();
     }, [dispatch]);
+    useEffect(() => {
+
+        if (!hospitals || hospitals.length === 0) {
+            dispatch(getAllHospital());
+            setLoading(false);
+        } else {
+            setLoading(false);
+        }
+    }, [dispatch, hospitals]);
 
     // Unique cities & specialties for filters
     const cities = Array.from(new Set(hospitals.map(hospital => hospital.city)));

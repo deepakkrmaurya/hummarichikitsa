@@ -127,14 +127,16 @@ const Home = () => {
       await dispatch(getAllAppointment());
       setAppointmentsLoading(false);
       // alert(hospital.length)
-     
-        await dispatch(getAllHospital());
-        setHospitalsLoading(false);
-    
-      
+
+      // await dispatch(getAllHospital());
+      // setHospitalsLoading(false);
+
+
       await dispatch(getAllDoctors());
       setDoctorsLoading(false);
     })();
+
+
 
     const interval = setInterval(() => {
       setCurrentImageIndex((prevIndex) =>
@@ -144,6 +146,16 @@ const Home = () => {
 
     return () => clearInterval(interval);
   }, []);
+
+   useEffect(() => {
+    
+      if (!hospital || hospital.length === 0) {
+        dispatch(getAllHospital());
+        setHospitalsLoading(false);
+      }else{
+           setHospitalsLoading(false);
+      }
+    }, [dispatch, hospital]);
 
   return (
     <Layout>
