@@ -10,8 +10,7 @@ import hospital_img from '../../src/assets/hospital_image.png';
 
 const HospitalListPage = () => {
     const navigate = useNavigate();
-      const hospitals = JSON.parse(localStorage.getItem("hospitals"));
-    // const hospitals = useSelector((state) => state.hospitals.hospitals);
+    const hospitals = useSelector((state) => state.hospitals.hospitals);
     const { doctors } = useSelector((state) => state?.doctors);
 
     const [searchTerm, setSearchTerm] = useState('');
@@ -32,13 +31,8 @@ const HospitalListPage = () => {
         (async () => {
             setLoading(true);
             await dispatch(getAllDoctors());
-            if(hospitals<=0){
-
-                await dispatch(getAllHospital());
-                setLoading(false);
-            }else{
-                setLoading(false);
-            }
+            await dispatch(getAllHospital());
+            setLoading(false);
         })();
     }, [dispatch]);
 

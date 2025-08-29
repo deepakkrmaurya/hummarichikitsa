@@ -96,8 +96,7 @@ const HospitalSkeleton = () => (
 
 const Home = () => {
   const navigate = useNavigate();
-  const hospital = JSON.parse(localStorage.getItem("hospitals"));
-  // const hospital = useSelector((state) => state.hospitals.hospitals);
+  const hospital = useSelector((state) => state.hospitals.hospitals);
   const currentUser = JSON.parse(localStorage.getItem('data')) || null;
   const isLoggdIn = JSON.parse(localStorage.getItem('isLoggedIn')) || false;
   const { doctors } = useSelector((state) => state?.doctors);
@@ -124,17 +123,15 @@ const Home = () => {
       setAppointmentsLoading(true);
       setHospitalsLoading(true);
       setDoctorsLoading(true);
-        
+
       await dispatch(getAllAppointment());
       setAppointmentsLoading(false);
-      if (hospital.length === 0) {
+      // alert(hospital.length)
+     
         await dispatch(getAllHospital());
         setHospitalsLoading(false);
-      }else{
-        setHospitalsLoading(false);
-      }
-
-
+    
+      
       await dispatch(getAllDoctors());
       setDoctorsLoading(false);
     })();
