@@ -96,22 +96,19 @@ const HospitalSkeleton = () => (
 
 const Home = () => {
   const navigate = useNavigate();
-  const hospital = useSelector((state) => state.hospitals.hospitals);
+  const hospital = JSON.parse(localStorage.getItem("hospitals"));
+  // const hospital = useSelector((state) => state.hospitals.hospitals);
   const currentUser = JSON.parse(localStorage.getItem('data')) || null;
   const isLoggdIn = JSON.parse(localStorage.getItem('isLoggedIn')) || false;
   const { doctors } = useSelector((state) => state?.doctors);
   const appointments = useSelector((state) => state.appointment?.appointment);
   const dispatch = useDispatch();
-  
+
   // Loading states
   const [hospitalsLoading, setHospitalsLoading] = useState(true);
   const [doctorsLoading, setDoctorsLoading] = useState(true);
   const [appointmentsLoading, setAppointmentsLoading] = useState(true);
 
-  const CancledAppointment = async (id) => {
-    await dispatch(AppointmentCancelled(id))
-    await dispatch(getAllAppointment())
-  }
   const backgroundImages = [
     'https://images.unsplash.com/photo-1576091160550-2173dba999ef?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80',
     'https://images.unsplash.com/photo-1530026186672-2cd00ffc50fe?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80',
@@ -121,23 +118,27 @@ const Home = () => {
     'https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80'
   ];
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
-  
+
   useEffect(() => {
     (async () => {
       setAppointmentsLoading(true);
       setHospitalsLoading(true);
       setDoctorsLoading(true);
-      
+        
       await dispatch(getAllAppointment());
       setAppointmentsLoading(false);
-      
-      await dispatch(getAllHospital());
-      setHospitalsLoading(false);
-      
+      if (hospital.length === 0) {
+        await dispatch(getAllHospital());
+        setHospitalsLoading(false);
+      }else{
+        setHospitalsLoading(false);
+      }
+
+
       await dispatch(getAllDoctors());
       setDoctorsLoading(false);
     })();
-    
+
     const interval = setInterval(() => {
       setCurrentImageIndex((prevIndex) =>
         (prevIndex + 1) % backgroundImages.length
@@ -236,7 +237,7 @@ const Home = () => {
               <AppointmentSkeleton />
             ) : appointments.length > 0 ? (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {appointments?.slice(0,3)?.map((appointment) => {
+                {appointments?.slice(0, 3)?.map((appointment) => {
                   const doctor = doctors.find(d => d._id === appointment.doctorId);
                   const hospitals = hospital.find(h => h._id === appointment.hospitalId);
 
@@ -418,7 +419,7 @@ const Home = () => {
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {hospital
-                .filter(hospital => hospital.status === 'active') 
+                .filter(hospital => hospital.status === 'active')
                 .slice(0, 3)
                 .map((hospital) => (
                   <div
