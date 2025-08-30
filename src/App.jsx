@@ -7,6 +7,7 @@ import { Routes, Route, Navigate } from "react-router-dom";
 import RequireAuth from './components/RequireAuth';
 import NotRequireAuth from './components/NotRequireAuth';
 import InternetChecker from './components/InternetChecker';
+import SignInButton from './page/SignInButton';
 
 
 const Home = lazy(() => import('./page/Home'))
@@ -72,7 +73,8 @@ function App() {
         <Suspense fallback={<Loading />}>
           <Routes>
             <Route element={<NotRequireAuth />}>
-              <Route path="/login" element={<MobileOTPLogin />} />
+              {/* <Route path="/login" element={<MobileOTPLogin />} /> */}
+              <Route path="/login" element={<SignInButton />} />
               <Route path='/doctor/login' element={<DoctorLogin />} />
 
             </Route>

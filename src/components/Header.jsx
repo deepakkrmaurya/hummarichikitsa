@@ -1,14 +1,17 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Menu, X, User, Calendar, LogOut } from 'lucide-react';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { Logout } from '../Redux/doctorSlice';
+import SignInButton from '../page/SignInButton';
 
 
 const Header = () => {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     //   const { currentUser, login, logout } = useApp();
-    const currentUser = JSON.parse(localStorage.getItem('data')) || null;
+    // const currentUser = JSON.parse(localStorage.getItem('data')) || null;
+    const currentUser = useSelector((store) => store?.auth)
+    // console.log(currentUser?.isLoggedIn)
     const isLoggdIn = JSON.parse(localStorage.getItem('isLoggedIn')) || false;
     const navigate = useNavigate();
 
@@ -32,7 +35,30 @@ const Header = () => {
         }
         setIsMenuOpen(false);
         navigate('/');
+        window.location.reload();
     };
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
     return (
         <header className="bg-white shadow-md sticky top-0 z-50">
@@ -58,9 +84,9 @@ const Header = () => {
                             </Link>
                         )}
 
-                        {currentUser ? (
+                        {currentUser?.isLoggedIn ? (
                             <div className="flex items-center">
-                                
+
                                 <button
                                     onClick={handleLogout}
                                     className="flex items-center text-gray-700 hover:text-red-600 transition"
@@ -71,15 +97,8 @@ const Header = () => {
                             </div>
                         ) : (
                             <div className="flex space-x-2">
-                                <Link to='/login'>
-                                    <button
-                                        onClick={() => handleLogin(false)}
-                                        className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition"
-                                    >
-                                        Patient Login
-                                    </button>
-                                </Link>
-
+                                <SignInButton/>
+                                
                                 <Link to='/doctor/login'>
                                     <button
                                         onClick={() => handleLogin(true)}
@@ -131,9 +150,9 @@ const Header = () => {
                                 </Link>
                             )}
 
-                            {currentUser ? (
+                            {currentUser?.isLoggedIn ? (
                                 <div className="flex flex-col space-y-2">
-                                    
+
                                     <button
                                         onClick={handleLogout}
                                         className="flex items-center text-gray-700 hover:text-red-600 transition"
@@ -144,14 +163,7 @@ const Header = () => {
                                 </div>
                             ) : (
                                 <div className="flex flex-col space-y-2">
-                                    <Link to='/login'>
-                                        <button
-                                            onClick={() => handleLogin(false)}
-                                            className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition"
-                                        >
-                                            Patient Login
-                                        </button>
-                                    </Link>
+                                    <SignInButton/>
                                     <Link to='/doctor/login'>
                                         <button
                                             onClick={() => handleLogin(true)}
