@@ -13,12 +13,12 @@ const DoctorListPage = () => {
   const navigate = useNavigate();
   const { hospitalId } = useParams();
   const dispatch = useDispatch();
-  
+
   // Redux state
   const hospitals = useSelector((state) => state.hospitals.hospitals);
   const { doctors, loading: doctorsLoading } = useSelector((state) => state.doctors);
   const { loading: hospitalsLoading } = useSelector((state) => state.hospitals);
-  
+
   // Local state
   const [selectedSpecialty, setSelectedSpecialty] = useState('');
   const [isFilterOpen, setIsFilterOpen] = useState(false);
@@ -27,14 +27,14 @@ const DoctorListPage = () => {
   // Find the current hospital and its doctors
   const hospital = hospitals.find(h => h._id === hospitalId);
   const hospitalDoctors = doctors.filter(d => d?.hospitalId?._id === hospitalId);
-  
+
   // Get unique specialties for filters
   const specialties = Array.from(
     new Set(hospitalDoctors.map(doctor => doctor.specialty))
   ).sort();
 
   // Filter doctors based on selected specialty
-  const filteredDoctors = selectedSpecialty 
+  const filteredDoctors = selectedSpecialty
     ? hospitalDoctors.filter(doctor => doctor.specialty === selectedSpecialty)
     : hospitalDoctors;
 
@@ -55,21 +55,25 @@ const DoctorListPage = () => {
 
   // Fetch data on component mount
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        await Promise.all([
-          dispatch(getAllHospital()),
-          dispatch(getAllDoctors())
-        ]);
-      } finally {
+    (async () => {
+      if (!hospital || hospital.length === 0) {
+
+        await dispatch(getAllHospital())
+        setIsLoading(false);
+      } else {
         setIsLoading(false);
       }
-    };
-    
-    fetchData();
-  }, [dispatch]);
 
-  // Loading state
+      if (!doctors || doctors.length === 0) {
+        await dispatch(getAllDoctors())
+      }
+
+    })()
+
+  }, [dispatch, hospitals, doctors]);
+  useEffect(() => {
+    window.scrollTo(0, 0); // Scrolls to top when page/component mounts
+  }, []);
   if (isLoading || hospitalsLoading || doctorsLoading) {
     return (
       <Layout>
@@ -166,7 +170,7 @@ const DoctorListPage = () => {
                 alt={hospital.name}
                 className="w-full h-auto rounded-lg object-cover"
                 style={{ maxHeight: '150px' }}
-                
+
               />
             </div>
             <div className="md:w-3/4">
@@ -228,11 +232,10 @@ const DoctorListPage = () => {
             <div className="flex flex-wrap gap-2">
               <button
                 onClick={() => setSelectedSpecialty('')}
-                className={`px-4 py-2 rounded-md text-sm font-medium ${
-                  selectedSpecialty === ''
-                    ? 'bg-blue-600 text-white'
-                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                } transition`}
+                className={`px-4 py-2 rounded-md text-sm font-medium ${selectedSpecialty === ''
+                  ? 'bg-blue-600 text-white'
+                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                  } transition`}
               >
                 All Specialties
               </button>
@@ -243,11 +246,10 @@ const DoctorListPage = () => {
                     setSelectedSpecialty(specialty);
                     setIsFilterOpen(false);
                   }}
-                  className={`px-4 py-2 rounded-md text-sm font-medium ${
-                    selectedSpecialty === specialty
-                      ? 'bg-blue-600 text-white'
-                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                  } transition`}
+                  className={`px-4 py-2 rounded-md text-sm font-medium ${selectedSpecialty === specialty
+                    ? 'bg-blue-600 text-white'
+                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                    } transition`}
                 >
                   {specialty}
                 </button>
@@ -270,7 +272,7 @@ const DoctorListPage = () => {
                       src={doctor.photo || avatar}
                       alt={doctor.name}
                       className="w-32 h-32 md:w-40 md:h-40 rounded-full object-cover border-4 border-white shadow-md"
-                      
+
                     />
                   </div>
                   <div className="p-6 md:w-3/4">

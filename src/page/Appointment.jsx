@@ -18,11 +18,26 @@ function Appointment() {
 
     useEffect(() => {
         (async () => {
-            await dispatch(getAllAppointment())
-            await dispatch(getAllDoctors())
-            await dispatch(getAllHospital())
+              if(!doctors || doctors.length === 0){
+                  await dispatch(getAllDoctors())
+              }
+
+              if(!hospital || hospital.length === 0 ){
+
+                  await dispatch(getAllHospital())
+              }
+      
         })()
-    }, [])
+    }, [dispatch,doctors,hospital])
+
+    useEffect(()=>{
+        if(!appointments || appointments.length===0){
+           (async()=>{
+            await dispatch(getAllAppointment())
+           })()
+        }
+    },[dispatch,appointments])
+
 
     // Function to format date with ordinal suffix
     const formatDate = (dateString) => {

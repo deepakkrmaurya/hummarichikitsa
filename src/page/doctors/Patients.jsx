@@ -56,18 +56,18 @@ const Patients = () => {
 
     // Filter appointments based on search and selected date
     const filteredAppointments = appointments?.filter(appointment => {
-    // Search term conditions from both filters
-    const matchesSearch = 
-        appointment._id.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        (appointment.patientId?.name && appointment.patientId.name.toLowerCase().includes(searchTerm.toLowerCase())) ||
-        appointment?.token?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        appointment.patient?.name?.toLowerCase().includes(searchTerm.toLowerCase());
-    
-    // Date condition from first filter
-    const matchesDate = selectedDate ? isSameDay(new Date(appointment.date), new Date(selectedDate)) : true;
-    
-    return matchesSearch && matchesDate;
-});
+        // Search term conditions from both filters
+        const matchesSearch =
+            appointment._id.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            (appointment.patientId?.name && appointment.patientId.name.toLowerCase().includes(searchTerm.toLowerCase())) ||
+            appointment?.token?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            appointment.patient?.name?.toLowerCase().includes(searchTerm.toLowerCase());
+
+        // Date condition from first filter
+        const matchesDate = selectedDate ? isSameDay(new Date(appointment.date), new Date(selectedDate)) : true;
+
+        return matchesSearch && matchesDate;
+    });
 
     // Get dates for current month view
     const getDaysInMonth = () => {
@@ -291,109 +291,124 @@ const Patients = () => {
                                 <tbody className="bg-white divide-y divide-gray-200">
                                     <AnimatePresence>
                                         {filteredAppointments?.length > 0 ? (
-                                            filteredAppointments.map((appointment) => (
-                                                <motion.tr
-                                                    key={appointment._id}
-                                                    initial={{ opacity: 0, y: 10 }}
-                                                    animate={{ opacity: 1, y: 0 }}
-                                                    exit={{ opacity: 0 }}
-                                                    transition={{ duration: 0.3 }}
-                                                    className="hover:bg-gray-50"
-                                                >
-                                                    <td className="px-6 py-4 whitespace-nowrap">
-                                                        <div className="flex items-center">
-                                                            <div className="h-10 w-10 rounded-full flex items-center justify-center" style={{ backgroundColor: `${colors.primary}20` }}>
-                                                                <User className="h-5 w-5" style={{ color: colors.primary }} />
-                                                            </div>
-                                                            <div className="ml-4">
-                                                                <div className="text-sm font-medium" style={{ color: colors.text }}>
-                                                                    {appointment.patientId?.name || `Patient ${appointment._id.slice(-4)}`}
-                                                                </div>
-                                                                <div className="text-xs" style={{ color: colors.muted }}>
-                                                                    ID: {appointment._id.slice(-6)}
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                    </td>
-                                                    <td className="px-6 py-4 whitespace-nowrap">
-                                                        <div className="text-sm font-medium" style={{ color: colors.text }}>{appointment.slot}</div>
-                                                        <div className="text-xs" style={{ color: colors.muted }}>
-                                                            {format(new Date(appointment.date), 'MMM d, yyyy')}
-                                                        </div>
-                                                    </td>
-                                                    <td className="px-6 py-4 whitespace-nowrap">
-                                                        <div className="text-sm font-medium" style={{ color: colors.text }}>{appointment.token}</div>
+                                            filteredAppointments.map((appointment) => {
+                                                let finalStatus;
+                                                if (appointment.status === "completed") {
+                                                    finalStatus = "Completed";
+                                                } else {
+                                                    const today = new Date();
+                                                    today.setHours(0, 0, 0, 0);
 
-                                                    </td>
-                                                    <td className="px-6 py-4 whitespace-nowrap">
-                                                        <motion.span
-                                                            className={`px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${appointment?.status === 'confirmed'
-                                                                ? 'bg-green-100 text-green-800'
-                                                                : appointment?.status === 'pending'
-                                                                    ? 'bg-yellow-100 text-yellow-800'
-                                                                    : appointment?.status === 'cancelled'
-                                                                        ? 'bg-red-100 text-red-800'
-                                                                        : 'bg-blue-100 text-blue-800'
-                                                                }`}
-                                                            initial={{ opacity: 0, scale: 0.8 }}
-                                                            animate={{
-                                                                opacity: 1,
-                                                                scale: 1,
-                                                                transition: { type: 'spring', stiffness: 300 }
-                                                            }}
-                                                            whileHover={{ scale: 1.05 }}
-                                                            whileTap={{ scale: 0.95 }}
-                                                        >
-                                                            {appointment?.status.charAt(0).toUpperCase() + appointment?.status.slice(1)}
-                                                        </motion.span>
-                                                    </td>
-                                                    <td className="px-6 py-4 whitespace-nowrap">
-                                                        <span className={`px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full 
-                                                            ${appointment.paymentStatus === 'completed'
-                                                                ? 'bg-green-100 text-green-800'
-                                                                : 'bg-yellow-100 text-yellow-800'
-                                                            }`}>
-                                                            {appointment.paymentStatus.charAt(0).toUpperCase() + appointment.paymentStatus.slice(1)}
-                                                        </span>
-                                                    </td>
-                                                    <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                                        <Link to={`/appointment/${appointment?._id}`}>
-                                                            <motion.button
+                                                    const appointmentDate = new Date(appointment.date);
+                                                    appointmentDate.setHours(0, 0, 0, 0);
+
+                                                    finalStatus = appointmentDate >= today ? "Active" : "Inactive";
+                                                }
+                                                return (
+                                                    <motion.tr
+                                                        key={appointment._id}
+                                                        initial={{ opacity: 0, y: 10 }}
+                                                        animate={{ opacity: 1, y: 0 }}
+                                                        exit={{ opacity: 0 }}
+                                                        transition={{ duration: 0.3 }}
+                                                        className="hover:bg-gray-50"
+                                                    >
+                                                        <td className="px-6 py-4 whitespace-nowrap">
+                                                            <div className="flex items-center">
+                                                                <div className="h-10 w-10 rounded-full flex items-center justify-center" style={{ backgroundColor: `${colors.primary}20` }}>
+                                                                    <User className="h-5 w-5" style={{ color: colors.primary }} />
+                                                                </div>
+                                                                <div className="ml-4">
+                                                                    <div className="text-sm font-medium" style={{ color: colors.text }}>
+                                                                        {appointment.patientId?.name || `Patient ${appointment._id.slice(-4)}`}
+                                                                    </div>
+                                                                    <div className="text-xs" style={{ color: colors.muted }}>
+                                                                        ID: {appointment._id.slice(-6)}
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </td>
+                                                        <td className="px-6 py-4 whitespace-nowrap">
+                                                            <div className="text-sm font-medium" style={{ color: colors.text }}>{appointment.slot}</div>
+                                                            <div className="text-xs" style={{ color: colors.muted }}>
+                                                                {format(new Date(appointment.date), 'MMM d, yyyy')}
+                                                            </div>
+                                                        </td>
+                                                        <td className="px-6 py-4 whitespace-nowrap">
+                                                            <div className="text-sm font-medium" style={{ color: colors.text }}>{appointment.token}</div>
+
+                                                        </td>
+                                                        <td className="px-6 py-4 whitespace-nowrap">
+                                                            <motion.span
+                                                                className={`px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${finalStatus === 'Active'
+                                                                    ? 'bg-green-100 text-green-800'
+                                                                    : finalStatus === 'completed'
+                                                                        ? 'bg-yellow-100 text-yellow-800'
+                                                                        : finalStatus === 'Inactive'
+                                                                            ? 'bg-red-100 text-red-800'
+                                                                            : 'bg-blue-100 text-blue-800'
+                                                                    }`}
+                                                                initial={{ opacity: 0, scale: 0.8 }}
+                                                                animate={{
+                                                                    opacity: 1,
+                                                                    scale: 1,
+                                                                    transition: { type: 'spring', stiffness: 300 }
+                                                                }}
                                                                 whileHover={{ scale: 1.05 }}
                                                                 whileTap={{ scale: 0.95 }}
-                                                                className="px-3 py-1 rounded-lg"
-                                                                style={{
-                                                                    backgroundColor: `${colors.primary}20`,
-                                                                    color: colors.primary
-                                                                }}
                                                             >
-                                                                View Details
-                                                            </motion.button>
-                                                        </Link>
-
-                                                        {
-                                                            appointment.status !== 'completed' && (
+                                                                {finalStatus.charAt(0).toUpperCase() + finalStatus.slice(1)}
+                                                            </motion.span>
+                                                        </td>
+                                                        <td className="px-6 py-4 whitespace-nowrap">
+                                                            <span className={`px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full 
+                                                            ${appointment.paymentStatus === 'completed'
+                                                                    ? 'bg-green-100 text-green-800'
+                                                                    : 'bg-yellow-100 text-yellow-800'
+                                                                }`}>
+                                                                {appointment.paymentStatus.charAt(0).toUpperCase() + appointment.paymentStatus.slice(1)}
+                                                            </span>
+                                                        </td>
+                                                        <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                                            <Link to={`/appointment/${appointment?._id}`}>
                                                                 <motion.button
-                                                                    onClick={() => {
-                                                                        if (window.confirm("Are you sure you want to mark this appointment as completed?")) {
-                                                                            ConfirmAppointment(appointment?._id);
-                                                                        }
-                                                                    }}
                                                                     whileHover={{ scale: 1.05 }}
                                                                     whileTap={{ scale: 0.95 }}
-                                                                    className="px-3 py-1 rounded-lg mr-2"
+                                                                    className="px-3 py-1 rounded-lg"
                                                                     style={{
                                                                         backgroundColor: `${colors.primary}20`,
                                                                         color: colors.primary
                                                                     }}
                                                                 >
-                                                                    Complete
+                                                                    View Details
                                                                 </motion.button>
-                                                            )
-                                                        }
-                                                    </td>
-                                                </motion.tr>
-                                            ))
+                                                            </Link>
+
+                                                            {
+                                                                appointment.status !== 'completed' && (
+                                                                    <motion.button
+                                                                        onClick={() => {
+                                                                            if (window.confirm("Are you sure you want to mark this appointment as completed?")) {
+                                                                                ConfirmAppointment(appointment?._id);
+                                                                            }
+                                                                        }}
+                                                                        whileHover={{ scale: 1.05 }}
+                                                                        whileTap={{ scale: 0.95 }}
+                                                                        className="px-3 py-1 rounded-lg mr-2"
+                                                                        style={{
+                                                                            backgroundColor: `${colors.primary}20`,
+                                                                            color: colors.primary
+                                                                        }}
+                                                                    >
+                                                                        Complete
+                                                                    </motion.button>
+                                                                )
+                                                            }
+                                                        </td>
+                                                    </motion.tr>
+                                                )
+                                            }
+                                            )
                                         ) : (
                                             <motion.tr
                                                 initial={{ opacity: 0 }}

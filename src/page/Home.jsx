@@ -120,16 +120,12 @@ const Home = () => {
 
   useEffect(() => {
     (async () => {
-      setAppointmentsLoading(true);
+
       setHospitalsLoading(true);
       setDoctorsLoading(true);
 
-      await dispatch(getAllAppointment());
-      setAppointmentsLoading(false);
-      // alert(hospital.length)
 
-      // await dispatch(getAllHospital());
-      // setHospitalsLoading(false);
+
 
 
       await dispatch(getAllDoctors());
@@ -146,6 +142,17 @@ const Home = () => {
 
     return () => clearInterval(interval);
   }, []);
+
+  useEffect(() => {
+    setAppointmentsLoading(true);
+    if (!appointments || appointments.length === 0) {
+      dispatch(getAllAppointment());
+      setAppointmentsLoading(false);
+    } else {
+      setAppointmentsLoading(false);
+    }
+  }, [dispatch, appointments])
+
 
   useEffect(() => {
 
