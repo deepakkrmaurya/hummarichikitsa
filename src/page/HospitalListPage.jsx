@@ -36,7 +36,7 @@ const HospitalListPage = () => {
         })();
     }, [dispatch]);
     useEffect(() => {
-
+        setLoading(true);
         if (!hospitals || hospitals.length === 0) {
             dispatch(getAllHospital());
             setLoading(false);

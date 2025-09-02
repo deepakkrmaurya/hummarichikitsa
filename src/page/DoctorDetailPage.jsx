@@ -113,7 +113,7 @@ const DoctorDetailPage = () => {
     const handleBooking = async () => {
         if (!isLoggdIn) {
             toast.error('Please log in to book an appointment');
-            navigate('/login');
+            navigate('/');
             return;
         }
 

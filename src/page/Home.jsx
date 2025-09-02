@@ -155,7 +155,7 @@ const Home = () => {
 
 
   useEffect(() => {
-
+      setHospitalsLoading(true);
     if (!hospital || hospital.length === 0) {
       dispatch(getAllHospital());
       setHospitalsLoading(false);
