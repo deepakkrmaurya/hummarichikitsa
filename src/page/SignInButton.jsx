@@ -15,7 +15,10 @@ const SignInButton = () => {
         // Define the listener function
         window.phoneEmailListener = async function(userObj) {
             const user_json_url = userObj.user_json_url;
-            const response = await dispatch(AuthLogin({ userid: userObj.user_phone_number }));
+            useEffect(()=>{
+
+                const response = await dispatch(AuthLogin({ userid: userObj.user_phone_number }));
+            },[])
             // document.querySelector('.pe_signin_button').insertAdjacentHTML('beforeend', `<span>Phone Verification Successful !! <br />Read the following user_json_url from the backend to get the verified phone number - ${user_json_url} <br /> Please delete this debug message code from the phoneEmailListener function once you implement integration step 2.</span>`);
         };
 
