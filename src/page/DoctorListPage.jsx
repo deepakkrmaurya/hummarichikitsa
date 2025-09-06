@@ -70,10 +70,12 @@ const DoctorListPage = () => {
 
     })()
 
-  }, [dispatch, hospitals, doctors]);
+  }, []);
   useEffect(() => {
     window.scrollTo(0, 0); // Scrolls to top when page/component mounts
   }, []);
+
+  
   if (isLoading || hospitalsLoading || doctorsLoading) {
     return (
       <Layout>

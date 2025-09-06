@@ -1,7 +1,7 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { CheckCircle, Calendar, MapPin, Phone, Mail, Download, Share2, ChevronLeft } from 'lucide-react';
-import { getAllAppointment } from '../Redux/appointment';
+import { getAllAppointment, getAppointmentById } from '../Redux/appointment';
 import { getAllHospital } from '../Redux/hospitalSlice';
 import { getAllDoctors } from '../Redux/doctorSlice';
 import { useDispatch, useSelector } from 'react-redux';
@@ -16,20 +16,8 @@ const ConfirmationPage = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const { appointmentId } = useParams();
+  const [appointment,setappointment]=useState(null)
 
-  // Redux state
-  const hospitals = useSelector((state) => state?.hospitals?.hospitals);
-  const { doctors, loading: doctorsLoading } = useSelector((state) => state?.doctors);
-  const { appointment: appointments, loading: appointmentsLoading } = useSelector((state) => state.appointment);
-  const { loading: hospitalsLoading } = useSelector((state) => state.hospitals);
-
-  // Find appointment, doctor, and hospital
-  const appointment = appointments.find(a => a._id === appointmentId);
-
-  const doctor = appointment ? doctors.find(d => d._id === appointment?.doctorId?._id) : null;
-  const hospital = appointment ? hospitals.find(h => h._id === appointment?.hospitalId) : null;
-
-  // Format date for display
   const formatDate = (dateString) => {
     if (!dateString) return '';
     const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
@@ -41,36 +29,16 @@ const ConfirmationPage = () => {
     if (!slot) return '';
     return slot.replace(/(\d+)([ap]m)/i, '$1 $2').toUpperCase();
   };
-
-
-
   // Fetch data on component mount
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        await Promise.all([
-          dispatch(getAllAppointment()),
-          dispatch(getAllHospital()),
-          dispatch(getAllDoctors())
-        ]);
-      } catch (error) {
-        console.error("Error fetching data:", error);
-      }
-    };
+  (async()=>{
+   const app = await dispatch(getAppointmentById(appointmentId))
+   setappointment(app.payload)
+  })()
 
-    fetchData();
-  }, [dispatch]);
-
-
-  const hospitalLogo = 'data:image/png;base64,...';
-
+  }, []);
   const downloadPdfReceipt = () => {
     const doc = new jsPDF();
-
-    // Header Section: Logo + Title
-    // if (hospitalLogo) {
-    //   doc.addImage(hospitalLogo, 'PNG', 20, 10, 30, 30); // Position and size as needed
-    // }
     doc.setFontSize(22);
     doc.setTextColor(13, 148, 136); // Teal color
     doc.setFont('helvetica', 'bold');
@@ -82,10 +50,10 @@ const ConfirmationPage = () => {
     doc.roundedRect(150, 14, 45, 20, 3, 3, 'F'); // Rounded info box
     doc.setFontSize(11);
     doc.setTextColor(13, 148, 136);
-    doc.text(hospital?.name || '', 153, 22);
+    doc.text(appointment?.hospitalId?.name || '', 153, 22);
     doc.setFontSize(9);
     doc.setTextColor(81, 86, 102);  // Greyish text
-    doc.text(`${hospital?.address || ''}, ${hospital?.city || ''}`, 153, 29);
+    doc.text(`${appointment?.hospitalId?.address || ''}, ${appointment?.hospitalId?.city || ''}`, 153, 29);
 
     // Divider Line
     doc.setDrawColor(13, 148, 136);
@@ -104,7 +72,7 @@ const ConfirmationPage = () => {
     doc.setTextColor(0, 0, 0);
     doc.setFont('helvetica', 'normal');
     doc.text(`Patient: ${appointment?.patient}`, 22, 65);
-    doc.text(`Doctor: Dr. ${doctor?.name} (${doctor?.specialty})`, 22, 72);
+    doc.text(`Doctor: ${appointment?.doctorId?.name} (${appointment?.doctorId?.specialty})`, 22, 72);
     doc.text(`Date: ${formatDate(appointment?.date)}`, 22, 79);
     doc.text(`Time: ${formatTimeSlot(appointment?.slot)}`, 22, 86);
     doc.text(`Token No: ${appointment?.token}`, 22, 93);
@@ -141,66 +109,66 @@ const ConfirmationPage = () => {
   };
 
   // Loading state
-  if (appointmentsLoading || hospitalsLoading || doctorsLoading) {
-    return (
-      <Layout>
-        <div className="container mx-auto px-4 py-8">
-          <div className="max-w-3xl mx-auto">
-            {/* Confirmation Header Skeleton */}
-            <div className="bg-white rounded-xl shadow-sm p-8 mb-8 text-center border border-teal-100">
-              <Skeleton circle width={80} height={80} className="mb-6 mx-auto" />
-              <Skeleton width={250} height={30} className="mb-2 mx-auto" />
-              <Skeleton width={300} height={20} className="mb-6 mx-auto" />
-              <Skeleton width={200} height={30} className="mx-auto" />
-            </div>
+  // if (appointmentsLoading || hospitalsLoading || doctorsLoading) {
+  //   return (
+  //     <Layout>
+  //       <div className="container mx-auto px-4 py-8">
+  //         <div className="max-w-3xl mx-auto">
+  //           {/* Confirmation Header Skeleton */}
+  //           <div className="bg-white rounded-xl shadow-sm p-8 mb-8 text-center border border-teal-100">
+  //             <Skeleton circle width={80} height={80} className="mb-6 mx-auto" />
+  //             <Skeleton width={250} height={30} className="mb-2 mx-auto" />
+  //             <Skeleton width={300} height={20} className="mb-6 mx-auto" />
+  //             <Skeleton width={200} height={30} className="mx-auto" />
+  //           </div>
 
-            {/* Appointment Details Skeleton */}
-            <div className="bg-white rounded-xl shadow-sm overflow-hidden mb-8 border border-teal-100">
-              <Skeleton height={50} className="bg-teal-600 mb-0" />
-              <div className="p-6">
-                <div className="flex items-start mb-6">
-                  <Skeleton circle width={64} height={64} className="mr-4" />
-                  <div>
-                    <Skeleton width={150} height={20} className="mb-2" />
-                    <Skeleton width={100} height={16} className="mb-1" />
-                    <Skeleton width={120} height={14} />
-                  </div>
-                </div>
+  //           {/* Appointment Details Skeleton */}
+  //           <div className="bg-white rounded-xl shadow-sm overflow-hidden mb-8 border border-teal-100">
+  //             <Skeleton height={50} className="bg-teal-600 mb-0" />
+  //             <div className="p-6">
+  //               <div className="flex items-start mb-6">
+  //                 <Skeleton circle width={64} height={64} className="mr-4" />
+  //                 <div>
+  //                   <Skeleton width={150} height={20} className="mb-2" />
+  //                   <Skeleton width={100} height={16} className="mb-1" />
+  //                   <Skeleton width={120} height={14} />
+  //                 </div>
+  //               </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-                  {[1, 2].map((i) => (
-                    <div key={i} className="flex items-start">
-                      <Skeleton circle width={20} height={20} className="mr-2 mt-0.5" />
-                      <div>
-                        <Skeleton width={80} height={14} className="mb-1" />
-                        <Skeleton width={120} height={16} />
-                      </div>
-                    </div>
-                  ))}
-                </div>
+  //               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+  //                 {[1, 2].map((i) => (
+  //                   <div key={i} className="flex items-start">
+  //                     <Skeleton circle width={20} height={20} className="mr-2 mt-0.5" />
+  //                     <div>
+  //                       <Skeleton width={80} height={14} className="mb-1" />
+  //                       <Skeleton width={120} height={16} />
+  //                     </div>
+  //                   </div>
+  //                 ))}
+  //               </div>
 
-                <Skeleton height={1} className="mb-6" />
+  //               <Skeleton height={1} className="mb-6" />
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-                  {[1, 2, 3, 4].map((i) => (
-                    <div key={i}>
-                      <Skeleton width={100} height={14} className="mb-1" />
-                      <Skeleton width={150} height={16} />
-                    </div>
-                  ))}
-                </div>
+  //               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+  //                 {[1, 2, 3, 4].map((i) => (
+  //                   <div key={i}>
+  //                     <Skeleton width={100} height={14} className="mb-1" />
+  //                     <Skeleton width={150} height={16} />
+  //                   </div>
+  //                 ))}
+  //               </div>
 
-                <div className="flex justify-between">
-                  <Skeleton width={120} height={40} />
-                  <Skeleton width={80} height={40} />
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </Layout>
-    );
-  }
+  //               <div className="flex justify-between">
+  //                 <Skeleton width={120} height={40} />
+  //                 <Skeleton width={80} height={40} />
+  //               </div>
+  //             </div>
+  //           </div>
+  //         </div>
+  //       </div>
+  //     </Layout>
+  //   );
+  // }
 
   // Appointment not found state
   // if (!appointment || !doctor || !hospital) {
@@ -219,6 +187,10 @@ const ConfirmationPage = () => {
   //     </Layout>
   //   );
   // }
+
+  useEffect(() => {
+        window.scrollTo({ top: 0, behavior: "smooth" });
+    }, []);
 
   return (
     <Layout>
@@ -240,7 +212,7 @@ const ConfirmationPage = () => {
             </div>
             <h1 className="text-2xl font-bold text-gray-800 mb-2">Appointment Confirmed!</h1>
             <p className="text-gray-600 mb-6">
-              Your appointment with Dr. {doctor?.name} has been successfully booked.
+              Your appointment with {appointment?.doctorId?.name} has been successfully booked.
             </p>
             <div className="inline-block bg-teal-50 text-teal-800 px-4 py-2 rounded-lg font-medium border border-teal-100">
               Token No: {appointment?.token}
@@ -258,17 +230,17 @@ const ConfirmationPage = () => {
               {/* Doctor Info */}
               <div className="flex items-start mb-6">
                 {
-                  doctor?.photo ? (
+                  appointment?.doctorId?.photo ? (
                     <img
-                      src={doctor?.photo}
-                      alt={doctor?.name}
+                      src={appointment?.doctorId?.photo}
+                      alt={appointment?.doctorId?.name}
                       className="w-16 h-16 rounded-full object-cover mr-4 border-2 border-white shadow-sm"
 
                     />
                   ) : (
                     <img
                       src={avatar}
-                      alt={doctor?.name}
+                      alt={appointment?.doctorId?.name}
                       className="w-16 h-16 rounded-full object-cover mr-4 border-2 border-white shadow-sm"
 
                     />
@@ -277,9 +249,9 @@ const ConfirmationPage = () => {
 
 
                 <div>
-                  <h3 className="font-semibold text-gray-800 text-lg">Dr. {doctor?.name}</h3>
-                  <p className="text-teal-600">{doctor?.specialty}</p>
-                  <p className="text-gray-600 text-sm">{hospital?.name}</p>
+                  <h3 className="font-semibold text-gray-800 text-lg">{appointment?.doctorId?.name}</h3>
+                  <p className="text-teal-600">{appointment?.doctorId?.specialty}</p>
+                  <p className="text-gray-600 text-sm">{appointment?.hospitalId?.name}</p>
                 </div>
               </div>
 
@@ -299,7 +271,7 @@ const ConfirmationPage = () => {
                   <div>
                     <p className="text-sm text-gray-500">Location</p>
                     <p className="font-medium text-gray-800">
-                      {hospital?.address}, {hospital?.city}
+                      {appointment?.hospitalId?.address}, {appointment?.hospitalId?.city}
                     </p>
                   </div>
                 </div>
@@ -419,10 +391,10 @@ const ConfirmationPage = () => {
                   <div>
                     <p className="text-sm text-gray-500">Hospital Phone</p>
                     <a
-                      href={`tel:${hospital?.phone}`}
+                      href={`tel:${appointment?.hospitalId?.phone}`}
                       className="font-medium text-gray-800 hover:text-teal-600 transition"
                     >
-                      {hospital?.phone}
+                      {appointment?.hospitalId?.phone}
                     </a>
                   </div>
                 </div>
@@ -431,10 +403,10 @@ const ConfirmationPage = () => {
                   <div>
                     <p className="text-sm text-gray-500">Email</p>
                     <a
-                      href={`mailto:${hospital?.email}`}
+                      href={`mailto:${appointment?.hospitalId?.email}`}
                       className="font-medium text-gray-800 hover:text-teal-600 transition"
                     >
-                      {hospital?.email}
+                      {appointment?.hospitalId?.email}
                     </a>
                   </div>
                 </div>
@@ -443,7 +415,7 @@ const ConfirmationPage = () => {
                   <div>
                     <p className="text-sm text-gray-500">Address</p>
                     <p className="font-medium text-gray-800">
-                      {hospital?.address}, {hospital?.city}, {hospital?.state} - {hospital?.pincode}
+                      {appointment?.hospitalId?.address}, {appointment?.hospitalId?.city}, {appointment?.hospitalId?.state} - {appointment?.hospitalId?.pincode}
                     </p>
                   </div>
                 </div>

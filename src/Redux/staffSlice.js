@@ -45,6 +45,6 @@ export const getStaffByHospitalId = createAsyncThunk('/staff/get', async (id) =>
         const response = axiosInstance.get(`/staff/${id}`)
         return (await response)?.data
     } catch (error) {
-        toast.error(error?.response?.data?.message)
+        // toast.error(error?.response?.data?.message)
     }
 })

@@ -1,45 +1,46 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Calendar, Clock, User, FileText, BarChart, Settings } from 'lucide-react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Link, useNavigate } from 'react-router-dom';
 import { Logout } from '../../Redux/doctorSlice';
 import avatar from '../../../src/assets/logo-def.png';
+import axiosInstance from '../../Helper/axiosInstance';
 const Dashboard = ({ children }) => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  // const [data,setData]=useState();
-  const { isLoggedIn,role,data } = useSelector((state) => state.auth);
+  const [data, setData] = useState();
+  const { isLoggedIn, role } = useSelector((state) => state.auth);
   const [activeTab, setActiveTab] = useState('appointments');
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   // var role  = data?.role
-  // useEffect(() => {
-  //   async function fetchData() {
-  //     try {
-  //       const response = await axiosInstance.get("/user/me");
-  //       // console.log(response.data.role);
-  //       setData(response.data);
-  //     } catch (error) {
-  //       console.error("Error fetching data:", error);
-  //     }
-  //   }
-  //   fetchData();
-  // }, []);
+  useEffect(() => {
+    async function fetchData() {
+      try {
+        const response = await axiosInstance.get("/user/me");
+        setData(response.data);
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      }
+    }
+    fetchData();
+  }, []);
 
-    const handleLogout = async () => {
-            
-           const res = await dispatch(Logout())
-           if (res?.payload?.success) {
-               localStorage.removeItem("data");
-               localStorage.removeItem("isLoggedIn");
-               localStorage.removeItem("role");
-               localStorage.clear();
-               navigate('/');
-           }
-       };
+  const handleLogout = async () => {
+
+    const res = await dispatch(Logout())
+    if (res?.payload?.success) {
+      localStorage.removeItem("data");
+      localStorage.removeItem("isLoggedIn");
+      localStorage.removeItem("role");
+      localStorage.clear();
+      window.location.reload();
+      navigate('/');
+    }
+  };
   return (
     <div className=" sticky top-0 mx-auto">
       {/* Mobile Header */}
-      <div className="lg:hidden flex justify-between items-center mb-4">
+      <div className="lg:hidden px-5 flex justify-between items-center mb-4">
         <h1 className="text-xl font-bold text-gray-800">Doctor Dashboard</h1>
         <button
           onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
@@ -63,7 +64,7 @@ const Dashboard = ({ children }) => {
             <div className="p-4 sm:p-6 bg-gradient-to-r from-[rgb(43,108,176)] to-[rgb(33,88,156)] text-white">
               <div className="flex items-center">
                 <img
-                  src={avatar}
+                  src={data?.user?.photo || avatar}
                   alt={"currentUser.name"}
                   className="w-12 h-12 sm:w-16 sm:h-16 rounded-full object-cover border-2 border-white mr-3 sm:mr-4"
                 />
@@ -120,24 +121,24 @@ const Dashboard = ({ children }) => {
                 } */}
 
                 {
-                  role !== 'admin' &&(
+                  role !== 'admin' && (
                     <li>
-                  <Link to={`/book/appointment`}>
-                  <button
-                    onClick={() => {
-                      setActiveTab('bookAppointment');
-                      setMobileMenuOpen(false);
-                    }}
-                    className={`w-full flex items-center p-2 sm:p-3 rounded-lg transition text-sm sm:text-base ${activeTab === 'bookAppointment'
-                      ? 'bg-blue-50 text-blue-700'
-                      : 'text-gray-700 hover:bg-gray-100'
-                      }`}
-                  >
-                    <Clock className="h-4 w-4 sm:h-5 sm:w-5 mr-2 sm:mr-3" />
-                    <span className="font-medium">Book Appointment</span>
-                  </button>
-                  </Link>
-                </li>
+                      <Link to={`/book/appointment`}>
+                        <button
+                          onClick={() => {
+                            setActiveTab('bookAppointment');
+                            setMobileMenuOpen(false);
+                          }}
+                          className={`w-full flex items-center p-2 sm:p-3 rounded-lg transition text-sm sm:text-base ${activeTab === 'bookAppointment'
+                            ? 'bg-blue-50 text-blue-700'
+                            : 'text-gray-700 hover:bg-gray-100'
+                            }`}
+                        >
+                          <Clock className="h-4 w-4 sm:h-5 sm:w-5 mr-2 sm:mr-3" />
+                          <span className="font-medium">Book Appointment</span>
+                        </button>
+                      </Link>
+                    </li>
                   )
                 }
                 <li>

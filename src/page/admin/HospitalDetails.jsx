@@ -3,7 +3,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 import {
     FaHospital, FaPhone, FaEnvelope, FaGlobe, FaStar,
     FaMapMarkerAlt, FaEdit, FaUserMd, FaProcedures, FaBed,
-    FaSearch, FaPlus, FaCalendarAlt, FaChartLine
+    FaSearch, FaPlus, FaCalendarAlt, FaChartLine, FaUsers,
+    FaTrash, FaEye, FaClinicMedical
 } from 'react-icons/fa';
 import Dashboard from '../../components/Layout/Dashboard';
 import axiosInstance from '../../Helper/axiosInstance';
@@ -14,6 +15,7 @@ import { GetHospitalById } from '../../Redux/hospitalSlice';
 import { toast } from 'react-hot-toast';
 import { GetStaff, getStaffByHospitalId, StaffDelete } from '../../Redux/staffSlice';
 import avatar from '../../../src/assets/logo-def.png';
+
 const HospitalDetails = () => {
     const navigate = useNavigate();
     const [hospital, setHospital] = useState(null);
@@ -27,15 +29,17 @@ const HospitalDetails = () => {
 
     // Professional healthcare color scheme
     const colors = {
-        primary: '#2563eb',      // Vibrant blue
-        secondary: '#3b82f6',    // Light blue
-        accent: '#10b981',       // Emerald green
-        danger: '#ef4444',       // Red
-        warning: '#f59e0b',      // Amber
-        background: '#f8fafc',   // Lightest gray
-        card: '#ffffff',         // White
-        text: '#1e293b',         // Dark slate
-        muted: '#64748b'         // Slate
+        primary: '#1e40af',           // Deep blue
+        secondary: '#3b82f6',         // Medium blue
+        accent: '#0ea5e9',            // Sky blue
+        success: '#10b981',           // Emerald green
+        danger: '#ef4444',            // Red
+        warning: '#f59e0b',           // Amber
+        background: '#f8fafc',        // Lightest blue-gray
+        card: '#ffffff',              // White
+        text: '#1e293b',              // Dark slate
+        muted: '#64748b',             // Slate
+        border: '#e2e8f0'             // Light border
     };
 
     const getHospitalById = async () => {
@@ -47,16 +51,15 @@ const HospitalDetails = () => {
             toast.error("Failed to load hospital data");
         }
     };
+    
     const getstaff = async () => {
         try {
-            "getStaffByHospitalId"
             const res = await dispatch(getStaffByHospitalId(id))
             const data = res?.payload
             setStaff(data)
-
         } catch (error) {
-            console.error("Error fetching doctors:", error);
-            toast.error("Failed to load doctors");
+            console.error("Error fetching staff:", error);
+            toast.error("Failed to load staff");
         }
     };
 
@@ -67,8 +70,8 @@ const HospitalDetails = () => {
                 getstaff()
             }
         } catch (error) {
-            console.error("Error fetching hospital:", error);
-            toast.error("Failed to load hospital data");
+            console.error("Error deleting staff:", error);
+            toast.error("Failed to delete staff");
         }
     };
 
@@ -113,6 +116,7 @@ const HospitalDetails = () => {
         doc.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
         doc.specialty.toLowerCase().includes(searchTerm.toLowerCase())
     );
+    
     const filteredStaff = staff?.filter(doc =>
         doc.name.toLowerCase().includes(searchTerm.toLowerCase())
     );
@@ -134,7 +138,7 @@ const HospitalDetails = () => {
     };
 
     const statusBadgeVariants = {
-        active: { backgroundColor: colors.accent },
+        active: { backgroundColor: colors.success },
         deactive: { backgroundColor: colors.danger }
     };
 
@@ -170,7 +174,6 @@ const HospitalDetails = () => {
                         style={{
                             backgroundColor: colors.primary,
                             color: 'white',
-                            ':hover': { backgroundColor: colors.secondary }
                         }}
                     >
                         Back to Hospitals
@@ -186,34 +189,30 @@ const HospitalDetails = () => {
                 initial="hidden"
                 animate="show"
                 variants={containerVariants}
-                className="min-h-screen"
+                className="h-screen flex flex-col overflow-hidden"
                 style={{ backgroundColor: colors.background }}
             >
                 {/* Header Section */}
                 <motion.div
                     variants={itemVariants}
-                    className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4 p-6 rounded-xl"
+                    className="flex flex-col md:flex-row justify-between items-start md:items-center p-4 md:p-6 gap-4 flex-shrink-0"
                     style={{
-                        backgroundColor: '#2B6CB0',
-                        backgroundImage: ''
+                        background: `linear-gradient(135deg, ${colors.primary} 0%, ${colors.secondary} 100%)`,
+                        color: 'white'
                     }}
                 >
                     <div>
-                        <h1 className="text-2xl md:text-3xl font-bold text-white">Hospital Profile</h1>
-                        <p className="text-sm" style={{ color: 'rgba(255,255,255,0.9)' }}>
+                        <h1 className="text-2xl md:text-3xl font-bold">Hospital Profile</h1>
+                        <p className="text-sm opacity-90">
                             Detailed view and management of hospital information
                         </p>
                     </div>
-                    <div className="flex flex-wrap gap-3">
+                    <div className="flex flex-wrap gap-2">
                         <Link to={`/hospital/update/${id}`}>
                             <motion.button
                                 whileHover={{ scale: 1.05 }}
                                 whileTap={{ scale: 0.95 }}
-                                className="flex items-center gap-2 px-5 py-2.5 rounded-xl shadow-md transition-all"
-                                style={{
-                                    backgroundColor: colors.accent,
-                                    color: 'white'
-                                }}
+                                className="flex items-center gap-2 px-4 py-2 rounded-xl shadow-md transition-all  bg-opacity-20 hover:bg-opacity-30 backdrop-blur-sm text-sm md:text-base"
                             >
                                 <FaEdit /> Edit Profile
                             </motion.button>
@@ -222,11 +221,7 @@ const HospitalDetails = () => {
                             whileHover={{ scale: 1.05 }}
                             whileTap={{ scale: 0.95 }}
                             onClick={() => navigate(-1)}
-                            className="flex items-center gap-2 px-5 py-2.5 rounded-xl shadow-md transition-all"
-                            style={{
-                                backgroundColor: 'rgba(255,255,255,0.9)',
-                                color: colors.primary
-                            }}
+                            className="flex items-center gap-2 px-4 py-2 rounded-xl shadow-md transition-all bg-white text-blue-800 text-sm md:text-base"
                         >
                             Back to List
                         </motion.button>
@@ -234,15 +229,15 @@ const HospitalDetails = () => {
                 </motion.div>
 
                 {/* Main Content */}
-                <div className="flex flex-col lg:flex-row gap-6">
+                <div className="flex flex-col lg:flex-row gap-4 p-4 md:p-6 flex-1 overflow-hidden">
                     {/* Left Sidebar - Hospital Info */}
                     <motion.div
                         variants={itemVariants}
-                        className="w-full lg:w-1/3"
+                        className="w-full lg:w-1/3 flex flex-col h-full"
                     >
-                        <div className="bg-white rounded-2xl shadow-md overflow-hidden">
+                        <div className="bg-white rounded-2xl shadow-md overflow-hidden flex-1 flex flex-col">
                             {/* Hospital Image */}
-                            <div className="h-48 md:h-56 bg-gradient-to-r from-blue-50 to-blue-100 flex items-center justify-center">
+                            <div className="h-40 md:h-48 bg-gradient-to-r from-blue-50 to-blue-100 flex items-center justify-center relative">
                                 {hospital?.image ? (
                                     <motion.img
                                         src={hospital.image}
@@ -251,35 +246,38 @@ const HospitalDetails = () => {
                                         whileHover={{ scale: 1.02 }}
                                     />
                                 ) : (
-                                    <div className="p-8 rounded-lg flex items-center justify-center">
-                                        <FaHospital className="text-6xl" style={{ color: colors.primary }} />
+                                    <div className="p-6 rounded-lg flex items-center justify-center">
+                                        <FaHospital className="text-5xl" style={{ color: colors.primary }} />
                                     </div>
                                 )}
+                                <div className="absolute bottom-3 right-3 bg-white rounded-full p-1 shadow-md">
+                                    <div className="w-2 h-2 rounded-full bg-green-500"></div>
+                                </div>
                             </div>
 
                             {/* Hospital Details */}
-                            <div className="p-6">
+                            <div className="p-4 md:p-6 flex-1 flex flex-col overflow-auto">
                                 <h2 className="text-xl md:text-2xl font-bold mb-2" style={{ color: colors.text }}>
                                     {hospital.name}
                                 </h2>
-                                <div className="flex items-center gap-2 mb-4" style={{ color: colors.muted }}>
+                                <div className="flex items-center gap-2 mb-3" style={{ color: colors.muted }}>
                                     <FaMapMarkerAlt style={{ color: colors.primary }} />
-                                    <span>{hospital.address}, {hospital.city}, {hospital.state} - {hospital.pincode}</span>
+                                    <span className="text-sm">{hospital.address}, {hospital.city}, {hospital.state} - {hospital.pincode}</span>
                                 </div>
 
-                                <div className="space-y-3 mb-6">
-                                    <div className="flex items-center gap-3 p-3 rounded-lg" style={{ backgroundColor: `${colors.primary}05` }}>
-                                        <div className="p-2 rounded-full" style={{ backgroundColor: `${colors.primary}10` }}>
+                                <div className="space-y-2 mb-4">
+                                    <div className="flex items-center gap-2 p-2 rounded-lg border" style={{ borderColor: colors.border }}>
+                                        <div className="p-1 rounded-full bg-blue-50">
                                             <FaPhone style={{ color: colors.primary }} />
                                         </div>
-                                        <span style={{ color: colors.text }}>{hospital.phone}</span>
+                                        <span className="text-sm" style={{ color: colors.text }}>{hospital.phone}</span>
                                     </div>
 
-                                    <div className="flex items-center gap-3 p-3 rounded-lg" style={{ backgroundColor: `${colors.primary}05` }}>
-                                        <div className="p-2 rounded-full" style={{ backgroundColor: `${colors.primary}10` }}>
+                                    <div className="flex items-center gap-2 p-2 rounded-lg border" style={{ borderColor: colors.border }}>
+                                        <div className="p-1 rounded-full bg-blue-50">
                                             <FaEnvelope style={{ color: colors.primary }} />
                                         </div>
-                                        <span style={{ color: colors.text }}>{hospital.email}</span>
+                                        <span className="text-sm" style={{ color: colors.text }}>{hospital.email}</span>
                                     </div>
 
                                     {hospital.website && (
@@ -287,13 +285,13 @@ const HospitalDetails = () => {
                                             href={hospital.website}
                                             target="_blank"
                                             rel="noopener noreferrer"
-                                            className="flex items-center gap-3 p-3 rounded-lg hover:bg-blue-50 transition-colors"
-                                            style={{ backgroundColor: `${colors.primary}05` }}
+                                            className="flex items-center gap-2 p-2 rounded-lg border hover:bg-blue-50 transition-colors"
+                                            style={{ borderColor: colors.border }}
                                         >
-                                            <div className="p-2 rounded-full" style={{ backgroundColor: `${colors.primary}10` }}>
+                                            <div className="p-1 rounded-full bg-blue-50">
                                                 <FaGlobe style={{ color: colors.primary }} />
                                             </div>
-                                            <span style={{ color: colors.primary }} className="hover:underline">
+                                            <span style={{ color: colors.primary }} className="hover:underline text-sm">
                                                 {hospital.website.replace(/^https?:\/\//, '')}
                                             </span>
                                         </a>
@@ -301,27 +299,27 @@ const HospitalDetails = () => {
                                 </div>
 
                                 {/* Quick Stats */}
-                                <div className="grid grid-cols-2 gap-3 mb-6">
-                                    <div className="p-3 rounded-lg text-center" style={{ backgroundColor: `${colors.primary}05` }}>
-                                        <div className="text-sm" style={{ color: colors.muted }}>Doctors</div>
-                                        <div className="text-xl font-bold" style={{ color: colors.primary }}>{doctor?.length}</div>
+                                <div className="grid grid-cols-2 gap-2 mb-4">
+                                    <div className="p-2 rounded-lg text-center border" style={{ borderColor: colors.border }}>
+                                        <div className="text-xs" style={{ color: colors.muted }}>Doctors</div>
+                                        <div className="text-lg font-bold" style={{ color: colors.primary }}>{doctor?.length}</div>
                                     </div>
-                                    <div className="p-3 rounded-lg text-center" style={{ backgroundColor: `${colors.accent}05` }}>
-                                        <div className="text-sm" style={{ color: colors.muted }}>Staff</div>
-                                        <div className="text-xl font-bold" style={{ color: colors.accent }}>{staff?.length}</div>
+                                    <div className="p-2 rounded-lg text-center border" style={{ borderColor: colors.border }}>
+                                        <div className="text-xs" style={{ color: colors.muted }}>Staff</div>
+                                        <div className="text-lg font-bold" style={{ color: colors.accent }}>{staff?.length}</div>
                                     </div>
                                 </div>
 
                                 {/* Specialties */}
-                                <div className="mb-6">
-                                    <h3 className="text-lg font-semibold mb-3" style={{ color: colors.text }}>Specialties</h3>
-                                    <div className="flex flex-wrap gap-2">
+                                <div className="mb-4">
+                                    <h3 className="text-md font-semibold mb-2" style={{ color: colors.text }}>Specialties</h3>
+                                    <div className="flex flex-wrap gap-1">
                                         {hospital.specialties.map((specialty, index) => (
                                             <motion.span
                                                 key={index}
-                                                className="px-3 py-1 rounded-full text-sm"
+                                                className="px-2 py-1 rounded-full text-xs border"
                                                 style={{
-                                                    backgroundColor: `${colors.primary}10`,
+                                                    borderColor: colors.border,
                                                     color: colors.primary
                                                 }}
                                                 whileHover={{ scale: 1.05 }}
@@ -338,24 +336,23 @@ const HospitalDetails = () => {
                     {/* Right Content - Tabs */}
                     <motion.div
                         variants={itemVariants}
-                        className="w-full lg:w-2/3"
+                        className="w-full lg:w-2/3 flex flex-col h-full"
                     >
-                        <div className="bg-white rounded-2xl shadow-md overflow-hidden">
+                        <div className="bg-white rounded-2xl shadow-md overflow-hidden flex-1 flex flex-col">
                             {/* Tabs Navigation */}
-                            <div className="flex overflow-x-auto">
+                            <div className="flex overflow-x-auto border-b" style={{ borderColor: colors.border }}>
                                 {[
-                                    { id: 'overview', icon: <FaHospital className="mr-2" />, label: 'Overview' },
-                                    { id: 'doctors', icon: <FaUserMd className="mr-2" />, label: 'Doctors' },
-                                    { id: 'staff', icon: <FaUserMd className="mr-2" />, label: 'Staff' },
-                                    { id: 'facilities', icon: <FaProcedures className="mr-2" />, label: 'Facilities' },
-                                    { id: 'appointments', icon: <FaCalendarAlt className="mr-2" />, label: 'Appointments' },
-
+                                    { id: 'overview', icon: <FaHospital className="mr-1 md:mr-2" />, label: 'Overview' },
+                                    { id: 'doctors', icon: <FaUserMd className="mr-1 md:mr-2" />, label: 'Doctors' },
+                                    { id: 'staff', icon: <FaUsers className="mr-1 md:mr-2" />, label: 'Staff' },
+                                    { id: 'facilities', icon: <FaProcedures className="mr-1 md:mr-2" />, label: 'Facilities' },
+                                    { id: 'appointments', icon: <FaCalendarAlt className="mr-1 md:mr-2" />, label: 'Appointments' },
                                 ].map((tab) => (
                                     <button
                                         key={tab.id}
                                         onClick={() => setActiveTab(tab.id)}
-                                        className={`flex items-center px-4 py-3 font-medium text-sm whitespace-nowrap border-b-2 transition-colors ${activeTab === tab.id ?
-                                            `border-${colors.primary} text-${colors.primary}` :
+                                        className={`flex items-center px-3 py-2 md:px-4 md:py-3 font-medium text-xs md:text-sm whitespace-nowrap border-b-2 transition-colors ${activeTab === tab.id ?
+                                            'border-blue-500 text-blue-600' :
                                             'border-transparent text-gray-500 hover:text-gray-700'}`}
                                     >
                                         {tab.icon}
@@ -365,7 +362,7 @@ const HospitalDetails = () => {
                             </div>
 
                             {/* Tab Content */}
-                            <div className="p-6">
+                            <div className="p-4 md:p-6 flex-1 overflow-auto">
                                 <AnimatePresence mode="wait">
                                     <motion.div
                                         key={activeTab}
@@ -373,16 +370,19 @@ const HospitalDetails = () => {
                                         animate={{ opacity: 1, y: 0 }}
                                         exit={{ opacity: 0, y: -10 }}
                                         transition={{ duration: 0.2 }}
+                                        className="h-full"
                                     >
                                         {activeTab === 'overview' && (
-                                            <div>
+                                            <div className="h-full">
                                                 <h3 className="text-xl font-bold mb-4" style={{ color: colors.text }}>Hospital Overview</h3>
                                                 <div className="prose max-w-none" style={{ color: colors.text }}>
                                                     <p className="mb-4">Welcome to the comprehensive overview of {hospital.name}. This hospital is a leading healthcare provider in the region, offering top-notch medical services across various specialties.</p>
 
                                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-                                                        <div className="p-4 rounded-lg border" style={{ borderColor: `${colors.muted}20` }}>
-                                                            <h4 className="font-bold mb-2" style={{ color: colors.primary }}>Key Features</h4>
+                                                        <div className="p-4 rounded-lg border" style={{ borderColor: colors.border }}>
+                                                            <h4 className="font-bold mb-2 flex items-center gap-2" style={{ color: colors.primary }}>
+                                                                <FaClinicMedical /> Key Features
+                                                            </h4>
                                                             <ul className="space-y-2">
                                                                 {hospital.facilities.slice(0, 5).map((facility, index) => (
                                                                     <li key={index} className="flex items-start">
@@ -392,19 +392,17 @@ const HospitalDetails = () => {
                                                                 ))}
                                                             </ul>
                                                         </div>
-                                                        <div className="p-4 rounded-lg border" style={{ borderColor: `${colors.muted}20` }}>
-                                                            <h4 className="font-bold mb-2" style={{ color: colors.primary }}>Medical Team</h4>
+                                                        <div className="p-4 rounded-lg border" style={{ borderColor: colors.border }}>
+                                                            <h4 className="font-bold mb-2 flex items-center gap-2" style={{ color: colors.primary }}>
+                                                                <FaUserMd /> Medical Team
+                                                            </h4>
                                                             <p>Our hospital boasts a team of {doctor.length} highly qualified doctors across various specialties.</p>
                                                             <div className="mt-3">
                                                                 <motion.button
                                                                     whileHover={{ scale: 1.02 }}
                                                                     whileTap={{ scale: 0.98 }}
                                                                     onClick={() => setActiveTab('doctors')}
-                                                                    className="text-sm px-4 py-2 rounded-lg"
-                                                                    style={{
-                                                                        backgroundColor: `${colors.primary}10`,
-                                                                        color: colors.primary
-                                                                    }}
+                                                                    className="text-sm px-4 py-2 rounded-lg bg-blue-50 text-blue-600"
                                                                 >
                                                                     View All Doctors
                                                                 </motion.button>
@@ -416,22 +414,18 @@ const HospitalDetails = () => {
                                         )}
 
                                         {activeTab === 'doctors' && (
-                                            <div>
-                                                <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
+                                            <div className="h-full flex flex-col">
+                                                <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-4 gap-3">
                                                     <h3 className="text-xl font-bold" style={{ color: colors.text }}>Medical Team</h3>
-                                                    <div className="flex flex-col md:flex-row gap-3 w-full md:w-auto">
-                                                        <div className="relative w-full md:w-64">
+                                                    <div className="flex flex-col md:flex-row gap-2 w-full md:w-auto">
+                                                        <div className="relative w-full md:w-56">
                                                             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                                                <FaSearch style={{ color: colors.muted }} />
+                                                                <FaSearch className="text-gray-400" />
                                                             </div>
                                                             <input
                                                                 type="text"
                                                                 placeholder="Search doctors..."
-                                                                className="pl-10 pr-4 py-2 border rounded-lg text-sm w-full"
-                                                                style={{
-                                                                    borderColor: colors.muted,
-                                                                    ':focus': { borderColor: colors.primary }
-                                                                }}
+                                                                className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg text-sm w-full focus:border-blue-500 focus:ring-blue-500"
                                                                 value={searchTerm}
                                                                 onChange={(e) => setSearchTerm(e.target.value)}
                                                             />
@@ -440,156 +434,118 @@ const HospitalDetails = () => {
                                                             whileHover={{ scale: 1.05 }}
                                                             whileTap={{ scale: 0.95 }}
                                                             onClick={() => navigate(`/doctor/create/${hospital._id}`)}
-                                                            className="px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap flex items-center gap-2"
-                                                            style={{
-                                                                backgroundColor: colors.primary,
-                                                                color: 'white'
-                                                            }}
+                                                            className="px-3 py-2 rounded-lg text-sm font-medium whitespace-nowrap flex items-center gap-1 bg-blue-600 text-white"
                                                         >
-                                                            <FaPlus /> Add Doctor
+                                                            <FaPlus className="text-xs" /> Add Doctor
                                                         </motion.button>
                                                     </div>
                                                 </div>
 
                                                 {/* Doctors Grid */}
-                                                <div className="overflow-x-auto rounded-lg border" style={{ borderColor: `${colors.muted}20`, backgroundColor: colors.card }}>
+                                                <div className="border border-gray-200 rounded-lg bg-white flex-1 overflow-hidden flex flex-col">
                                                     {filteredDoctors.length > 0 ? (
-                                                        <motion.table
-                                                            initial={{ opacity: 0 }}
-                                                            animate={{ opacity: 1 }}
-                                                            transition={{ duration: 0.3 }}
-                                                            className="w-full"
-                                                        >
-                                                            <thead>
-                                                                <tr style={{ backgroundColor: `${colors.primary}05` }}>
-                                                                    <th className="p-3 text-left text-sm font-medium" style={{ color: colors.primary }}>Doctor</th>
-                                                                    <th className="p-3 text-left text-sm font-medium" style={{ color: colors.primary }}>Specialty</th>
-                                                                    <th className="p-3 text-left text-sm font-medium" style={{ color: colors.primary }}>Experience</th>
-                                                                    <th className="p-3 text-left text-sm font-medium" style={{ color: colors.primary }}>Fee</th>
-                                                                    <th className="p-3 text-left text-sm font-medium" style={{ color: colors.primary }}>Rating</th>
-                                                                    <th className="p-3 text-left text-sm font-medium" style={{ color: colors.primary }}>Status</th>
-                                                                    <th className="p-3 text-right text-sm font-medium" style={{ color: colors.primary }}>Actions</th>
-                                                                </tr>
-                                                            </thead>
-                                                            <tbody>
-                                                                {filteredDoctors.map((doc) => (
-                                                                    <motion.tr
-                                                                        key={doc._id}
-                                                                        initial={{ opacity: 0, y: 10 }}
-                                                                        animate={{ opacity: 1, y: 0 }}
-                                                                        transition={{ duration: 0.3 }}
-                                                                        className="border-b hover:bg-opacity-10"
-                                                                        style={{
-                                                                            borderColor: `${colors.muted}10`,
-                                                                            backgroundColor: doc._id % 2 === 0 ? `${colors.muted}03` : 'transparent'
-                                                                        }}
-                                                                        whileHover={{ backgroundColor: `${colors.primary}05` }}
-                                                                    >
-                                                                        <td className="p-3">
-                                                                            <div className="flex items-center gap-3">
-                                                                                <div className="w-10 h-10 rounded-full overflow-hidden bg-gray-100">
-                                                                                    <img
-                                                                                        className="h-full w-full object-cover"
-                                                                                        src={doc.photo || avatar}
-                                                                                        alt={doc.name}
-                                                                                    />
+                                                        <div className="overflow-auto flex-1">
+                                                            <table className="w-full">
+                                                                <thead>
+                                                                    <tr className="bg-gray-50">
+                                                                        <th className="p-2 text-left text-xs font-medium text-gray-600">Doctor</th>
+                                                                        <th className="p-2 text-left text-xs font-medium text-gray-600">Specialty</th>
+                                                                        <th className="p-2 text-left text-xs font-medium text-gray-600">Experience</th>
+                                                                        <th className="p-2 text-left text-xs font-medium text-gray-600">Fee</th>
+                                                                        <th className="p-2 text-left text-xs font-medium text-gray-600">Status</th>
+                                                                        <th className="p-2 text-right text-xs font-medium text-gray-600">Actions</th>
+                                                                    </tr>
+                                                                </thead>
+                                                                <tbody>
+                                                                    {filteredDoctors.map((doc) => (
+                                                                        <motion.tr
+                                                                            key={doc._id}
+                                                                            initial={{ opacity: 0, y: 10 }}
+                                                                            animate={{ opacity: 1, y: 0 }}
+                                                                            transition={{ duration: 0.3 }}
+                                                                            className="border-b border-gray-100 hover:bg-gray-50"
+                                                                        >
+                                                                            <td className="p-2">
+                                                                                <div className="flex items-center gap-2">
+                                                                                    <div className="w-8 h-8 rounded-full overflow-hidden bg-gray-100 flex-shrink-0">
+                                                                                        <img
+                                                                                            className="h-full w-full object-cover"
+                                                                                            src={doc.photo || avatar}
+                                                                                            alt={doc.name}
+                                                                                        />
+                                                                                    </div>
+                                                                                    <span className="text-sm" style={{ color: colors.text }}>{doc.name}</span>
                                                                                 </div>
-                                                                                <span style={{ color: colors.text }}>{doc.name}</span>
-                                                                            </div>
-                                                                        </td>
-                                                                        <td className="p-3 text-sm" style={{ color: colors.muted }}>{doc.specialty}</td>
-                                                                        <td className="p-3 text-sm" style={{ color: colors.text }}>{doc.experience} years</td>
-                                                                        <td className="p-3 text-sm" style={{ color: colors.text }}>₹{doc.consultationFee}</td>
-                                                                        <td className="p-3">
-                                                                            <div className="flex items-center">
-                                                                                {[...Array(5)].map((_, i) => (
-                                                                                    <svg
-                                                                                        key={i}
-                                                                                        className={`w-4 h-4 ${i < Math.floor(doc.rating) ? 'text-yellow-400' : 'text-gray-300'}`}
-                                                                                        fill="currentColor"
-                                                                                        viewBox="0 0 20 20"
-                                                                                    >
-                                                                                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                                                                                    </svg>
-                                                                                ))}
-                                                                                <span className="ml-1 text-xs" style={{ color: colors.muted }}>{doc.rating}</span>
-                                                                            </div>
-                                                                        </td>
-                                                                        <td className="p-3">
-                                                                            <motion.span
-                                                                                className="px-2 py-1 text-xs rounded-full"
-                                                                                animate={doc.status}
-                                                                                variants={statusBadgeVariants}
-                                                                                style={{
-                                                                                    color: 'white',
-                                                                                    display: 'inline-block',
-                                                                                    minWidth: '70px',
-                                                                                    textAlign: 'center'
-                                                                                }}
-                                                                            >
-                                                                                {doc.status}
-                                                                            </motion.span>
-                                                                        </td>
-                                                                        <td className="p-3">
-                                                                            <div className="flex justify-end gap-2">
-                                                                                <Link to={`/doctor/${doc._id}`}>
-                                                                                    <motion.button
-                                                                                        whileHover={{ scale: 1.05 }}
-                                                                                        whileTap={{ scale: 0.95 }}
-                                                                                        className="text-sm px-3 py-1 rounded"
-                                                                                        style={{
-                                                                                            backgroundColor: `${colors.primary}10`,
-                                                                                            color: colors.primary
-                                                                                        }}
-                                                                                    >
-                                                                                        View
-                                                                                    </motion.button>
-                                                                                </Link>
-                                                                                <Link to={`/update/doctor/${doc._id}`}>
-                                                                                    <motion.button
-                                                                                        whileHover={{ scale: 1.05 }}
-                                                                                        whileTap={{ scale: 0.95 }}
-                                                                                        className="text-sm px-3 py-1 rounded"
-                                                                                        style={{
-                                                                                            backgroundColor: `${colors.accent}10`,
-                                                                                            color: colors.accent
-                                                                                        }}
-                                                                                    >
-                                                                                        Edit
-                                                                                    </motion.button>
-                                                                                </Link>
-                                                                                <motion.button
-                                                                                    whileHover={{ scale: 1.05 }}
-                                                                                    whileTap={{ scale: 0.95 }}
-                                                                                    onClick={() => {
-                                                                                        if (window.confirm('Are you sure you want to delete this doctor?')) {
-                                                                                            deleteDoctorHandler(doc._id);
-                                                                                        }
-                                                                                    }}
-                                                                                    className="text-sm px-3 py-1 rounded"
+                                                                            </td>
+                                                                            <td className="p-2 text-xs text-gray-600">{doc.specialty}</td>
+                                                                            <td className="p-2 text-xs" style={{ color: colors.text }}>{doc.experience} years</td>
+                                                                            <td className="p-2 text-xs" style={{ color: colors.text }}>₹{doc.consultationFee}</td>
+                                                                            <td className="p-2">
+                                                                                <motion.span
+                                                                                    className="px-2 py-1 text-xs rounded-full text-white"
+                                                                                    animate={doc.status}
+                                                                                    variants={statusBadgeVariants}
                                                                                     style={{
-                                                                                        backgroundColor: `${colors.danger}10`,
-                                                                                        color: colors.danger
+                                                                                        display: 'inline-block',
+                                                                                        minWidth: '60px',
+                                                                                        textAlign: 'center'
                                                                                     }}
                                                                                 >
-                                                                                    Delete
-                                                                                </motion.button>
-                                                                            </div>
-                                                                        </td>
-                                                                    </motion.tr>
-                                                                ))}
-                                                            </tbody>
-                                                        </motion.table>
+                                                                                    {doc.status}
+                                                                                </motion.span>
+                                                                            </td>
+                                                                            <td className="p-2">
+                                                                                <div className="flex justify-end gap-1">
+                                                                                    <Link to={`/doctor/${doc._id}`}>
+                                                                                        <motion.button
+                                                                                            whileHover={{ scale: 1.05 }}
+                                                                                            whileTap={{ scale: 0.95 }}
+                                                                                            className="text-xs p-1 rounded bg-blue-50 text-blue-600"
+                                                                                            title="View"
+                                                                                        >
+                                                                                            <FaEye />
+                                                                                        </motion.button>
+                                                                                    </Link>
+                                                                                    <Link to={`/update/doctor/${doc._id}`}>
+                                                                                        <motion.button
+                                                                                            whileHover={{ scale: 1.05 }}
+                                                                                            whileTap={{ scale: 0.95 }}
+                                                                                            className="text-xs p-1 rounded bg-green-50 text-green-600"
+                                                                                            title="Edit"
+                                                                                        >
+                                                                                            <FaEdit />
+                                                                                        </motion.button>
+                                                                                    </Link>
+                                                                                    <motion.button
+                                                                                        whileHover={{ scale: 1.05 }}
+                                                                                        whileTap={{ scale: 0.95 }}
+                                                                                        onClick={() => {
+                                                                                            if (window.confirm('Are you sure you want to delete this doctor?')) {
+                                                                                                deleteDoctorHandler(doc._id);
+                                                                                            }
+                                                                                        }}
+                                                                                        className="text-xs p-1 rounded bg-red-50 text-red-600"
+                                                                                        title="Delete"
+                                                                                    >
+                                                                                        <FaTrash />
+                                                                                    </motion.button>
+                                                                                </div>
+                                                                            </td>
+                                                                        </motion.tr>
+                                                                    ))}
+                                                                </tbody>
+                                                            </table>
+                                                        </div>
                                                     ) : (
-                                                        <div className="p-8 text-center">
+                                                        <div className="p-6 text-center flex-1 flex items-center justify-center">
                                                             <div className="flex flex-col items-center justify-center">
-                                                                <div className="h-16 w-16 rounded-full flex items-center justify-center mb-4" style={{ backgroundColor: `${colors.primary}10` }}>
-                                                                    <FaUserMd className="text-2xl" style={{ color: colors.primary }} />
+                                                                <div className="h-12 w-12 rounded-full flex items-center justify-center mb-3 bg-blue-50">
+                                                                    <FaUserMd className="text-xl text-blue-500" />
                                                                 </div>
-                                                                <h3 className="text-lg font-medium mb-1" style={{ color: colors.text }}>
+                                                                <h3 className="text-md font-medium mb-1" style={{ color: colors.text }}>
                                                                     No doctors found
                                                                 </h3>
-                                                                <p className="text-sm" style={{ color: colors.muted }}>
+                                                                <p className="text-xs text-gray-500">
                                                                     {searchTerm ? 'Try a different search term' : 'No doctors registered in this hospital'}
                                                                 </p>
                                                             </div>
@@ -598,23 +554,20 @@ const HospitalDetails = () => {
                                                 </div>
                                             </div>
                                         )}
+                                        
                                         {activeTab === 'staff' && (
-                                            <div>
-                                                <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
-                                                    <h3 className="text-xl font-bold" style={{ color: colors.text }}>Medical Team</h3>
-                                                    <div className="flex flex-col md:flex-row gap-3 w-full md:w-auto">
-                                                        <div className="relative w-full md:w-64">
+                                            <div className="h-full flex flex-col">
+                                                <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-4 gap-3">
+                                                    <h3 className="text-xl font-bold" style={{ color: colors.text }}>Staff Members</h3>
+                                                    <div className="flex flex-col md:flex-row gap-2 w-full md:w-auto">
+                                                        <div className="relative w-full md:w-56">
                                                             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                                                <FaSearch style={{ color: colors.muted }} />
+                                                                <FaSearch className="text-gray-400" />
                                                             </div>
                                                             <input
                                                                 type="text"
                                                                 placeholder="Search staff..."
-                                                                className="pl-10 pr-4 py-2 border rounded-lg text-sm w-full"
-                                                                style={{
-                                                                    borderColor: colors.muted,
-                                                                    ':focus': { borderColor: colors.primary }
-                                                                }}
+                                                                className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg text-sm w-full focus:border-blue-500 focus:ring-blue-500"
                                                                 value={searchTerm}
                                                                 onChange={(e) => setSearchTerm(e.target.value)}
                                                             />
@@ -623,150 +576,112 @@ const HospitalDetails = () => {
                                                             whileHover={{ scale: 1.05 }}
                                                             whileTap={{ scale: 0.95 }}
                                                             onClick={() => navigate(`/staff/register/${hospital._id}`)}
-                                                            className="px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap flex items-center gap-2"
-                                                            style={{
-                                                                backgroundColor: colors.primary,
-                                                                color: 'white'
-                                                            }}
+                                                            className="px-3 py-2 rounded-lg text-sm font-medium whitespace-nowrap flex items-center gap-1 bg-blue-600 text-white"
                                                         >
-                                                            <FaPlus /> Add Staff
+                                                            <FaPlus className="text-xs" /> Add Staff
                                                         </motion.button>
                                                     </div>
                                                 </div>
 
-                                                {/* Doctors Grid */}
-                                                <div className="overflow-x-scroll rounded-lg border shadow-sm" style={{
-                                                    borderColor: `${colors.muted}20`,
-                                                    backgroundColor: colors.card
-                                                }}>
-                                                    <table className="min-w-full divide-y divide-gray-200">
-                                                        <thead className="bg-gray-50">
-                                                            <tr>
-                                                                <th scope="col" className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider" style={{ color: colors.muted }}>
-                                                                    Staff Member
-                                                                </th>
-                                                                <th scope="col" className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider" style={{ color: colors.muted }}>
-                                                                    Contact Info
-                                                                </th>
-                                                                <th scope="col" className="px-6 py-3 text-right text-xs font-medium uppercase tracking-wider" style={{ color: colors.muted }}>
-                                                                    Actions
-                                                                </th>
-                                                            </tr>
-                                                        </thead>
-                                                        <tbody className="bg-white divide-y divide-gray-200">
-                                                            {filteredStaff?.length > 0 ? (
-                                                                filteredStaff?.map((doc) => (
-                                                                    <motion.tr
-                                                                        key={doc._id}
-                                                                        initial={{ opacity: 0, y: 10 }}
-                                                                        animate={{ opacity: 1, y: 0 }}
-                                                                        exit={{ opacity: 0 }}
-                                                                        transition={{ duration: 0.3 }}
-                                                                        className="hover:bg-gray-50 transition-colors"
-                                                                    >
-                                                                        <td className="px-6 py-4 whitespace-nowrap">
-                                                                            <div className="flex items-center">
-                                                                                
-                                                                                <div className="ml-4">
-                                                                                    <div className="text-sm font-medium" style={{ color: colors.text }}>{doc.name}</div>
-                                                                                    <div className="text-xs" style={{ color: colors.muted }}>{doc.role || 'Staff'}</div>
-                                                                                </div>
-                                                                            </div>
-                                                                        </td>
-                                                                        <td className="px-6 py-4">
-                                                                            <div className="text-sm" style={{ color: colors.text }}>{doc.email}</div>
-                                                                            <div className="text-xs" style={{ color: colors.muted }}>+91-{doc.number}</div>
-                                                                        </td>
-                                                                        <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                                                            <div className="flex justify-end space-x-2">
-                                                                                {/* <Link to={`/doctor/${doc._id}`}>
-                                                                                    <motion.button
-                                                                                        whileHover={{ scale: 1.05 }}
-                                                                                        whileTap={{ scale: 0.95 }}
-                                                                                        className="inline-flex items-center px-3 py-1 rounded-md text-sm"
-                                                                                        style={{
-                                                                                            backgroundColor: `${colors.primary}10`,
-                                                                                            color: colors.primary
-                                                                                        }}
-                                                                                    >
-                                                                                        View
-                                                                                    </motion.button>
-                                                                                </Link> */}
-                                                                                {/* <Link to={`/doctor/update/${doc._id}`}>
-                                                                                    <motion.button
-                                                                                        whileHover={{ scale: 1.05 }}
-                                                                                        whileTap={{ scale: 0.95 }}
-                                                                                        className="inline-flex items-center px-3 py-1 rounded-md text-sm"
-                                                                                        style={{
-                                                                                            backgroundColor: `${colors.accent}10`,
-                                                                                            color: colors.accent
-                                                                                        }}
-                                                                                    >
-                                                                                        Edit
-                                                                                    </motion.button>
-                                                                                </Link> */}
-                                                                                <motion.button
-                                                                                    whileHover={{ scale: 1.05 }}
-                                                                                    whileTap={{ scale: 0.95 }}
-                                                                                    onClick={() => {
-                                                                                        if (window.confirm('Are you sure you want to delete this staff member?')) {
-                                                                                            deleteStaffId(doc._id);
-                                                                                        }
-                                                                                    }}
-                                                                                    className="inline-flex items-center px-3 py-1 rounded-md text-sm"
-                                                                                    style={{
-                                                                                        backgroundColor: `${colors.danger}10`,
-                                                                                        color: colors.danger
-                                                                                    }}
-                                                                                >
-                                                                                    Delete
-                                                                                </motion.button>
-                                                                            </div>
-                                                                        </td>
-                                                                    </motion.tr>
-                                                                ))
-                                                            ) : (
+                                                {/* Staff Table */}
+                                                <div className="border border-gray-200 rounded-lg bg-white flex-1 overflow-hidden flex flex-col">
+                                                    <div className="overflow-auto flex-1">
+                                                        <table className="min-w-full divide-y divide-gray-200">
+                                                            <thead className="bg-gray-50">
                                                                 <tr>
-                                                                    <td colSpan="3" className="px-6 py-12 text-center">
-                                                                        <div className="flex flex-col items-center justify-center">
-                                                                            <div className="h-16 w-16 rounded-full flex items-center justify-center mb-4" style={{ backgroundColor: `${colors.primary}10` }}>
-                                                                                <FaUserMd className="text-2xl" style={{ color: colors.primary }} />
-                                                                            </div>
-                                                                            <h3 className="text-lg font-medium mb-1" style={{ color: colors.text }}>
-                                                                                No staff members found
-                                                                            </h3>
-                                                                            <p className="text-sm" style={{ color: colors.muted }}>
-                                                                                {searchTerm ? 'Try a different search term' : 'No staff registered in this hospital'}
-                                                                            </p>
-                                                                        </div>
-                                                                    </td>
+                                                                    <th scope="col" className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                                                        Staff Member
+                                                                    </th>
+                                                                    <th scope="col" className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                                                        Contact Info
+                                                                    </th>
+                                                                    <th scope="col" className="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                                                        Actions
+                                                                    </th>
                                                                 </tr>
-                                                            )}
-                                                        </tbody>
-                                                    </table>
+                                                            </thead>
+                                                            <tbody className="bg-white divide-y divide-gray-200">
+                                                                {filteredStaff?.length > 0 ? (
+                                                                    filteredStaff?.map((doc) => (
+                                                                        <motion.tr
+                                                                            key={doc._id}
+                                                                            initial={{ opacity: 0, y: 10 }}
+                                                                            animate={{ opacity: 1, y: 0 }}
+                                                                            exit={{ opacity: 0 }}
+                                                                            transition={{ duration: 0.3 }}
+                                                                            className="hover:bg-gray-50 transition-colors"
+                                                                        >
+                                                                            <td className="px-4 py-3 whitespace-nowrap">
+                                                                                <div className="flex items-center">
+                                                                                    <div>
+                                                                                        <div className="text-sm font-medium text-gray-900">{doc.name}</div>
+                                                                                        <div className="text-xs text-gray-500">{doc.role || 'Staff'}</div>
+                                                                                    </div>
+                                                                                </div>
+                                                                            </td>
+                                                                            <td className="px-4 py-3">
+                                                                                <div className="text-sm text-gray-900">{doc.email}</div>
+                                                                                <div className="text-xs text-gray-500">+91-{doc.number}</div>
+                                                                            </td>
+                                                                            <td className="px-4 py-3 whitespace-nowrap text-right text-sm font-medium">
+                                                                                <div className="flex justify-end space-x-1">
+                                                                                    <motion.button
+                                                                                        whileHover={{ scale: 1.05 }}
+                                                                                        whileTap={{ scale: 0.95 }}
+                                                                                        onClick={() => {
+                                                                                            if (window.confirm('Are you sure you want to delete this staff member?')) {
+                                                                                                deleteStaffId(doc._id);
+                                                                                            }
+                                                                                        }}
+                                                                                        className="inline-flex items-center p-1 rounded-md text-xs bg-red-50 text-red-600"
+                                                                                        title="Delete"
+                                                                                    >
+                                                                                        <FaTrash />
+                                                                                    </motion.button>
+                                                                                </div>
+                                                                            </td>
+                                                                        </motion.tr>
+                                                                    ))
+                                                                ) : (
+                                                                    <tr>
+                                                                        <td colSpan="3" className="px-6 py-8 text-center">
+                                                                            <div className="flex flex-col items-center justify-center">
+                                                                                <div className="h-12 w-12 rounded-full flex items-center justify-center mb-3 bg-blue-50">
+                                                                                    <FaUsers className="text-xl text-blue-500" />
+                                                                                </div>
+                                                                                <h3 className="text-md font-medium mb-1 text-gray-900">
+                                                                                    No staff members found
+                                                                                </h3>
+                                                                                <p className="text-xs text-gray-500">
+                                                                                    {searchTerm ? 'Try a different search term' : 'No staff registered in this hospital'}
+                                                                                </p>
+                                                                            </div>
+                                                                        </td>
+                                                                    </tr>
+                                                                )}
+                                                            </tbody>
+                                                        </table>
+                                                    </div>
                                                 </div>
                                             </div>
                                         )}
 
                                         {activeTab === 'facilities' && (
-                                            <div>
-                                                <h3 className="text-xl font-bold mb-6" style={{ color: colors.text }}>Hospital Facilities</h3>
-                                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                            <div className="h-full">
+                                                <h3 className="text-xl font-bold mb-4" style={{ color: colors.text }}>Hospital Facilities</h3>
+                                                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                                                     {hospital.facilities.map((facility, index) => (
                                                         <motion.div
                                                             key={index}
-                                                            className="p-4 rounded-lg border hover:shadow-md transition-shadow"
-                                                            style={{
-                                                                borderColor: `${colors.muted}20`,
-                                                                backgroundColor: colors.card
-                                                            }}
+                                                            className="p-3 rounded-lg border hover:shadow-md transition-shadow bg-white"
+                                                            style={{ borderColor: colors.border }}
                                                             whileHover={{ scale: 1.02 }}
                                                         >
-                                                            <div className="flex items-center gap-3">
-                                                                <div className="p-2 rounded-lg" style={{ backgroundColor: `${colors.primary}10` }}>
-                                                                    <FaProcedures style={{ color: colors.primary }} />
+                                                            <div className="flex items-center gap-2">
+                                                                <div className="p-1 rounded-lg bg-blue-50">
+                                                                    <FaProcedures className="text-blue-500" />
                                                                 </div>
-                                                                <span className="font-medium" style={{ color: colors.text }}>{facility}</span>
+                                                                <span className="font-medium text-gray-900 text-sm">{facility}</span>
                                                             </div>
                                                         </motion.div>
                                                     ))}
@@ -775,24 +690,21 @@ const HospitalDetails = () => {
                                         )}
 
                                         {activeTab === 'appointments' && (
-                                            <div>
-                                                <h3 className="text-xl font-bold mb-6" style={{ color: colors.text }}>Appointments</h3>
-                                                <div className="bg-gray-50 p-8 rounded-lg text-center">
-                                                    <div className="h-16 w-16 rounded-full flex items-center justify-center mb-4 mx-auto" style={{ backgroundColor: `${colors.primary}10` }}>
-                                                        <FaCalendarAlt className="text-2xl" style={{ color: colors.primary }} />
+                                            <div className="h-full flex items-center justify-center">
+                                                <div className="bg-gray-50 p-6 rounded-lg text-center max-w-md w-full">
+                                                    <div className="h-12 w-12 rounded-full flex items-center justify-center mb-3 mx-auto bg-blue-50">
+                                                        <FaCalendarAlt className="text-xl text-blue-500" />
                                                     </div>
-                                                    <h4 className="text-lg font-medium mb-2" style={{ color: colors.text }}>Appointment Management</h4>
-                                                    <p className="text-sm mb-4" style={{ color: colors.muted }}>
+                                                    <h4 className="text-md font-medium mb-2 text-gray-900">Appointment Management</h4>
+                                                    <p className="text-xs mb-4 text-gray-600">
                                                         View and manage all hospital appointments in one place
                                                     </p>
-                                                    <button className="px-4 py-2 rounded-lg text-sm font-medium" style={{ backgroundColor: colors.primary, color: 'white' }}>
+                                                    <button className="px-3 py-1 rounded-lg text-xs font-medium bg-blue-600 text-white">
                                                         View Appointments
                                                     </button>
                                                 </div>
                                             </div>
                                         )}
-
-
                                     </motion.div>
                                 </AnimatePresence>
                             </div>

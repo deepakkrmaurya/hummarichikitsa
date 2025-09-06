@@ -65,6 +65,8 @@ const HospitalListPage = () => {
         return matchesSearch && matchesCity && matchesSpecialty;
     });
 
+
+
     // ✅ Skeleton Loader Component
     const SkeletonCard = () => (
         <div className="bg-white rounded-xl shadow-sm overflow-hidden border border-gray-100 animate-pulse">
@@ -87,7 +89,6 @@ const HospitalListPage = () => {
             </div>
         </div>
     );
-
     return (
         <Layout>
             <div className="bg-gradient-to-r from-blue-50 to-teal-50 min-h-screen">
@@ -129,7 +130,7 @@ const HospitalListPage = () => {
                     {/* Results Section */}
                     <div className="grid grid-cols-1 gap-6">
                         {loading ? (
-                            // ✅ Show 3 Skeleton Cards while loading
+
                             <>
                                 <SkeletonCard />
                                 <SkeletonCard />

@@ -11,7 +11,11 @@ import { getAllDoctors } from "../Redux/doctorSlice";
 import Layout from "../components/Layout/Layout";
 import { useState } from "react";
 import hospital_img from '../../src/assets/hospital_image.png';
-import avatar from '../../src/assets/logo-def.png';
+
+import deepak from '../../src/assets/deepak.jpg';
+import abhay from '../../src/assets/abjay.jpg';
+import rohit from '../../src/assets/rohit.jpg';
+import AppointmentsSection from "../components/AppointmentsSection";
 
 // Skeleton Components
 const StatsSkeleton = () => (
@@ -102,7 +106,6 @@ const Home = () => {
   const { doctors } = useSelector((state) => state?.doctors);
   const appointments = useSelector((state) => state.appointment?.appointment);
   const dispatch = useDispatch();
-
   // Loading states
   const [hospitalsLoading, setHospitalsLoading] = useState(true);
   const [doctorsLoading, setDoctorsLoading] = useState(true);
@@ -120,16 +123,14 @@ const Home = () => {
 
   useEffect(() => {
     (async () => {
-
-      setHospitalsLoading(true);
-      setDoctorsLoading(true);
-
-
-
-
-
-      await dispatch(getAllDoctors());
-      setDoctorsLoading(false);
+      if (!doctors || doctors.length === 0) {
+        setHospitalsLoading(true);
+        setDoctorsLoading(true);
+        await dispatch(getAllDoctors());
+        setDoctorsLoading(false);
+      } else {
+        setDoctorsLoading(false);
+      }
     })();
 
 
@@ -144,10 +145,12 @@ const Home = () => {
   }, []);
 
   useEffect(() => {
-    setAppointmentsLoading(true);
     if (!appointments || appointments.length === 0) {
+      // setAppointmentsLoading(true);
+
       dispatch(getAllAppointment());
       setAppointmentsLoading(false);
+
     } else {
       setAppointmentsLoading(false);
     }
@@ -155,7 +158,7 @@ const Home = () => {
 
 
   useEffect(() => {
-      setHospitalsLoading(true);
+    setHospitalsLoading(true);
     if (!hospital || hospital.length === 0) {
       dispatch(getAllHospital());
       setHospitalsLoading(false);
@@ -229,118 +232,137 @@ const Home = () => {
       </div>
 
       {/* User Appointments Section */}
-      {isLoggdIn && !currentUser?.isDoctor && (
-        <section className="py-16 bg-gray-50">
-          <div className="container mx-auto px-4">
-            <div className="flex justify-between items-center mb-8">
-              <h2 className="text-2xl font-bold text-gray-800 flex items-center">
-                <Calendar className="mr-2 text-blue-600" size={24} />
-                Your Appointments
-              </h2>
-              {appointments.length > 0 && (
-                <button
-                  onClick={() => navigate('/appointments')}
-                  className="text-blue-600 hover:text-blue-800 font-medium flex items-center text-sm"
-                >
-                  View All <svg className="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7"></path>
-                  </svg>
-                </button>
-              )}
-            </div>
+      {isLoggdIn && currentUser?.role != 'admin' && (
+        <AppointmentsSection
+          isLoggedIn={isLoggdIn}
+          currentUser={currentUser}
+          appointments={appointments}
+          doctors={doctors}
+          hospital={hospital}
+          appointmentsLoading={appointmentsLoading}
+          doctorsLoading={doctorsLoading}
+        />
+        // <section className="py-16 bg-gray-50">
+        //   <div className="container mx-auto px-4">
+        //     <div className="flex justify-between items-center mb-8">
+        //       <h2 className="text-2xl font-bold text-gray-800 flex items-center">
+        //         <Calendar className="mr-2 text-blue-600" size={24} />
+        //         Your Appointments
+        //       </h2>
+        //       {appointments.length > 0 && (
+        //         <button
+        //           onClick={() => navigate('/appointments')}
+        //           className="text-blue-600 hover:text-blue-800 font-medium flex items-center text-sm"
+        //         >
+        //           View All <svg className="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        //             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7"></path>
+        //           </svg>
+        //         </button>
+        //       )}
+        //     </div>
 
-            {appointmentsLoading || doctorsLoading ? (
-              <AppointmentSkeleton />
-            ) : appointments.length > 0 ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {appointments?.slice(0, 3)?.map((appointment) => {
-                  let finalStatus;
-                  const doctor = doctors.find(d => d._id === appointment.doctorId);
-                  const hospitals = hospital.find(h => h._id === appointment.hospitalId);
-                  if (appointment.status === "completed") {
-                    finalStatus = "Completed";
-                  } else {
-                    const today = new Date();
-                    today.setHours(0, 0, 0, 0);
+        //     {/* {appointmentsLoading || doctorsLoading ? (
+        //       <AppointmentSkeleton />
+        //     ) : appointments.length > 0 ? (
+        //       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        //         {appointments?.slice(0, 3)?.map((appointment) => {
+        //           let finalStatus;
+        //           const doctor = doctors.find(d => d._id === appointment.doctorId);
+        //           const hospitals = hospital.find(h => h._id === appointment.hospitalId);
+        //           if (appointment.status === "completed") {
+        //             finalStatus = "Completed";
+        //           } else {
+        //             const today = new Date();
+        //             today.setHours(0, 0, 0, 0);
 
-                    const appointmentDate = new Date(appointment.date);
-                    appointmentDate.setHours(0, 0, 0, 0);
+        //             const appointmentDate = new Date(appointment.date);
+        //             appointmentDate.setHours(0, 0, 0, 0);
 
-                    finalStatus = appointmentDate >= today ? "Active" : "Inactive";
-                  }
-                  return (
-                    <div key={appointment.id} className="bg-white rounded-lg shadow-md overflow-hidden border border-gray-100 transition-all duration-200 hover:shadow-lg">
-                      <div className="p-5">
-                        <div className="flex items-start space-x-4">
-                          <img
-                            src={avatar}
-                            className="w-14 h-14 rounded-full object-cover border-2 border-blue-100"
-                          />
-                          <div className="flex-1">
-                            <div className="flex justify-between items-start">
-                              <div>
-                                <h3 className="font-semibold text-gray-800">{doctor?.name}</h3>
-                                <p className="text-sm text-gray-600">{doctor?.specialty}</p>
-                              </div>
-                              <span className={`px-2 py-1 text-xs rounded-full ${finalStatus === 'Active' ? 'bg-green-100 text-green-800' :
-                                finalStatus === 'Inactive' ? 'bg-gray-100 text-gray-800' :
-                                  'bg-blue-100 text-blue-800'
-                                }`}>
-                                {finalStatus}
-                              </span>
-                            </div>
-                            <div className="mt-3 text-sm text-gray-600 flex items-center">
-                              <MapPin className="w-4 h-4 mr-1 text-blue-500" />
-                              <span className="truncate">{hospitals?.name}</span>
-                            </div>
-                          </div>
-                        </div>
+        //             finalStatus = appointmentDate >= today ? "Active" : "Inactive";
+        //           }
+        //           return (
+        //             <div key={appointment.id} className="bg-white rounded-lg shadow-md overflow-hidden border border-gray-100 transition-all duration-200 hover:shadow-lg">
+        //               <div className="p-5">
+        //                 <div className="flex items-start space-x-4">
+        //                   <img
+        //                     src={avatar}
+        //                     className="w-14 h-14 rounded-full object-cover border-2 border-blue-100"
+        //                   />
+        //                   <div className="flex-1">
+        //                     <div className="flex justify-between items-start">
+        //                       <div>
+        //                         <h3 className="font-semibold text-gray-800">{doctor?.name}</h3>
+        //                         <p className="text-sm text-gray-600">{doctor?.specialty}</p>
+        //                       </div>
+        //                       <span className={`px-2 py-1 text-xs rounded-full ${finalStatus === 'Active' ? 'bg-green-100 text-green-800' :
+        //                         finalStatus === 'Inactive' ? 'bg-gray-100 text-gray-800' :
+        //                           'bg-blue-100 text-blue-800'
+        //                         }`}>
+        //                         {finalStatus}
+        //                       </span>
+        //                     </div>
+        //                     <div className="mt-3 text-sm text-gray-600 flex items-center">
+        //                       <MapPin className="w-4 h-4 mr-1 text-blue-500" />
+        //                       <span className="truncate">{hospitals?.name}</span>
+        //                     </div>
+        //                   </div>
+        //                 </div>
 
-                        <div className="mt-4 pt-4 border-t border-gray-100 space-y-2">
-                          <div className="flex items-center text-sm text-gray-600">
-                            <Calendar className="w-4 h-4 mr-2 text-blue-500" />
-                            {new Date(appointment.date).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}
-                            <span className="mx-2">•</span>
-                            <Clock className="w-4 h-4 mr-2 text-blue-500" />
-                            {appointment.slot}
-                          </div>
-                          <div className="flex items-center text-sm text-gray-600">
-                            <CreditCard className="w-4 h-4 mr-2 text-blue-500" />
-                            ₹{appointment.booking_amount} • {appointment.paymentMethod}
-                          </div>
-                        </div>
+        //                 <div className="mt-4 pt-4 border-t border-gray-100 space-y-2">
+        //                   <div className="flex items-center text-sm text-gray-600">
+        //                     <Calendar className="w-4 h-4 mr-2 text-blue-500" />
+        //                     {new Date(appointment.date).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}
+        //                     <span className="mx-2">•</span>
+        //                     <Clock className="w-4 h-4 mr-2 text-blue-500" />
+        //                     {appointment.slot}
+        //                   </div>
+        //                   <div className="flex items-center text-sm text-gray-600">
+        //                     <CreditCard className="w-4 h-4 mr-2 text-blue-500" />
+        //                     ₹{appointment.booking_amount} • {appointment.paymentMethod}
+        //                   </div>
+        //                 </div>
 
-                        <div className="mt-5 flex justify-between items-center">
-                          <Link
-                            to={`/appointment_details_page/${appointment?._id}`}
-                            className="text-blue-600 hover:text-blue-800 text-sm font-medium flex items-center"
-                          >
-                            View Details
-                            <svg className="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7"></path>
-                            </svg>
-                          </Link>
-                        </div>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            ) : (
-              <div className="bg-white rounded-lg shadow-sm p-8 text-center border border-dashed border-gray-300">
-                <Calendar className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                <h3 className="text-lg font-medium text-gray-800 mb-2">No Appointments Scheduled</h3>
-                <p className="text-gray-600 mb-6">Book your first appointment with our specialists</p>
-                <button
-                  onClick={() => navigate('/hospitals')}
-                  className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg font-medium text-sm transition-colors"
-                >
-                  Book Appointment
-                </button>
-              </div>
-            )}
-          </div>
-        </section>
+        //                 <div className="mt-5 flex justify-between items-center">
+        //                   <Link
+        //                     to={`/appointment_details_page/${appointment?._id}`}
+        //                     className="text-blue-600 hover:text-blue-800 text-sm font-medium flex items-center"
+        //                   >
+        //                     View Details
+        //                     <svg className="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        //                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7"></path>
+        //                     </svg>
+        //                   </Link>
+        //                 </div>
+        //               </div>
+        //             </div>
+        //           );
+        //         })}
+        //       </div>
+        //     ) : (
+        //       <div className="bg-white rounded-lg shadow-sm p-8 text-center border border-dashed border-gray-300">
+        //         <Calendar className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+        //         <h3 className="text-lg font-medium text-gray-800 mb-2">No Appointments Scheduled</h3>
+        //         <p className="text-gray-600 mb-6">Book your first appointment with our specialists</p>
+        //         <button
+        //           onClick={() => navigate('/hospitals')}
+        //           className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg font-medium text-sm transition-colors"
+        //         >
+        //           Book Appointment
+        //         </button>
+        //       </div>
+        //     )} */}
+
+        //     <AppointmentsSection
+        //       isLoggedIn={isLoggdIn}
+        //       currentUser={currentUser}
+        //       appointments={appointments}
+        //       doctors={doctors}
+        //       hospital={hospital}
+        //       appointmentsLoading={appointmentsLoading}
+        //       doctorsLoading={doctorsLoading}
+        //     />
+        //   </div>
+        // </section>
       )}
 
       {/* Specialties Section */}
@@ -522,25 +544,25 @@ const Home = () => {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {[
               {
-                name: "Rahul Sharma",
+                name: "deepak maurya",
                 role: "Cardiac Patient",
                 content: "The cardiology team provided exceptional care during my treatment. Their expertise and compassion made all the difference.",
                 rating: 5,
-                image: "https://randomuser.me/api/portraits/men/32.jpg"
+                image: `${deepak}`
               },
               {
-                name: "Priya Patel",
-                role: "New Mother",
+                name: "Abhay Patel",
+                role: "Neurology",
                 content: "The maternity ward staff were incredibly supportive throughout my delivery. Couldn't have asked for a better experience.",
                 rating: 5,
-                image: "https://randomuser.me/api/portraits/women/44.jpg"
+                image: `${abhay}`
               },
               {
-                name: "Amit Kumar",
+                name: "Rohit Yadav",
                 role: "Orthopedic Patient",
                 content: "My knee replacement surgery was successful and the rehabilitation program got me back on my feet quickly.",
                 rating: 4,
-                image: "https://randomuser.me/api/portraits/men/75.jpg"
+                image: `${rohit}`
               }
             ].map((testimonial, index) => (
               <div key={index} className="bg-white p-6 rounded-lg shadow-sm">

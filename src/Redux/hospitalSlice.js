@@ -72,7 +72,7 @@ const hospitalSlice = createSlice({
       .addCase(getAllHospital.fulfilled, (state, action) => {
         state.loading = false;
         state.hospitals = action.payload;
-        localStorage.setItem("hospitals", JSON.stringify(action.payload));
+        // localStorage.setItem("hospitals", JSON.stringify(action.payload));
       })
       .addCase(LoginHospital.fulfilled, (state, action) => {
         localStorage.setItem("data", JSON.stringify(action?.payload?.user));

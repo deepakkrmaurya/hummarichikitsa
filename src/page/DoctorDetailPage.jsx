@@ -68,6 +68,7 @@ const DoctorDetailPage = () => {
     // Local state
     const [selectedDate, setSelectedDate] = useState('');
     const [selectedSlot, setSelectedSlot] = useState('');
+    const [errormessage, setErrorMessage] = useState();
     const [patient, setPatient] = useState('');
     const [mobile, setMobile] = useState('');
     const [dob, setDob] = useState('');
@@ -116,6 +117,13 @@ const DoctorDetailPage = () => {
             navigate('/');
             return;
         }
+
+        if (!selectDate) {
+            setErrorMessage('Please select a date')
+            return
+        }
+
+
 
         // if (!selectedDate || !selectedSlot) {
         //     toast.error('Please select a date and time slot');
@@ -266,6 +274,11 @@ const DoctorDetailPage = () => {
         };
 
         fetchData();
+    }, []);
+
+
+    useEffect(() => {
+        window.scrollTo({ top: 0, behavior: "smooth" });
     }, []);
 
     return (
@@ -523,11 +536,15 @@ const DoctorDetailPage = () => {
                                             <button
                                                 type="button"
                                                 onClick={() => setSelectDate(today)}
-                                                className={`flex-1 py-2.5 px-4 rounded-lg font-medium transition-all duration-200 ${isTodaySelected
-                                                        ? 'bg-blue-600 text-white shadow-sm'
-                                                        : selectDate
-                                                            ? 'bg-blue-50 text-blue-600 hover:bg-blue-100 border border-blue-100'
-                                                            : 'bg-gray-100 text-gray-400 cursor-not-allowed border border-gray-200'
+                                                // className={`flex-1 py-2.5 px-4 rounded-lg font-medium transition-all duration-200  ${isTodaySelected
+                                                //     ? 'bg-blue-600 text-white shadow-sm'
+                                                //     : selectDate
+                                                //         ? 'bg-blue-50 text-blue-600 hover:bg-blue-100 border border-blue-100'
+                                                //         : 'bg-gray-600 text-gray-400 cursor-not-allowed border border-gray-200'
+                                                //     }`}
+                                                className={`flex-1 p-3 rounded-lg font-medium shadow-md transition-all ${isTodaySelected
+                                                    ? 'bg-blue-700 text-white hover:bg-blue-800'
+                                                    : 'bg-blue-100 text-blue-700 hover:bg-blue-200'
                                                     }`}
                                             >
                                                 Today
@@ -536,11 +553,15 @@ const DoctorDetailPage = () => {
                                             <button
                                                 type="button"
                                                 onClick={() => setSelectDate(tomorrowFormatted)}
-                                                className={`flex-1 py-2.5 px-4 rounded-lg font-medium transition-all duration-200 ${isTomorrowSelected
-                                                        ? 'bg-blue-600 text-white shadow-sm'
-                                                        : selectDate
-                                                            ? 'bg-blue-50 text-blue-600 hover:bg-blue-100 border border-blue-100'
-                                                            : 'bg-gray-100 text-gray-400 cursor-not-allowed border border-gray-200'
+                                                // className={`flex-1 py-2.5 px-4 rounded-lg font-medium transition-all duration-200 ${isTomorrowSelected
+                                                //     ? 'bg-blue-600 text-white shadow-sm'
+                                                //     : selectDate
+                                                //         ? 'bg-blue-50 text-blue-600 hover:bg-blue-100 border border-blue-100'
+                                                //         : 'bg-gray-100 text-gray-400 cursor-not-allowed border border-gray-200'
+                                                //     }`}
+                                                className={`flex-1 p-3 rounded-lg font-medium shadow-md transition-all ${isTomorrowSelected
+                                                    ? 'bg-blue-700 text-white hover:bg-blue-800'
+                                                    : 'bg-blue-100 text-blue-700 hover:bg-blue-200'
                                                     }`}
                                             >
                                                 Tomorrow
@@ -548,8 +569,8 @@ const DoctorDetailPage = () => {
                                         </div>
 
                                         {/* Error Message */}
-                                        {!selectDate && (
-                                            <div className="flex items-center text-red-500 text-xs mt-1 ml-1">
+                                        {errormessage != null && (
+                                            <div className="flex items-center text-red-500 text-xs py-2 ml-1">
                                                 <svg
                                                     xmlns="http://www.w3.org/2000/svg"
                                                     className="h-3.5 w-3.5 mr-1"
@@ -562,7 +583,7 @@ const DoctorDetailPage = () => {
                                                         clipRule="evenodd"
                                                     />
                                                 </svg>
-                                                Please select a date
+                                                <p className=' text-xl'>{errormessage}</p>
                                             </div>
                                         )}
                                     </div>

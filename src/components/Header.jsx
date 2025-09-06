@@ -32,10 +32,11 @@ const Header = () => {
             localStorage.removeItem("isLoggedIn");
             localStorage.removeItem("role");
             localStorage.clear();
+            window.location.reload();
         }
         setIsMenuOpen(false);
+        
         navigate('/');
-        window.location.reload();
     };
 
 
@@ -79,9 +80,11 @@ const Header = () => {
                                 Dashboard
                             </Link>
                         ) : (
+                            currentUser?.isLoggedIn && (
                             <Link to="/appointments" className="text-gray-700 hover:text-blue-600 transition">
                                 My Appointments
                             </Link>
+                            )
                         )}
 
                         {currentUser?.isLoggedIn ? (

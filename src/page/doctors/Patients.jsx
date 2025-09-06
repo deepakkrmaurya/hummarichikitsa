@@ -9,6 +9,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 
 const Patients = () => {
     const dispatch = useDispatch();
+    const [isDateFilterOpen, setIsDateFilterOpen] = useState(false);
+
     const [searchTerm, setSearchTerm] = useState('');
     const [currentMonth, setCurrentMonth] = useState(new Date());
     const [selectedDate, setSelectedDate] = useState(null);
@@ -51,7 +53,10 @@ const Patients = () => {
                 console.error("Error fetching appointments:", error);
             }
         };
-        fetchData();
+        if (!appointments || appointments.length === 0) {
+
+            fetchData();
+        }
     }, [dispatch]);
 
     // Filter appointments based on search and selected date
@@ -61,7 +66,8 @@ const Patients = () => {
             appointment._id.toLowerCase().includes(searchTerm.toLowerCase()) ||
             (appointment.patientId?.name && appointment.patientId.name.toLowerCase().includes(searchTerm.toLowerCase())) ||
             appointment?.token?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            appointment.patient?.name?.toLowerCase().includes(searchTerm.toLowerCase());
+            appointment.patient?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            appointment.mobile?.toLowerCase().includes(searchTerm.toLowerCase());
 
         // Date condition from first filter
         const matchesDate = selectedDate ? isSameDay(new Date(appointment.date), new Date(selectedDate)) : true;
@@ -113,6 +119,8 @@ const Patients = () => {
 
     return (
         <Dashboard>
+
+
             <motion.div
                 initial="hidden"
                 animate="show"
@@ -121,117 +129,139 @@ const Patients = () => {
                 style={{ backgroundColor: colors.background, minHeight: '100vh' }}
             >
                 {/* Date Filter Section */}
-                <motion.div
-                    variants={itemVariants}
-                    className="bg-white rounded-xl shadow-sm p-6 transition-all hover:shadow-md"
-                    style={{ borderLeft: `4px solid ${colors.primary}` }}
-                >
-                    <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-4 gap-4">
-                        <h3 className="text-lg font-semibold" style={{ color: colors.text }}>Filter by Date</h3>
-                        <div className="flex items-center space-x-3">
-                            <motion.button
-                                whileHover={{ scale: 1.1 }}
-                                whileTap={{ scale: 0.9 }}
-                                onClick={() => setCurrentMonth(subMonths(currentMonth, 1))}
-                                className="p-1 rounded-md hover:bg-gray-100"
-                            >
-                                <ChevronLeft className="h-5 w-5" style={{ color: colors.primary }} />
-                            </motion.button>
-                            <span className="font-medium" style={{ color: colors.text }}>
-                                {format(currentMonth, 'MMMM yyyy')}
-                            </span>
-                            <motion.button
-                                whileHover={{ scale: 1.1 }}
-                                whileTap={{ scale: 0.9 }}
-                                onClick={() => setCurrentMonth(addMonths(currentMonth, 1))}
-                                className="p-1 rounded-md hover:bg-gray-100"
-                            >
-                                <ChevronRight className="h-5 w-5" style={{ color: colors.primary }} />
-                            </motion.button>
-                        </div>
-                    </div>
 
-                    {/* Mini Calendar */}
-                    <div className="mb-4">
-                        <div className="grid grid-cols-7 gap-1 mb-2">
-                            {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((day) => (
-                                <div key={day} className="text-center text-xs font-medium py-1" style={{ color: colors.muted }}>
-                                    {day}
-                                </div>
-                            ))}
-                        </div>
-                        <div className="grid grid-cols-7 gap-1">
-                            {getDaysInMonth().map((date) => {
-                                const dateStr = format(date, 'yyyy-MM-dd');
-                                const hasAppointments = appointmentsByDate[dateStr] > 0;
-                                const isSelected = selectedDate && isSameDay(date, new Date(selectedDate));
-                                const isToday = isSameDay(date, new Date());
-                                return (
+                {isDateFilterOpen && (
+                    <motion.div
+                        variants={itemVariants}
+
+                    >
+                        <motion.div
+                            variants={itemVariants}
+                            className="bg-white rounded-xl shadow-sm p-6 transition-all hover:shadow-md"
+                            style={{ borderLeft: `4px solid ${colors.primary}` }}
+                        >
+                            <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-4 gap-4">
+                                <h3 className="text-lg font-semibold" style={{ color: colors.text }}>Filter by Date</h3>
+                                <div className="flex items-center space-x-3">
                                     <motion.button
-                                        key={dateStr}
-                                        whileHover={hasAppointments ? { scale: 1.05 } : {}}
-                                        whileTap={hasAppointments ? { scale: 0.95 } : {}}
-                                        onClick={() => setSelectedDate(hasAppointments ? dateStr : null)}
-                                        className={`h-12 rounded-lg flex flex-col items-center justify-center text-sm font-medium transition-all
+                                        whileHover={{ scale: 1.1 }}
+                                        whileTap={{ scale: 0.9 }}
+                                        onClick={() => setCurrentMonth(subMonths(currentMonth, 1))}
+                                        className="p-1 rounded-md hover:bg-gray-100"
+                                    >
+                                        <ChevronLeft className="h-5 w-5" style={{ color: colors.primary }} />
+                                    </motion.button>
+                                    <span className="font-medium" style={{ color: colors.text }}>
+                                        {format(currentMonth, 'MMMM yyyy')}
+                                    </span>
+                                    <motion.button
+                                        whileHover={{ scale: 1.1 }}
+                                        whileTap={{ scale: 0.9 }}
+                                        onClick={() => setCurrentMonth(addMonths(currentMonth, 1))}
+                                        className="p-1 rounded-md hover:bg-gray-100"
+                                    >
+                                        <ChevronRight className="h-5 w-5" style={{ color: colors.primary }} />
+                                    </motion.button>
+                                </div>
+                            </div>
+
+                            {/* Mini Calendar */}
+                            <div className="mb-4">
+                                <div className="grid grid-cols-7 gap-1 mb-2">
+                                    {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((day) => (
+                                        <div key={day} className="text-center text-xs font-medium py-1" style={{ color: colors.muted }}>
+                                            {day}
+                                        </div>
+                                    ))}
+                                </div>
+                                <div className="grid grid-cols-7 gap-1">
+                                    {getDaysInMonth().map((date) => {
+                                        const dateStr = format(date, 'yyyy-MM-dd');
+                                        const hasAppointments = appointmentsByDate[dateStr] > 0;
+                                        const isSelected = selectedDate && isSameDay(date, new Date(selectedDate));
+                                        const isToday = isSameDay(date, new Date());
+                                        return (
+                                            <motion.button
+                                                key={dateStr}
+                                                whileHover={hasAppointments ? { scale: 1.05 } : {}}
+                                                whileTap={hasAppointments ? { scale: 0.95 } : {}}
+                                                onClick={() => setSelectedDate(hasAppointments ? dateStr : null)}
+                                                className={`h-12 rounded-lg flex flex-col items-center justify-center text-sm font-medium transition-all
                                             ${isSelected ? 'bg-blue-600 text-white' : ''}
                                             ${!isSelected && isToday ? 'border-2' : ''}
                                             ${hasAppointments ? 'hover:bg-blue-50 cursor-pointer' : 'text-gray-300 cursor-default'}
                                             ${!hasAppointments && !isSelected ? 'bg-gray-50' : ''}
                                         `}
-                                        style={{
-                                            borderColor: isToday ? colors.primary : 'transparent',
-                                            color: isSelected ? 'white' : (isToday ? colors.primary : (hasAppointments ? colors.text : ''))
-                                        }}
-                                        disabled={!hasAppointments}
-                                    >
-                                        {date.getDate()}
-                                        {hasAppointments && (
-                                            <motion.span
-                                                className={`w-2 h-2 rounded-full mt-1 
+                                                style={{
+                                                    borderColor: isToday ? colors.primary : 'transparent',
+                                                    color: isSelected ? 'white' : (isToday ? colors.primary : (hasAppointments ? colors.text : ''))
+                                                }}
+                                                disabled={!hasAppointments}
+                                            >
+                                                {date.getDate()}
+                                                {hasAppointments && (
+                                                    <motion.span
+                                                        className={`w-2 h-2 rounded-full mt-1 
                                                     ${isSelected ? 'bg-white' : 'bg-blue-500'}`}
-                                                animate={{
-                                                    scale: [1, 1.2, 1]
-                                                }}
-                                                transition={{
-                                                    duration: 0.5,
-                                                    repeat: Infinity
-                                                }}
-                                            />
-                                        )}
-                                    </motion.button>
-                                );
-                            })}
-                        </div>
-                    </div>
+                                                        animate={{
+                                                            scale: [1, 1.2, 1]
+                                                        }}
+                                                        transition={{
+                                                            duration: 0.5,
+                                                            repeat: Infinity
+                                                        }}
+                                                    />
+                                                )}
+                                            </motion.button>
+                                        );
+                                    })}
+                                </div>
+                            </div>
 
-                    <AnimatePresence>
-                        {selectedDate && (
-                            <motion.div
-                                initial={{ opacity: 0, y: -10 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                exit={{ opacity: 0, y: -10 }}
-                                className="flex justify-between items-center rounded-lg px-4 py-3 mb-2"
-                                style={{ backgroundColor: `${colors.primary}10` }}
-                            >
-                                <span className="text-sm font-medium" style={{ color: colors.primary }}>
-                                    Showing appointments for {format(new Date(selectedDate), 'MMMM d, yyyy')}
-                                </span>
-                                <motion.button
-                                    whileHover={{ scale: 1.05 }}
-                                    whileTap={{ scale: 0.95 }}
-                                    onClick={() => setSelectedDate(null)}
-                                    className="text-sm font-medium px-3 py-1 rounded-md"
-                                    style={{
-                                        backgroundColor: `${colors.primary}20`,
-                                        color: colors.primary
-                                    }}
-                                >
-                                    Clear filter
-                                </motion.button>
-                            </motion.div>
-                        )}
-                    </AnimatePresence>
-                </motion.div>
+                            <AnimatePresence>
+                                {selectedDate && (
+                                    <motion.div
+                                        initial={{ opacity: 0, y: -10 }}
+                                        animate={{ opacity: 1, y: 0 }}
+                                        exit={{ opacity: 0, y: -10 }}
+                                        className="flex justify-between items-center rounded-lg px-4 py-3 mb-2"
+                                        style={{ backgroundColor: `${colors.primary}10` }}
+                                    >
+                                        <span className="text-sm font-medium" style={{ color: colors.primary }}>
+                                            Showing appointments for {format(new Date(selectedDate), 'MMMM d, yyyy')}
+                                        </span>
+                                        <motion.button
+                                            whileHover={{ scale: 1.05 }}
+                                            whileTap={{ scale: 0.95 }}
+                                            onClick={() => setSelectedDate(null)}
+                                            className="text-sm font-medium px-3 py-1 rounded-md"
+                                            style={{
+                                                backgroundColor: `${colors.primary}20`,
+                                                color: colors.primary
+                                            }}
+                                        >
+                                            Clear filter
+                                        </motion.button>
+                                    </motion.div>
+                                )}
+                            </AnimatePresence>
+                        </motion.div>
+                        <motion.button
+                            whileHover={{ scale: 1.05 }}
+                            whileTap={{ scale: 0.95 }}
+                            className="mt-4 px-3 py-1 rounded-md"
+                            style={{
+                                backgroundColor: `${colors.danger}10`,
+                                color: colors.danger
+                            }}
+                            onClick={() => setIsDateFilterOpen(false)}
+                        >
+                            Close
+                        </motion.button>
+                    </motion.div>
+                )}
+
+
 
                 {/* Appointments Table */}
                 <motion.div
@@ -239,6 +269,18 @@ const Patients = () => {
                     className="bg-white rounded-xl shadow-sm overflow-hidden transition-all hover:shadow-md"
                 >
                     <div className="p-6 border-b border-gray-200 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                        <motion.button
+                            whileHover={{ scale: 1.05 }}
+                            whileTap={{ scale: 0.95 }}
+                            className="px-4 py-2 rounded-lg font-medium"
+                            style={{
+                                backgroundColor: `${colors.primary}20`,
+                                color: colors.primary
+                            }}
+                            onClick={() => setIsDateFilterOpen(!isDateFilterOpen)}
+                        >
+                            Filter by Date
+                        </motion.button>
                         <h2 className="text-xl font-semibold" style={{ color: colors.text }}>
                             {selectedDate
                                 ? `Appointments on ${format(new Date(selectedDate), 'MMMM d, yyyy')}`
@@ -276,9 +318,10 @@ const Patients = () => {
                             />
                         </div>
                     ) : (
-                        <div className="overflow-x-auto">
+
+                        <div className="overflow-auto rounded-xl" style={{ maxHeight: '630px' }}>
                             <table className="min-w-full divide-y divide-gray-200">
-                                <thead className="bg-gray-50">
+                                <thead className="bg-gray-50 sticky top-0 z-10">
                                     <tr>
                                         <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider" style={{ color: colors.muted }}>Patient</th>
                                         <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider" style={{ color: colors.muted }}>Time</th>
@@ -320,7 +363,7 @@ const Patients = () => {
                                                                 </div>
                                                                 <div className="ml-4">
                                                                     <div className="text-sm font-medium" style={{ color: colors.text }}>
-                                                                        {appointment.patientId?.name || `Patient ${appointment._id.slice(-4)}`}
+                                                                        {appointment.patient || `Patient ${appointment._id.slice(-4)}`}
                                                                     </div>
                                                                     <div className="text-xs" style={{ color: colors.muted }}>
                                                                         ID: {appointment._id.slice(-6)}
@@ -432,6 +475,7 @@ const Patients = () => {
                                 </tbody>
                             </table>
                         </div>
+
                     )}
                 </motion.div>
             </motion.div>

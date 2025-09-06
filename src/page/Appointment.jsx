@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react'
+import React, { useEffect, useState } from 'react'
 import { Calendar, CreditCard, MapPin, Clock, Frown, PlusCircle } from 'lucide-react';
 import { useDispatch, useSelector } from 'react-redux';
 import { getAllAppointment } from '../Redux/appointment';
@@ -14,30 +14,52 @@ function Appointment() {
     const dispatch = useDispatch();
     const { doctors } = useSelector((state) => state?.doctors);
     const isLoading = useSelector((state) => state.appointment?.loading);
-
+    const [activeTab, setActiveTab] = useState('active');
 
     useEffect(() => {
         (async () => {
-              if(!doctors || doctors.length === 0){
-                  await dispatch(getAllDoctors())
-              }
+            if (!doctors || doctors.length === 0) {
+                await dispatch(getAllDoctors())
+            }
 
-              if(!hospital || hospital.length === 0 ){
-
-                  await dispatch(getAllHospital())
-              }
-      
+            if (!hospital || hospital.length === 0) {
+                await dispatch(getAllHospital())
+            }
         })()
-    }, [dispatch,doctors,hospital])
+    }, [])
 
-    useEffect(()=>{
-        if(!appointments || appointments.length===0){
-           (async()=>{
-            await dispatch(getAllAppointment())
-           })()
+    useEffect(() => {
+        if (!appointments || appointments.length === 0) {
+            (async () => {
+                await dispatch(getAllAppointment())
+            })()
         }
-    },[dispatch,appointments])
-
+    }, [])
+  
+    // Filter appointments based on tab selection
+    const filteredAppointments = appointments?.filter(appointment => {
+        if (activeTab === 'active') {
+            // For active tab, show appointments that are not completed and not in the past
+            if (appointment.status === "completed") return false;
+            
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            const appointmentDate = new Date(appointment.date);
+            appointmentDate.setHours(0, 0, 0, 0);
+            
+            return appointmentDate >= today;
+        } else {
+            // For completed tab, show completed appointments and past appointments
+            if (appointment.status === "completed") return true;
+            
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            const appointmentDate = new Date(appointment.date);
+            appointmentDate.setHours(0, 0, 0, 0);
+            
+            return appointmentDate < today;
+        }
+    }) || [];
 
     // Function to format date with ordinal suffix
     const formatDate = (dateString) => {
@@ -55,6 +77,10 @@ function Appointment() {
         return `${weekday}, ${month} ${day}${suffix}`;
     }
 
+    useEffect(() => {
+        window.scrollTo({ top: 0, behavior: "smooth" });
+    }, []);
+
     if (isLoading) {
         return (
             <Layout>
@@ -68,8 +94,29 @@ function Appointment() {
     return (
         <Layout>
             <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-                <div className="flex justify-between items-center mb-8">
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-4">
                     <h1 className="text-2xl font-bold text-gray-900">My Appointments</h1>
+                    
+                    {/* Tab Navigation */}
+                    <div className="flex bg-white rounded-lg shadow-sm p-1 border border-gray-200">
+                        <button
+                            onClick={() => setActiveTab('active')}
+                            className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${activeTab === 'active' 
+                                ? 'bg-blue-600 text-white' 
+                                : 'text-gray-600 hover:text-gray-900'}`}
+                        >
+                            Active
+                        </button>
+                        <button
+                            onClick={() => setActiveTab('completed')}
+                            className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${activeTab === 'completed' 
+                                ? 'bg-blue-600 text-white' 
+                                : 'text-gray-600 hover:text-gray-900'}`}
+                        >
+                            Completed
+                        </button>
+                    </div>
+                    
                     <Link
                         to="/hospitals"
                         className="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-md shadow-sm transition-colors duration-150"
@@ -79,32 +126,37 @@ function Appointment() {
                     </Link>
                 </div>
 
-                {appointments?.length === 0 ? (
+                {filteredAppointments.length === 0 ? (
                     <div className="bg-white rounded-xl shadow-sm overflow-hidden border border-gray-200 p-12 text-center">
                         <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-blue-100">
                             <Frown className="h-6 w-6 text-blue-600" />
                         </div>
-                        <h3 className="mt-4 text-lg font-medium text-gray-900">No appointments found</h3>
+                        <h3 className="mt-4 text-lg font-medium text-gray-900">
+                            {activeTab === 'active' ? 'No Active Appointments' : 'No Completed Appointments'}
+                        </h3>
                         <p className="mt-2 text-sm text-gray-500">
-                            You haven't booked any appointments yet. Book your first appointment now!
+                            {activeTab === 'active' 
+                                ? "You don't have any upcoming appointments" 
+                                : "Your completed appointments will appear here"}
                         </p>
                         <div className="mt-6">
-                            <Link
-                                to="/hospitals"
-                                className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-                            >
-                                <PlusCircle className="-ml-1 mr-2 h-5 w-5" />
-                                Book Appointment
-                            </Link>
+                            {activeTab === 'active' && (
+                                <Link
+                                    to="/hospitals"
+                                    className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                                >
+                                    <PlusCircle className="-ml-1 mr-2 h-5 w-5" />
+                                    Book Appointment
+                                </Link>
+                            )}
                         </div>
                     </div>
                 ) : (
                     <div className="space-y-6">
-                        {appointments?.map((appointment, index) => {
+                        {filteredAppointments.map((appointment, index) => {
                             let finalStatus;
-                            const doctor = doctors.find(d => d._id === appointment.doctorId);
-                            const hospitals = hospital.find(h => h._id === appointment.hospitalId);
-
+                            const doctor = doctors.find(d => d._id === appointment?.doctorId);
+                            const hospitals = hospital.find(h => h._id === appointment?.hospitalId);
 
                             if (appointment.status === "completed") {
                                 finalStatus = "Completed";
@@ -115,7 +167,7 @@ function Appointment() {
                                 const appointmentDate = new Date(appointment.date);
                                 appointmentDate.setHours(0, 0, 0, 0);
 
-                                finalStatus = appointmentDate >= today ? "Active" : "Inactive";
+                                finalStatus = appointmentDate >= today ? "Active" : "Past";
                             }
 
                             return (
@@ -128,7 +180,6 @@ function Appointment() {
                                                     className="w-16 h-16 rounded-lg object-cover border-2 border-blue-50"
                                                     alt={`${doctor?.name}'s profile`}
                                                 />
-
                                             </div>
 
                                             <div className="flex-1 min-w-0">
@@ -137,11 +188,11 @@ function Appointment() {
                                                         <h3 className="font-semibold text-gray-900 text-lg truncate">{doctor?.name}</h3>
                                                         <p className="text-sm text-gray-600 truncate">{doctor?.specialty}</p>
                                                     </div>
-                                                    <span className={`px-3 py-1 text-xs font-medium rounded-full ${appointment.status === 'confirmed' ? 'bg-green-100 text-green-800' :
-                                                        appointment.status === 'cancelled' ? 'bg-gray-100 text-gray-800' :
-                                                            'bg-blue-100 text-blue-800'
+                                                    <span className={`px-3 py-1 text-xs font-medium rounded-full ${finalStatus === 'Active' ? 'bg-green-100 text-green-800' :
+                                                        finalStatus === 'Completed' ? 'bg-blue-100 text-blue-800' :
+                                                            'bg-gray-100 text-gray-800'
                                                         }`}>
-                                                        {finalStatus.charAt(0).toUpperCase() + finalStatus.slice(1)}
+                                                        {finalStatus}
                                                     </span>
                                                 </div>
 
@@ -203,11 +254,6 @@ function Appointment() {
                                             >
                                                 View Details
                                             </Link>
-                                            {/* {appointment.status === 'confirmed' && (
-                                                <button className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500">
-                                                    Cancel Appointment
-                                                </button>
-                                            )} */}
                                         </div>
                                     </div>
                                 </div>
