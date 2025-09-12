@@ -25,22 +25,11 @@ const DoctorDetailPage = () => {
     tomorrow.setDate(tomorrow.getDate() + 1);
     const tomorrowFormatted = tomorrow.toISOString().split('T')[0];
 
-    const [selectDate, setSelectDate] = useState(null);
+    const [selectDate, setSelectDate] = useState();
 
     // Check which button is selected
     const isTodaySelected = selectDate === today;
     const isTomorrowSelected = selectDate === tomorrowFormatted;
-
-
-
-
-
-
-
-
-
-    const rzpInstanceRef = useRef(null);
-    const [currentMonth, setCurrentMonth] = useState(new Date());
     const dispatch = useDispatch();
     const currentUser = JSON.parse(localStorage.getItem('data')) || null;
     const isLoggdIn = JSON.parse(localStorage.getItem('isLoggedIn')) || false;
@@ -163,11 +152,11 @@ const DoctorDetailPage = () => {
         const res = await dispatch(AppointmentCreate(newAppointment));
 
         if (res?.payload?.success) {
-            if (res.payload?.savedAppointment) {
+           
                 setLoading(false)
                 navigate(`/confirmation/${res.payload?.savedAppointment?._id}`);
                 return;
-            }
+          
 
             // const loadRazorpayScript = () => {
             //     return new Promise((resolve) => {
@@ -741,9 +730,9 @@ const DoctorDetailPage = () => {
                                             setLoading(true)
                                         }}
                                         // !selectedDate || !selectedSlot ||
-                                        disabled={!patient || !mobile || mobile.length !== 10}
+                                        disabled={!patient  ||!mobile || mobile.length !== 10}
                                         className={`w-full py-3 rounded-lg font-medium flex items-center justify-center transition
-                                    ${!patient || !mobile || mobile.length !== 10
+                                    ${!patient || !selectDate || !mobile || mobile.length !== 10
                                                 ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
                                                 : 'bg-gradient-to-r from-teal-600 to-teal-500 text-white hover:from-teal-700 hover:to-teal-600 shadow-md'
                                             }
