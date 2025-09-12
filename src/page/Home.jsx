@@ -1,6 +1,3 @@
-
-
-
 import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { getAllHospital } from "../Redux/hospitalSlice";
@@ -11,11 +8,11 @@ import { getAllDoctors } from "../Redux/doctorSlice";
 import Layout from "../components/Layout/Layout";
 import { useState } from "react";
 import hospital_img from '../../src/assets/hospital_image.png';
-
 import deepak from '../../src/assets/deepak.jpg';
 import abhay from '../../src/assets/abjay.jpg';
 import rohit from '../../src/assets/rohit.jpg';
 import AppointmentsSection from "../components/AppointmentsSection";
+import SignInButton from "./SignInButton";
 
 // Skeleton Components
 const StatsSkeleton = () => (
@@ -106,7 +103,7 @@ const Home = () => {
   const { doctors } = useSelector((state) => state?.doctors);
   const appointments = useSelector((state) => state.appointment?.appointment);
   const dispatch = useDispatch();
-  // Loading states
+
   const [hospitalsLoading, setHospitalsLoading] = useState(true);
   const [doctorsLoading, setDoctorsLoading] = useState(true);
   const [appointmentsLoading, setAppointmentsLoading] = useState(true);
@@ -132,9 +129,6 @@ const Home = () => {
         setDoctorsLoading(false);
       }
     })();
-
-
-
     const interval = setInterval(() => {
       setCurrentImageIndex((prevIndex) =>
         (prevIndex + 1) % backgroundImages.length
@@ -147,14 +141,14 @@ const Home = () => {
   useEffect(() => {
     if (!appointments || appointments.length === 0) {
       // setAppointmentsLoading(true);
-
+      //  alert("skjah")
       dispatch(getAllAppointment());
       setAppointmentsLoading(false);
 
     } else {
       setAppointmentsLoading(false);
     }
-  }, [dispatch, appointments])
+  }, [dispatch])
 
 
   useEffect(() => {
@@ -169,7 +163,6 @@ const Home = () => {
 
   return (
     <Layout>
-      {/* Hero Section with Medical Imagery */}
       <section className="relative bg-gradient-to-r from-blue-900 to-teal-800 text-white py-24">
         <div className="absolute inset-0 opacity-15">
           {backgroundImages.map((image, index) => (
@@ -468,7 +461,7 @@ const Home = () => {
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {hospital
-                .filter(hospital => hospital.status === 'active')
+                .filter(hospital => hospital.status)
                 .slice(0, 3)
                 .map((hospital) => (
                   <div

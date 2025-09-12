@@ -100,7 +100,12 @@ const UpdateDoctor = () => {
         formData.append('bio', doctor.bio);
         formData.append('rating', doctor.rating.toString());
         formData.append('consultationFee', doctor.consultationFee.toString());
-        formData.append('status', doctor.status);
+        if(doctor.status=='active'){
+
+            formData.append('status', true);
+        }else{
+            formData.append('status', false);
+        }
         formData.append('gender', doctor.gender);
 
         // Only append photo if it's a new file
@@ -117,11 +122,6 @@ const UpdateDoctor = () => {
                 }));
                 getDoctorById()
             }
-            // setSubmitSuccess(true);
-            // setTimeout(() => {
-            //     setSubmitSuccess(false);
-            //     navigate('/doctors'); // Redirect after success
-            // }, 2000);
         } catch (error) {
             console.error("Error submitting form:", error);
         } finally {
@@ -143,10 +143,6 @@ const UpdateDoctor = () => {
             });
         }
     };
-
-    // Rest of your component remains the same...
-    // [Keep all the JSX rendering code exactly as you had it]
-
     return (
         <Dashboard>
             <div className="min-h-screen" style={{ backgroundColor: colors.background }}>
@@ -389,7 +385,6 @@ const UpdateDoctor = () => {
                                                     >
                                                         <option value="active">Active</option>
                                                         <option value="inactive">Inactive</option>
-                                                        <option value="onleave">On Leave</option>
                                                     </select>
                                                 </div>
                                                 <div>

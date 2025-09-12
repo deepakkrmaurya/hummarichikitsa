@@ -1,47 +1,69 @@
 import { useEffect, useState } from 'react';
-import { Calendar, Clock, User, FileText, BarChart, Settings } from 'lucide-react';
+import { Calendar, Clock, User, FileText, Settings, LogOut } from 'lucide-react';
 import { useDispatch, useSelector } from 'react-redux';
-import { Link, useNavigate } from 'react-router-dom';
+import { NavLink, useNavigate } from 'react-router-dom';
 import { Logout } from '../../Redux/doctorSlice';
 import avatar from '../../../src/assets/logo-def.png';
-import axiosInstance from '../../Helper/axiosInstance';
+import { AuthMe } from '../../Redux/AuthLoginSlice';
+
 const Dashboard = ({ children }) => {
+  const { isLoggedIn, role, data } = useSelector((state) => state?.LoginAuth || {});
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  const [data, setData] = useState();
-  const { isLoggedIn, role } = useSelector((state) => state.auth);
-  const [activeTab, setActiveTab] = useState('appointments');
+  const [userData, setUserData] = useState({});
+  const [userRole, setUserRole] = useState('');
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  // var role  = data?.role
+
   useEffect(() => {
-    async function fetchData() {
-      try {
-        const response = await axiosInstance.get("/user/me");
-        setData(response.data);
-      } catch (error) {
-        console.error("Error fetching data:", error);
+    // Check if we have data in Redux, if not, fetch it
+    if (!data || Object.keys(data).length === 0) {
+      dispatch(AuthMe())
+        .unwrap()
+        .then((result) => {
+          if (result && result.user) {
+            setUserData(result);
+            setUserRole(result.user.role);
+          }
+        })
+        .catch((error) => {
+          console.error("Error fetching user data:", error);
+        });
+    } else {
+      // Use data from Redux
+      setUserData(data);
+      if (data.user && data.user.role) {
+        setUserRole(data.user.role);
+      } else if (role) {
+        setUserRole(role);
       }
     }
-    fetchData();
-  }, []);
+  }, [dispatch, data, role]);
 
   const handleLogout = async () => {
-
-    const res = await dispatch(Logout())
+    const res = await dispatch(Logout());
     if (res?.payload?.success) {
       localStorage.removeItem("data");
       localStorage.removeItem("isLoggedIn");
       localStorage.removeItem("role");
       localStorage.clear();
-      window.location.reload();
       navigate('/');
+      window.location.reload();
     }
   };
+
+  // Get role from multiple possible sources
+  const currentRole = userRole || data?.user?.role || role || '';
+  // console.log("Current role:", currentRole);
+  // console.log("Redux data:", data);
+  // console.log("User data:", userData);
+
   return (
-    <div className=" sticky top-0 mx-auto">
+    <div className="min-h-screen flex flex-col lg:flex-row bg-gray-50">
       {/* Mobile Header */}
-      <div className="lg:hidden px-5 flex justify-between items-center mb-4">
-        <h1 className="text-xl font-bold text-gray-800">Doctor Dashboard</h1>
+      <div className="lg:hidden bg-white shadow-sm py-4 px-5 flex justify-between items-center">
+        <h1 className="text-xl font-bold text-gray-800">
+          {currentRole === 'doctor' ? 'Doctor' : currentRole === 'hospital' ? 'Hospital' : 'Admin'} Dashboard
+        </h1>
         <button
           onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
           className="p-2 rounded-md text-gray-700 hover:bg-gray-100 focus:outline-none"
@@ -56,204 +78,143 @@ const Dashboard = ({ children }) => {
         </button>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-4 gap-4">
+      <div className="flex flex-1">
         {/* Sidebar - Hidden on mobile unless toggled */}
-        <div className={`${mobileMenuOpen ? 'block' : 'hidden'} lg:block lg:col-span-1`}>
-          <div className="bg-white rounded-lg shadow-md overflow-hidden">
+        <div className={`${mobileMenuOpen ? 'block' : 'hidden'} lg:block w-full lg:w-64 bg-white shadow-lg z-10`}>
+          <div className="flex flex-col h-full">
             {/* Profile Section */}
-            <div className="p-4 sm:p-6 bg-gradient-to-r from-[rgb(43,108,176)] to-[rgb(33,88,156)] text-white">
+            <div className="p-4 sm:p-6 bg-gradient-to-r from-blue-600 to-blue-800 text-white">
               <div className="flex items-center">
                 <img
-                  src={data?.user?.photo || avatar}
-                  alt={"currentUser.name"}
+                  src={data?.user?.photo || data?.user?.image || data?.photo || data?.image || userData?.user?.photo || userData?.user?.image || avatar}
+                  alt={data?.user?.name || data?.name || userData?.user?.name || "User"}
                   className="w-12 h-12 sm:w-16 sm:h-16 rounded-full object-cover border-2 border-white mr-3 sm:mr-4"
                 />
                 <div>
-                  <h2 className="font-semibold text-sm sm:text-lg">{data?.user?.name}</h2>
-                  <p className="text-blue-100 text-xs sm:text-sm">{role || 'Doctor'}</p>
-                  <p className="text-blue-100 text-xs sm:text-sm">{data?.hospital?.name || ''}</p>
-
+                  <h2 className="font-semibold text-sm sm:text-lg">{data?.user?.name || data?.name || userData?.user?.name || "User"}</h2>
+                  <p className="text-blue-100 text-xs sm:text-sm capitalize">{currentRole || 'User'}</p>
+                  <p className="text-blue-100 text-xs sm:text-sm">{data?.hospital?.name || userData?.hospital?.name || ''}</p>
                 </div>
               </div>
             </div>
 
             {/* Navigation */}
-            <nav className="p-2 sm:p-4">
+            <nav className="flex-1 p-2 sm:p-4 overflow-y-auto">
               <ul className="space-y-1 sm:space-y-2">
                 <li>
-                  <Link to='/doctor/dashboard'>
-                    <button
-                      onClick={() => {
-                        setActiveTab('appointments');
-                        setMobileMenuOpen(false);
-                      }}
-                      className={`w-full flex items-center p-2 sm:p-3 rounded-lg transition text-sm sm:text-base ${activeTab === 'appointments'
-                        ? 'bg-blue-50 text-blue-700'
-                        : 'text-gray-700 hover:bg-gray-100'
-                        }`}
+                  <NavLink
+                    to='/doctor/dashboard'
+                    className={({ isActive }) =>
+                      `flex items-center p-2 sm:p-3 rounded-lg transition text-sm sm:text-base ${isActive ? "bg-blue-50 text-blue-600" : "text-gray-600 hover:bg-gray-100"
+                      }`
+                    }
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
+                    <Calendar className="h-4 w-4 sm:h-5 sm:w-5 mr-2 sm:mr-3" />
+                    <span className="font-medium">Appointments</span>
+                  </NavLink>
+                </li>
+
+                {currentRole !== 'admin' && (
+                  <li>
+                    <NavLink
+                      to='/book/appointment'
+                      className={({ isActive }) =>
+                        `flex items-center p-2 sm:p-3 rounded-lg transition text-sm sm:text-base ${isActive ? "bg-blue-50 text-blue-600" : "text-gray-600 hover:bg-gray-100"
+                        }`
+                      }
+                      onClick={() => setMobileMenuOpen(false)}
                     >
-                      <Calendar className="h-4 w-4 sm:h-5 sm:w-5 mr-2 sm:mr-3" />
-                      <span className="font-medium">Appointments</span>
-                    </button>
-                  </Link>
-                </li>
-                {/* {
-                  role === 'doctor' &&(
+                      <Clock className="h-4 w-4 sm:h-5 sm:w-5 mr-2 sm:mr-3" />
+                      <span className="font-medium">Book Appointment</span>
+                    </NavLink>
+                  </li>
+                )}
+
                 <li>
-                  <Link to={`/schedule/${data?._id}`}>
-                  <button
-                    onClick={() => {
-                      setActiveTab('schedule');
-                      setMobileMenuOpen(false);
-                    }}
-                    className={`w-full flex items-center p-2 sm:p-3 rounded-lg transition text-sm sm:text-base ${activeTab === 'schedule'
-                      ? 'bg-blue-50 text-blue-700'
-                      : 'text-gray-700 hover:bg-gray-100'
-                      }`}
+                  <NavLink
+                    to='/patient'
+                    className={({ isActive }) =>
+                      `flex items-center p-2 sm:p-3 rounded-lg transition text-sm sm:text-base ${isActive ? "bg-blue-50 text-blue-600" : "text-gray-600 hover:bg-gray-100"
+                      }`
+                    }
+                    onClick={() => setMobileMenuOpen(false)}
                   >
-                    <Clock className="h-4 w-4 sm:h-5 sm:w-5 mr-2 sm:mr-3" />
-                    <span className="font-medium">Schedule</span>
-                  </button>
-                  </Link>
+                    <User className="h-4 w-4 sm:h-5 sm:w-5 mr-2 sm:mr-3" />
+                    <span className="font-medium">Patients</span>
+                  </NavLink>
                 </li>
 
-                  )
-                } */}
-
-                {
-                  role !== 'admin' && (
-                    <li>
-                      <Link to={`/book/appointment`}>
-                        <button
-                          onClick={() => {
-                            setActiveTab('bookAppointment');
-                            setMobileMenuOpen(false);
-                          }}
-                          className={`w-full flex items-center p-2 sm:p-3 rounded-lg transition text-sm sm:text-base ${activeTab === 'bookAppointment'
-                            ? 'bg-blue-50 text-blue-700'
-                            : 'text-gray-700 hover:bg-gray-100'
-                            }`}
-                        >
-                          <Clock className="h-4 w-4 sm:h-5 sm:w-5 mr-2 sm:mr-3" />
-                          <span className="font-medium">Book Appointment</span>
-                        </button>
-                      </Link>
-                    </li>
-                  )
-                }
-                <li>
-                  <Link className=' cursor-pointer' to='/patient'>
-                    <button
-                      onClick={() => {
-                        setActiveTab('patients');
-                        setMobileMenuOpen(false);
-                      }}
-                      className={`w-full flex items-center p-2 sm:p-3 rounded-lg transition text-sm sm:text-base ${activeTab === 'patients'
-                        ? 'bg-blue-50 text-blue-700'
-                        : 'text-gray-700 hover:bg-gray-100'
-                        }`}
+                {currentRole === 'hospital' && (
+                  <li>
+                    <NavLink
+                      to='/hospital'
+                      className={({ isActive }) =>
+                        `flex items-center p-2 sm:p-3 rounded-lg transition text-sm sm:text-base ${isActive ? "bg-blue-50 text-blue-600" : "text-gray-600 hover:bg-gray-100"
+                        }`
+                      }
+                      onClick={() => setMobileMenuOpen(false)}
                     >
-                      <User className="h-4 w-4 sm:h-5 sm:w-5 mr-2 sm:mr-3" />
-                      <span className="font-medium">Patients</span>
-                    </button>
-                  </Link>
-                </li>
-                {/* <li>
-                  <button
-                    onClick={() => {
-                      setActiveTab('reports');
-                      setMobileMenuOpen(false);
-                    }}
-                    className={`w-full flex items-center p-2 sm:p-3 rounded-lg transition text-sm sm:text-base ${activeTab === 'reports'
-                      ? 'bg-blue-50 text-blue-700'
-                      : 'text-gray-700 hover:bg-gray-100'
-                      }`}
-                  >
-                    <FileText className="h-4 w-4 sm:h-5 sm:w-5 mr-2 sm:mr-3" />
-                    <span className="font-medium">Reports</span>
-                  </button>
-                </li> */}
-                {
-                  role === 'hospital' && (
-                    <li>
-                      <Link to='/hospital'>
-                        <button
-                          onClick={() => {
-                            setActiveTab('myhospital');
-                            setMobileMenuOpen(false);
-                          }}
-                          className={`w-full flex items-center p-2 sm:p-3 rounded-lg transition text-sm sm:text-base ${activeTab === 'myhospital'
-                            ? 'bg-blue-50 text-blue-700'
-                            : 'text-gray-700 hover:bg-gray-100'
-                            }`}
-                        >
-                          <FileText className="h-4 w-4 sm:h-5 sm:w-5 mr-2 sm:mr-3" />
-                          <span className="font-medium">My Hospital</span>
-                        </button>
-                      </Link>
-                    </li>
-                  )
-                }
+                      <FileText className="h-4 w-4 sm:h-5 sm:w-5 mr-2 sm:mr-3" />
+                      <span className="font-medium">My Hospital</span>
+                    </NavLink>
+                  </li>
+                )}
 
-                {
-                  role === 'admin' && (
-                    <li>
-                      <Link to='/hospital/list'>
-                        <button
-                          onClick={() => {
-                            setActiveTab('hospital');
-                            setMobileMenuOpen(false);
-                          }}
-                          className={`w-full flex items-center p-2 sm:p-3 rounded-lg transition text-sm sm:text-base ${activeTab === 'hospital'
-                            ? 'bg-blue-50 text-blue-700'
-                            : 'text-gray-700 hover:bg-gray-100'
-                            }`}
-                        >
-                          <FileText className="h-4 w-4 sm:h-5 sm:w-5 mr-2 sm:mr-3" />
-                          <span className="font-medium">Hospital</span>
-                        </button>
-                      </Link>
-                    </li>
-                  )
-                }
-                {/* <li>
+                {currentRole === 'admin' && (
+                  <li>
+                    <NavLink
+                      to='/hospital/list'
+                      className={({ isActive }) =>
+                        `flex items-center p-2 sm:p-3 rounded-lg transition text-sm sm:text-base ${isActive ? "bg-blue-50 text-blue-600" : "text-gray-600 hover:bg-gray-100"
+                        }`
+                      }
+                      onClick={() => setMobileMenuOpen(false)}
+                    >
+                      <FileText className="h-4 w-4 sm:h-5 sm:w-5 mr-2 sm:mr-3" />
+                      <span className="font-medium">Hospital</span>
+                    </NavLink>
+                  </li>
+                )}
+
+                {currentRole === 'hospital' && (
+                  <li>
+                    <NavLink
+                      to="/hospital/setting"
+                      className={({ isActive }) =>
+                        `flex items-center p-2 sm:p-3 rounded-lg transition text-sm sm:text-base ${isActive ? "bg-blue-50 text-blue-600" : "text-gray-600 hover:bg-gray-100"
+                        }`
+                      }
+                      onClick={() => setMobileMenuOpen(false)}
+                    >
+                      <Settings className="h-4 w-4 sm:h-5 sm:w-5 mr-2 sm:mr-3" />
+                      <span className="font-medium">Setting</span>
+                    </NavLink>
+                  </li>
+                )}
+
+                {currentRole === 'doctor' && (
+                  <li>
+                    <NavLink
+                      to="/doctor/setting"
+                      className={({ isActive }) =>
+                        `flex items-center p-2 sm:p-3 rounded-lg transition text-sm sm:text-base ${isActive ? "bg-blue-50 text-blue-600" : "text-gray-600 hover:bg-gray-100"
+                        }`
+                      }
+                      onClick={() => setMobileMenuOpen(false)}
+                    >
+                      <Settings className="h-4 w-4 sm:h-5 sm:w-5 mr-2 sm:mr-3" />
+                      <span className="font-medium">Setting</span>
+                    </NavLink>
+                  </li>
+                )}
+
+                <li className="mt-4">
                   <button
-                    onClick={() => {
-                      setActiveTab('analytics');
-                      setMobileMenuOpen(false);
-                    }}
-                    className={`w-full flex items-center p-2 sm:p-3 rounded-lg transition text-sm sm:text-base ${activeTab === 'analytics'
-                      ? 'bg-blue-50 text-blue-700'
-                      : 'text-gray-700 hover:bg-gray-100'
-                      }`}
+                    onClick={handleLogout}
+                    className="w-full flex items-center p-2 sm:p-3 rounded-lg transition text-sm sm:text-base text-gray-600 hover:bg-gray-100"
                   >
-                    <BarChart className="h-4 w-4 sm:h-5 sm:w-5 mr-2 sm:mr-3" />
-                    <span className="font-medium">Analytics</span>
-                  </button>
-                </li> */}
-                {/* <li>
-                  <button
-                    onClick={() => {
-                      setActiveTab('settings');
-                      setMobileMenuOpen(false);
-                    }}
-                    className={`w-full flex items-center p-2 sm:p-3 rounded-lg transition text-sm sm:text-base ${activeTab === 'settings'
-                      ? 'bg-blue-50 text-blue-700'
-                      : 'text-gray-700 hover:bg-gray-100'
-                      }`}
-                  >
-                    <Settings className="h-4 w-4 sm:h-5 sm:w-5 mr-2 sm:mr-3" />
-                    <span className="font-medium">Settings</span>
-                  </button>
-                </li> */}
-                <li>
-                  <button
-                    onClick={() => {
-                      handleLogout()
-                    }}
-                    className={`w-full flex items-center p-2 sm:p-3 rounded-lg transition text-sm sm:text-base`}
-                  >
-                    <Settings className="h-4 w-4 sm:h-5 sm:w-5 mr-2 sm:mr-3" />
+                    <LogOut className="h-4 w-4 sm:h-5 sm:w-5 mr-2 sm:mr-3" />
                     <span className="font-medium">Logout</span>
                   </button>
                 </li>
@@ -263,7 +224,7 @@ const Dashboard = ({ children }) => {
         </div>
 
         {/* Main Content */}
-        <div className="lg:col-span-3">
+        <div className="flex-1 p-4 lg:p-6 overflow-auto">
           {children}
         </div>
       </div>

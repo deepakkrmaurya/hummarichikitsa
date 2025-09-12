@@ -43,7 +43,7 @@ const DoctorForm = ({ doctorData }) => {
     rating: 0,
     consultationFee: 0,
     availableSlots: [],
-    status: 'active'
+    status: true
   });
 
   const [activeTab, setActiveTab] = useState('basic');
@@ -320,9 +320,9 @@ const DoctorForm = ({ doctorData }) => {
                               onChange={handleChange}
                               className="w-full px-3 py-2 border rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 border-gray-300 bg-gray-50"
                             >
-                              <option value="active">Active</option>
-                              <option value="inactive">Inactive</option>
-                              <option value="onleave">On Leave</option>
+                              <option value="true">Active</option>
+                              <option value="false">Inactive</option>
+                              {/* <option value="onleave">On Leave</option> */}
                             </select>
                           </div>
                           <div>

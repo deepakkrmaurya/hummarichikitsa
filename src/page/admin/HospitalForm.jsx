@@ -312,7 +312,7 @@ const HospitalForm = () => {
   return (
     <Dashboard>
       <div className="min-h-screen bg-gradient-to-br   font-sans">
-        <div className="max-w-4xl mx-auto">
+        <div className=" mx-auto">
           <div className="bg-white rounded-xl shadow-xl overflow-hidden">
             {/* Header with gradient background */}
             <div className="bg-gradient-to-r from-blue-600 to-indigo-700 py-2 px-6 sm:px-8">

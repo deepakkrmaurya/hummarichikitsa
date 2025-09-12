@@ -49,9 +49,8 @@ const HospitalList = () => {
     );
 
     const updateStatus = async (id, status) => {
-        const newStatus = status === 'active' ? 'deactive' : 'active';
         try {
-            const res = await axiosInstance.put(`/hospital/${id}/status`, { status: newStatus });
+            const res = await axiosInstance.put(`/hospital/${id}/status`);
             if (res.data.success) {
                 toast.success(res.data.message);
                 dispatch(getAllHospital());
@@ -305,10 +304,10 @@ const HospitalList = () => {
                                                             </td>
                                                             <td className="px-4 py-3">
                                                                 <button
-                                                                    onClick={() => updateStatus(hospital._id, hospital.status)}
+                                                                    onClick={() => updateStatus(hospital._id)}
                                                                     className={`inline-flex items-center rounded-full px-2 py-1 text-xs font-medium text-white ${hospital.status === 'active' ? 'bg-green-500' : 'bg-red-500'}`}
                                                                 >
-                                                                    {hospital.status.charAt(0).toUpperCase() + hospital.status.slice(1)}
+                                                                    {hospital?.status ? "InActive" : "Active"}
                                                                 </button>
                                                             </td>
                                                             <td className="px-4 py-3 text-right">

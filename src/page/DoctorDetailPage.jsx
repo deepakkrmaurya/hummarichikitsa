@@ -73,6 +73,7 @@ const DoctorDetailPage = () => {
     const [mobile, setMobile] = useState('');
     const [dob, setDob] = useState('');
     const [isLoading, setIsLoading] = useState(true);
+    const [Loading, setLoading] = useState(false);
 
     // Helper function to check if date is today or in the past
     const isDisabledDate = (dateString) => {
@@ -114,7 +115,7 @@ const DoctorDetailPage = () => {
     const handleBooking = async () => {
         if (!isLoggdIn) {
             toast.error('Please log in to book an appointment');
-            navigate('/');
+            navigate('/login');
             return;
         }
 
@@ -163,7 +164,7 @@ const DoctorDetailPage = () => {
 
         if (res?.payload?.success) {
             if (res.payload?.savedAppointment) {
-
+                setLoading(false)
                 navigate(`/confirmation/${res.payload?.savedAppointment?._id}`);
                 return;
             }
@@ -724,20 +725,36 @@ const DoctorDetailPage = () => {
                             </div>
 
                             {/* Book Button */}
-                            <button
-                                onClick={handleBooking}
-                                // !selectedDate || !selectedSlot ||
-                                disabled={!patient || !mobile || mobile.length !== 10}
-                                className={`w-full py-3 rounded-lg font-medium flex items-center justify-center transition
+                            {
+                                Loading ? (<button
+
+                                    className={`w-full py-3 rounded-lg font-medium flex items-center justify-center transition`}
+                                >
+                                    <CreditCard className="h-5 w-5 mr-2" />
+                                    Wait....
+                                </button>
+
+                                ) : (
+                                    <button
+                                        onClick={() => {
+                                            handleBooking()
+                                            setLoading(true)
+                                        }}
+                                        // !selectedDate || !selectedSlot ||
+                                        disabled={!patient || !mobile || mobile.length !== 10}
+                                        className={`w-full py-3 rounded-lg font-medium flex items-center justify-center transition
                                     ${!patient || !mobile || mobile.length !== 10
-                                        ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                                        : 'bg-gradient-to-r from-teal-600 to-teal-500 text-white hover:from-teal-700 hover:to-teal-600 shadow-md'
-                                    }
+                                                ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                                                : 'bg-gradient-to-r from-teal-600 to-teal-500 text-white hover:from-teal-700 hover:to-teal-600 shadow-md'
+                                            }
                                 `}
-                            >
-                                <CreditCard className="h-5 w-5 mr-2" />
-                                {currentUser ? 'Confirm Appointment' : 'Login to Book'}
-                            </button>
+                                    >
+                                        <CreditCard className="h-5 w-5 mr-2" />
+                                        {currentUser ? 'Confirm Appointment' : 'Login to Book'}
+                                    </button>
+                                )
+                            }
+
 
                             {!currentUser && (
                                 <p className="text-center text-sm text-gray-500 mt-2">

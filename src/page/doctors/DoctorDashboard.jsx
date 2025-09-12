@@ -207,9 +207,7 @@ const DoctorDashboard = () => {
                         stat.value
                       )}
                     </p>
-                    <p className="text-xs mt-1" style={{ color: stat.color }}>
-                      {stat.change}
-                    </p>
+                   
                   </div>
                   <div 
                     className="p-3 rounded-full"

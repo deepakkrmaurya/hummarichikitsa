@@ -8,7 +8,12 @@ import RequireAuth from './components/RequireAuth';
 import NotRequireAuth from './components/NotRequireAuth';
 import InternetChecker from './components/InternetChecker';
 import SignInButton from './page/SignInButton';
+import Setting from './page/admin/Setting';
+import DoctorSetting from './page/doctors/DoctorSetting';
 
+
+// import Homes from './pages/Dashboard/Home';
+// import AppLayout from './AdminDashboard/layout/AppLayout'
 
 const Home = lazy(() => import('./page/Home'))
 const DoctorListPage = lazy(() => import('./page/DoctorListPage'))
@@ -72,6 +77,7 @@ function App() {
 
         <Suspense fallback={<Loading />}>
           <Routes>
+
             <Route element={<NotRequireAuth />}>
               {/* <Route path="/login" element={<MobileOTPLogin />} /> */}
               <Route path="/login" element={<SignInButton />} />
@@ -95,6 +101,7 @@ function App() {
               <Route path='/patient' element={<Patients />} />
               <Route path='/book/appointment' element={<BookAppointment />} />
               <Route path='/appointment/:id' element={<AppointmentDetails />} />
+              <Route path='/hospital/setting' element={<Setting />} />
 
             </Route>
 
@@ -107,6 +114,7 @@ function App() {
 
             <Route element={<RequireAuth allowedRoles={['doctor']} />}>
               <Route path='/schedule/:id' element={<Schedule />} />
+              <Route path='/doctor/setting' element={<DoctorSetting />} />
             </Route>
 
             <Route element={<RequireAuth allowedRoles={['hospital', "admin"]} />}>

@@ -254,5 +254,3 @@ const MobileOTPLogin = () => {
 };
 
 export default MobileOTPLogin;
-
-

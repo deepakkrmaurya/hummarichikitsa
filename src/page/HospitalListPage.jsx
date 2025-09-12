@@ -138,7 +138,7 @@ const HospitalListPage = () => {
                             </>
                         ) : filteredHospitals.length > 0 ? (
                             filteredHospitals
-                                .filter(hospital => hospital.status === 'active')
+                                // .filter(hospital => hospital.status)
                                 .map((hospital) => {
                                     const doctorCount = doctors.filter(d => d?.hospitalId?._id === hospital?._id).length;
 
@@ -158,6 +158,11 @@ const HospitalListPage = () => {
                                                 <div className="p-6 md:w-2/3">
                                                     <div className="flex flex-col md:flex-row md:justify-between md:items-start gap-4">
                                                         <div>
+                                                            {
+                                                                !hospital.status && (
+                                                                    <p className=' bg-red-100 text-red-500 py-0.5 px-2 font-semibold rounded-sm' >{hospital?.deactivationReason}</p>
+                                                                )
+                                                            }
                                                             <div className="flex items-center mb-1">
                                                                 <h2 className="text-2xl font-bold text-gray-800">{hospital.name}</h2>
                                                                 <div className="ml-3 flex items-center bg-blue-50 px-3 py-1 rounded-full">
@@ -201,12 +206,30 @@ const HospitalListPage = () => {
                                                         <div className="text-gray-700">
                                                             <span className="font-semibold text-gray-800">{doctorCount}</span> {doctorCount === 1 ? 'Doctor' : 'Doctors'} available
                                                         </div>
-                                                        <button
+                                                         {
+                                                            hospital.status ?(
+                                                                <button
                                                             onClick={() => navigate(`/hospitals/${hospital._id}/doctors`)}
-                                                            className="flex items-center justify-center bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg transition"
+                                                            className={`flex items-center justify-center px-6 py-3 rounded-lg transition text-white bg-blue-600 hover:bg-blue-700`}
+                                                           
                                                         >
                                                             View Doctors <ChevronRight className="ml-2 h-4 w-4" />
                                                         </button>
+                                                            ):(
+                                                                <button
+                                                           
+                                                            className={`flex items-center justify-center px-6 py-3 rounded-lg transition text-white ${hospital.status
+                                                                    ? "bg-blue-600 hover:bg-blue-700"
+                                                                    : "bg-red-100 disabled cursor-not-allowed"
+                                                                }`}
+                                                            disabled={hospital.status}
+                                                        >
+                                                            View Doctors <ChevronRight className="ml-2 h-4 w-4" />
+                                                        </button>
+                                                            )
+                                                         }
+                                                        
+
                                                     </div>
                                                 </div>
                                             </div>

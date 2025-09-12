@@ -12,7 +12,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import { deleteDoctor } from '../../Redux/doctorSlice';
 import { getStaffByHospitalId, StaffDelete } from '../../Redux/staffSlice';
-
+import avatar from '../../../src/assets/logo-def.png';
 const MyHospital = () => {
     // Enhanced healthcare color scheme
     const colors = {
@@ -398,7 +398,7 @@ const MyHospital = () => {
                                                                             <div className="w-8 h-8 rounded-full overflow-hidden bg-gray-100 flex-shrink-0">
                                                                                 <img
                                                                                     className="h-full w-full object-cover"
-                                                                                    src={doc.photo || 'https://via.placeholder.com/40'}
+                                                                                    src={doc.photo || avatar}
                                                                                     alt={doc.name}
                                                                                 />
                                                                             </div>
@@ -425,7 +425,7 @@ const MyHospital = () => {
                                                                     </td>
                                                                     <td className="p-2">
                                                                         <span
-                                                                            className={`px-2 py-1 text-xs rounded-full font-medium ${doc.status === 'active' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}
+                                                                            className={`px-2 py-1 text-xs rounded-full font-medium ${doc.status  ? 'bg-green-100 h-2 w-2 rounded-full text-green-800' : 'bg-red-100 text-red-800'}`}
                                                                         >
                                                                             {doc.status}
                                                                         </span>
