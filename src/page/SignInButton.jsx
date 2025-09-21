@@ -62,7 +62,7 @@ const SignInButton = () => {
             isProcessing.current = true;
             try {
                 const response = await dispatch(AuthLogin({ userid: userObj.user_phone_number,userObj:userObj }));
-                navigate(-1)
+                navigate("/")
             } catch (error) {
                 console.error('Login failed', error);
             } finally {
