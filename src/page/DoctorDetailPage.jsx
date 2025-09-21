@@ -148,7 +148,7 @@ const DoctorDetailPage = () => {
             booking_amount: doctor?.consultationFee,
             createdAt: new Date().toISOString()
         };
-
+        
         const res = await dispatch(AppointmentCreate(newAppointment));
 
         if (res?.payload?.success) {

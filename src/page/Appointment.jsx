@@ -7,15 +7,54 @@ import { getAllHospital } from '../Redux/hospitalSlice';
 import avatar from '../../src/assets/logo-def.png';
 import { Link } from 'react-router-dom';
 import Layout from '../components/Layout/Layout';
+import socket from '../Helper/socket';
 
 function Appointment() {
     const hospital = useSelector((state) => state.hospitals.hospitals);
-    const appointments = useSelector((state) => state.appointment?.appointment);
+    const appoint = useSelector((state) => state.appointment?.appointment);
     const dispatch = useDispatch();
-    const { doctors } = useSelector((state) => state?.doctors);
+    const doct = useSelector((state) => state?.doctors?.doctors);
     const isLoading = useSelector((state) => state.appointment?.loading);
     const [activeTab, setActiveTab] = useState('active');
+    const [doctors, setdoctors] = useState([])
+    const [appointments, setappointments] = useState([])
+    useEffect(() => {
+        setdoctors(doct)
+    }, [doct])
+    useEffect(() => {
+        if (appoint) {
+            setappointments(appoint);
+        }
+    }, [appoint]);
+    useEffect(() => {
+        socket.on("appointmentUpdate", (data) => {
+            // console.log("👉 Live Update:", data);
 
+            setappointments((prev) => {
+                const exists = prev.some((a) => a._id === data._id);
+                if (exists) {
+                    return prev.map((a) => (a._id === data._id ? data : a));
+                }
+                return [...prev, data];
+            });
+        });
+
+        socket.on("doctorUpdate", (data) => {
+            setdoctors((prev) => {
+                const exists = prev.some((a) => a._id === data._id);
+                console.log(exists)
+                if (exists) {
+                    return prev.map((a) => (a._id === data._id ? data : a));
+                }
+                return [...prev, data];
+            });
+        })
+
+        return () => {
+            socket.off("appointmentUpdate");
+            socket.off("doctorUpdate");
+        };
+    }, [dispatch]);
     useEffect(() => {
         (async () => {
             if (!doctors || doctors.length === 0) {
@@ -35,28 +74,28 @@ function Appointment() {
             })()
         }
     }, [])
-  
+
     // Filter appointments based on tab selection
     const filteredAppointments = appointments?.filter(appointment => {
         if (activeTab === 'active') {
             // For active tab, show appointments that are not completed and not in the past
             if (appointment.status === "completed") return false;
-            
+
             const today = new Date();
             today.setHours(0, 0, 0, 0);
             const appointmentDate = new Date(appointment.date);
             appointmentDate.setHours(0, 0, 0, 0);
-            
+
             return appointmentDate >= today;
         } else {
             // For completed tab, show completed appointments and past appointments
             if (appointment.status === "completed") return true;
-            
+
             const today = new Date();
             today.setHours(0, 0, 0, 0);
             const appointmentDate = new Date(appointment.date);
             appointmentDate.setHours(0, 0, 0, 0);
-            
+
             return appointmentDate < today;
         }
     }) || [];
@@ -96,27 +135,27 @@ function Appointment() {
             <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
                 <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-4">
                     <h1 className="text-2xl font-bold text-gray-900">My Appointments</h1>
-                    
+
                     {/* Tab Navigation */}
                     <div className="flex bg-white rounded-lg shadow-sm p-1 border border-gray-200">
                         <button
                             onClick={() => setActiveTab('active')}
-                            className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${activeTab === 'active' 
-                                ? 'bg-blue-600 text-white' 
+                            className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${activeTab === 'active'
+                                ? 'bg-blue-600 text-white'
                                 : 'text-gray-600 hover:text-gray-900'}`}
                         >
                             Active
                         </button>
                         <button
                             onClick={() => setActiveTab('completed')}
-                            className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${activeTab === 'completed' 
-                                ? 'bg-blue-600 text-white' 
+                            className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${activeTab === 'completed'
+                                ? 'bg-blue-600 text-white'
                                 : 'text-gray-600 hover:text-gray-900'}`}
                         >
                             Completed
                         </button>
                     </div>
-                    
+
                     <Link
                         to="/hospitals"
                         className="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-md shadow-sm transition-colors duration-150"
@@ -135,8 +174,8 @@ function Appointment() {
                             {activeTab === 'active' ? 'No Active Appointments' : 'No Completed Appointments'}
                         </h3>
                         <p className="mt-2 text-sm text-gray-500">
-                            {activeTab === 'active' 
-                                ? "You don't have any upcoming appointments" 
+                            {activeTab === 'active'
+                                ? "You don't have any upcoming appointments"
                                 : "Your completed appointments will appear here"}
                         </p>
                         <div className="mt-6">
@@ -154,8 +193,10 @@ function Appointment() {
                 ) : (
                     <div className="space-y-6">
                         {filteredAppointments.map((appointment, index) => {
+
                             let finalStatus;
-                            const doctor = doctors.find(d => d._id === appointment?.doctorId);
+                            const doctor = doctors?.find(d => d._id === appointment?.doctorId?._id);
+
                             const hospitals = hospital.find(h => h._id === appointment?.hospitalId);
 
                             if (appointment.status === "completed") {
@@ -171,88 +212,124 @@ function Appointment() {
                             }
 
                             return (
-                                <div key={index} className="bg-white rounded-xl shadow-sm overflow-hidden border border-gray-100 transition-all duration-200 hover:shadow-md">
+                                <div key={index} className="bg-white rounded-2xl shadow-lg overflow-hidden border border-gray-100 transition-all duration-300 hover:shadow-xl hover:-translate-y-1">
                                     <div className="p-6">
-                                        <div className="flex items-start space-x-4">
-                                            <div className="relative">
-                                                <img
-                                                    src={doctor?.photo || avatar}
-                                                    className="w-16 h-16 rounded-lg object-cover border-2 border-blue-50"
-                                                    alt={`${doctor?.name}'s profile`}
-                                                />
-                                            </div>
-
-                                            <div className="flex-1 min-w-0">
-                                                <div className="flex justify-between items-start space-x-2">
-                                                    <div className="truncate">
-                                                        <h3 className="font-semibold text-gray-900 text-lg truncate">{doctor?.name}</h3>
-                                                        <p className="text-sm text-gray-600 truncate">{doctor?.specialty}</p>
+                                        {/* Header Section */}
+                                        <div className="flex items-start justify-between mb-5">
+                                            <div className="flex items-center space-x-4">
+                                                <div className="relative">
+                                                    <img
+                                                        src={doctor?.photo || avatar}
+                                                        className="w-16 h-16 rounded-xl object-cover border-2 border-white shadow-md"
+                                                        alt={`${doctor?.name}'s profile`}
+                                                    />
+                                                    <div className="absolute -bottom-1 -right-1 w-6 h-6 bg-blue-600 rounded-full flex items-center justify-center">
+                                                        <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
+                                                            <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd"></path>
+                                                        </svg>
                                                     </div>
-                                                    <span className={`px-3 py-1 text-xs font-medium rounded-full ${finalStatus === 'Active' ? 'bg-green-100 text-green-800' :
-                                                        finalStatus === 'Completed' ? 'bg-blue-100 text-blue-800' :
-                                                            'bg-gray-100 text-gray-800'
-                                                        }`}>
-                                                        {finalStatus}
-                                                    </span>
                                                 </div>
-
-                                                <div className="mt-3 flex items-center text-sm text-gray-600">
-                                                    <MapPin className="flex-shrink-0 w-4 h-4 text-blue-500" />
-                                                    <span className="ml-2 truncate">{hospitals?.name}</span>
+                                                <div className="min-w-0">
+                                                    <h3 className="font-bold text-gray-900 text-lg truncate">{doctor?.name}</h3>
+                                                    <p className="text-sm text-gray-600 truncate">{doctor?.specialty}</p>
+                                                    <div className="mt-1 flex items-center text-sm text-gray-500">
+                                                        <svg className="w-4 h-4 mr-1 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                                        </svg>
+                                                        <span className="truncate">{hospitals?.name}</span>
+                                                    </div>
                                                 </div>
                                             </div>
+                                            <span className={`px-3 py-1.5 text-xs font-semibold rounded-full ${finalStatus === 'Active' ? 'bg-green-100 text-green-800' :
+                                                finalStatus === 'Completed' ? 'bg-blue-100 text-blue-800' :
+                                                    'bg-gray-100 text-gray-800'
+                                                }`}>
+                                                {finalStatus}
+                                            </span>
                                         </div>
+                                        {
+                                            finalStatus != 'Completed' && (
+                                                <>
+                                                    {/* Live Status Bar */}
+                                                    <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-4 mb-5 border border-blue-100">
+                                                        <div className="flex items-center justify-between">
+                                                            <div className="flex items-center space-x-3">
+                                                                <div className="flex items-center space-x-2">
+                                                                    <span className="relative flex h-3 w-3">
+                                                                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#009689] opacity-75"></span>
+                                                                        <span className="relative inline-flex rounded-full h-3 w-3 bg-[#009689]"></span>
+                                                                    </span>
+                                                                </div>
+                                                                <div className="text-sm text-gray-700">
+                                                                    Current: <strong className="text-green-600">#{doctor?.currentAppointment}</strong>
+                                                                </div>
 
-                                        <div className="mt-5 pt-5 border-t border-gray-100 grid grid-cols-2 gap-4">
-                                            <div className="flex items-start">
-                                                <div className="bg-blue-50 p-2 rounded-lg">
+                                                            </div>
+                                                            <div className="text-sm text-gray-700">
+                                                                Your Token: <strong className="text-blue-600">#{appointment?.appointmentNumber}</strong>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+
+                                                </>
+                                            )
+                                        }
+
+
+
+                                        {/* Appointment Details Grid */}
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                                            <div className="bg-gray-50 rounded-xl p-4 flex items-center">
+                                                <div className="bg-blue-100 p-2.5 rounded-lg mr-3">
                                                     <Calendar className="w-5 h-5 text-blue-600" />
                                                 </div>
-                                                <div className="ml-3">
-                                                    <p className="text-xs text-gray-500">Appointment Date</p>
-                                                    <p className="font-medium text-gray-900">{formatDate(appointment.date)}</p>
+                                                <div>
+                                                    <p className="text-xs text-gray-500 font-medium">Appointment Date</p>
+                                                    <p className="font-semibold text-gray-900">{formatDate(appointment.date)}</p>
                                                 </div>
                                             </div>
 
-                                            <div className="flex items-start">
-                                                <div className="bg-blue-50 p-2 rounded-lg">
+                                            <div className="bg-gray-50 rounded-xl p-4 flex items-center">
+                                                <div className="bg-blue-100 p-2.5 rounded-lg mr-3">
                                                     <Clock className="w-5 h-5 text-blue-600" />
                                                 </div>
-                                                <div className="ml-3">
-                                                    <p className="text-xs text-gray-500">Time Slot</p>
-                                                    <p className="font-medium text-gray-900">{appointment.slot}</p>
+                                                <div>
+                                                    <p className="text-xs text-gray-500 font-medium">Time Slot</p>
+                                                    <p className="font-semibold text-gray-900">{appointment.slot}</p>
                                                 </div>
                                             </div>
 
-                                            <div className="flex items-start">
-                                                <div className="bg-blue-50 p-2 rounded-lg">
+                                            <div className="bg-gray-50 rounded-xl p-4 flex items-center">
+                                                <div className="bg-blue-100 p-2.5 rounded-lg mr-3">
                                                     <CreditCard className="w-5 h-5 text-blue-600" />
                                                 </div>
-                                                <div className="ml-3">
-                                                    <p className="text-xs text-gray-500">Payment</p>
-                                                    <p className="font-medium text-gray-900">₹{appointment.booking_amount} • {appointment.paymentMethod}</p>
+                                                <div>
+                                                    <p className="text-xs text-gray-500 font-medium">Payment</p>
+                                                    <p className="font-semibold text-gray-900">₹{appointment.booking_amount} • {appointment.paymentMethod}</p>
                                                 </div>
                                             </div>
 
-                                            <div className="flex items-start">
-                                                <div className="bg-blue-50 p-2 rounded-lg">
+                                            <div className="bg-gray-50 rounded-xl p-4 flex items-center">
+                                                <div className="bg-blue-100 p-2.5 rounded-lg mr-3">
                                                     <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
                                                     </svg>
                                                 </div>
-                                                <div className="ml-3">
-                                                    <p className="text-xs text-gray-500">Token No</p>
-                                                    <p className="font-medium text-gray-900">{appointment?.token}</p>
+                                                <div>
+                                                    <p className="text-xs text-gray-500 font-medium">Token No</p>
+                                                    <p className="font-semibold text-gray-900">{appointment?.token}</p>
                                                 </div>
                                             </div>
                                         </div>
 
-                                        <div className="mt-6 flex justify-between items-center">
+                                        {/* Action Button */}
+                                        <div className="flex justify-center">
                                             <Link
                                                 to={`/appointment_details_page/${appointment?._id}`}
-                                                className="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                                                className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white text-center py-3 px-4 rounded-xl font-medium transition-all duration-300 shadow-md hover:shadow-lg"
                                             >
-                                                View Details
+                                                View Full Details
                                             </Link>
                                         </div>
                                     </div>

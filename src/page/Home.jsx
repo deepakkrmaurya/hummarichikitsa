@@ -4,7 +4,7 @@ import { getAllHospital } from "../Redux/hospitalSlice";
 import { Link, useNavigate } from "react-router-dom";
 import { Search, Calendar, CreditCard, CheckCircle, Star, MapPin, Clock, Phone, HeartPulse, Stethoscope, Shield, Ambulance } from 'lucide-react';
 import { AppointmentCancelled, getAllAppointment } from "../Redux/appointment";
-import { getAllDoctors } from "../Redux/doctorSlice";
+import { getAllDoctors, updateDoctor } from "../Redux/doctorSlice";
 import Layout from "../components/Layout/Layout";
 import { useState } from "react";
 import hospital_img from '../../src/assets/hospital_image.png';
@@ -12,7 +12,10 @@ import deepak from '../../src/assets/deepak.jpg';
 import abhay from '../../src/assets/abjay.jpg';
 import rohit from '../../src/assets/rohit.jpg';
 import AppointmentsSection from "../components/AppointmentsSection";
-import SignInButton from "./SignInButton";
+// import io from "socket.io-client";
+// const socket = io("http://localhost:5000");
+import Profile from "./Profile";
+import socket from "../Helper/socket";
 
 // Skeleton Components
 const StatsSkeleton = () => (
@@ -100,13 +103,53 @@ const Home = () => {
   const hospital = useSelector((state) => state.hospitals.hospitals);
   const currentUser = JSON.parse(localStorage.getItem('data')) || null;
   const isLoggdIn = JSON.parse(localStorage.getItem('isLoggedIn')) || false;
-  const { doctors } = useSelector((state) => state?.doctors);
-  const appointments = useSelector((state) => state.appointment?.appointment);
   const dispatch = useDispatch();
-
   const [hospitalsLoading, setHospitalsLoading] = useState(true);
   const [doctorsLoading, setDoctorsLoading] = useState(true);
   const [appointmentsLoading, setAppointmentsLoading] = useState(true);
+  const appoint = useSelector((state) => state.appointment?.appointment);
+  const [appointments, setAppointments] = useState([]);
+  const doct = useSelector((state) => state?.doctors?.doctors);
+  // console.log(doct)
+  const [doctors, setdoctors] = useState([])
+  useEffect(() => {
+    setdoctors(doct)
+  }, [doct])
+  useEffect(() => {
+    if (appoint) {
+      setAppointments(appoint);
+    }
+  }, [appoint]);
+  useEffect(() => {
+    socket.on("appointmentUpdate", (data) => {
+      // console.log("👉 Live Update:", data);
+
+      setAppointments((prev) => {
+        const exists = prev.some((a) => a._id === data._id);
+        if (exists) {
+          return prev.map((a) => (a._id === data._id ? data : a));
+        }
+        return [...prev, data];
+      });
+    });
+
+    socket.on("doctorUpdate", (data) => {
+      setdoctors((prev) => {
+        const exists = prev.some((a) => a._id === data._id);
+        console.log(exists)
+        if (exists) {
+          return prev.map((a) => (a._id === data._id ? data : a));
+        }
+        return [...prev, data];
+      });
+    })
+
+    return () => {
+      socket.off("appointmentUpdate");
+      socket.off("doctorUpdate");
+    };
+  }, [dispatch]);
+
 
   const backgroundImages = [
     'https://images.unsplash.com/photo-1576091160550-2173dba999ef?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80',
@@ -140,11 +183,8 @@ const Home = () => {
 
   useEffect(() => {
     if (!appointments || appointments.length === 0) {
-      // setAppointmentsLoading(true);
-      //  alert("skjah")
       dispatch(getAllAppointment());
       setAppointmentsLoading(false);
-
     } else {
       setAppointmentsLoading(false);
     }
@@ -164,6 +204,7 @@ const Home = () => {
   return (
     <Layout>
       <section className="relative bg-gradient-to-r from-blue-900 to-teal-800 text-white py-24">
+        
         <div className="absolute inset-0 opacity-15">
           {backgroundImages.map((image, index) => (
             <div
@@ -235,127 +276,6 @@ const Home = () => {
           appointmentsLoading={appointmentsLoading}
           doctorsLoading={doctorsLoading}
         />
-        // <section className="py-16 bg-gray-50">
-        //   <div className="container mx-auto px-4">
-        //     <div className="flex justify-between items-center mb-8">
-        //       <h2 className="text-2xl font-bold text-gray-800 flex items-center">
-        //         <Calendar className="mr-2 text-blue-600" size={24} />
-        //         Your Appointments
-        //       </h2>
-        //       {appointments.length > 0 && (
-        //         <button
-        //           onClick={() => navigate('/appointments')}
-        //           className="text-blue-600 hover:text-blue-800 font-medium flex items-center text-sm"
-        //         >
-        //           View All <svg className="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        //             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7"></path>
-        //           </svg>
-        //         </button>
-        //       )}
-        //     </div>
-
-        //     {/* {appointmentsLoading || doctorsLoading ? (
-        //       <AppointmentSkeleton />
-        //     ) : appointments.length > 0 ? (
-        //       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        //         {appointments?.slice(0, 3)?.map((appointment) => {
-        //           let finalStatus;
-        //           const doctor = doctors.find(d => d._id === appointment.doctorId);
-        //           const hospitals = hospital.find(h => h._id === appointment.hospitalId);
-        //           if (appointment.status === "completed") {
-        //             finalStatus = "Completed";
-        //           } else {
-        //             const today = new Date();
-        //             today.setHours(0, 0, 0, 0);
-
-        //             const appointmentDate = new Date(appointment.date);
-        //             appointmentDate.setHours(0, 0, 0, 0);
-
-        //             finalStatus = appointmentDate >= today ? "Active" : "Inactive";
-        //           }
-        //           return (
-        //             <div key={appointment.id} className="bg-white rounded-lg shadow-md overflow-hidden border border-gray-100 transition-all duration-200 hover:shadow-lg">
-        //               <div className="p-5">
-        //                 <div className="flex items-start space-x-4">
-        //                   <img
-        //                     src={avatar}
-        //                     className="w-14 h-14 rounded-full object-cover border-2 border-blue-100"
-        //                   />
-        //                   <div className="flex-1">
-        //                     <div className="flex justify-between items-start">
-        //                       <div>
-        //                         <h3 className="font-semibold text-gray-800">{doctor?.name}</h3>
-        //                         <p className="text-sm text-gray-600">{doctor?.specialty}</p>
-        //                       </div>
-        //                       <span className={`px-2 py-1 text-xs rounded-full ${finalStatus === 'Active' ? 'bg-green-100 text-green-800' :
-        //                         finalStatus === 'Inactive' ? 'bg-gray-100 text-gray-800' :
-        //                           'bg-blue-100 text-blue-800'
-        //                         }`}>
-        //                         {finalStatus}
-        //                       </span>
-        //                     </div>
-        //                     <div className="mt-3 text-sm text-gray-600 flex items-center">
-        //                       <MapPin className="w-4 h-4 mr-1 text-blue-500" />
-        //                       <span className="truncate">{hospitals?.name}</span>
-        //                     </div>
-        //                   </div>
-        //                 </div>
-
-        //                 <div className="mt-4 pt-4 border-t border-gray-100 space-y-2">
-        //                   <div className="flex items-center text-sm text-gray-600">
-        //                     <Calendar className="w-4 h-4 mr-2 text-blue-500" />
-        //                     {new Date(appointment.date).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}
-        //                     <span className="mx-2">•</span>
-        //                     <Clock className="w-4 h-4 mr-2 text-blue-500" />
-        //                     {appointment.slot}
-        //                   </div>
-        //                   <div className="flex items-center text-sm text-gray-600">
-        //                     <CreditCard className="w-4 h-4 mr-2 text-blue-500" />
-        //                     ₹{appointment.booking_amount} • {appointment.paymentMethod}
-        //                   </div>
-        //                 </div>
-
-        //                 <div className="mt-5 flex justify-between items-center">
-        //                   <Link
-        //                     to={`/appointment_details_page/${appointment?._id}`}
-        //                     className="text-blue-600 hover:text-blue-800 text-sm font-medium flex items-center"
-        //                   >
-        //                     View Details
-        //                     <svg className="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        //                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7"></path>
-        //                     </svg>
-        //                   </Link>
-        //                 </div>
-        //               </div>
-        //             </div>
-        //           );
-        //         })}
-        //       </div>
-        //     ) : (
-        //       <div className="bg-white rounded-lg shadow-sm p-8 text-center border border-dashed border-gray-300">
-        //         <Calendar className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-        //         <h3 className="text-lg font-medium text-gray-800 mb-2">No Appointments Scheduled</h3>
-        //         <p className="text-gray-600 mb-6">Book your first appointment with our specialists</p>
-        //         <button
-        //           onClick={() => navigate('/hospitals')}
-        //           className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg font-medium text-sm transition-colors"
-        //         >
-        //           Book Appointment
-        //         </button>
-        //       </div>
-        //     )} */}
-
-        //     <AppointmentsSection
-        //       isLoggedIn={isLoggdIn}
-        //       currentUser={currentUser}
-        //       appointments={appointments}
-        //       doctors={doctors}
-        //       hospital={hospital}
-        //       appointmentsLoading={appointmentsLoading}
-        //       doctorsLoading={doctorsLoading}
-        //     />
-        //   </div>
-        // </section>
       )}
 
       {/* Specialties Section */}
@@ -465,7 +385,7 @@ const Home = () => {
                 .slice(0, 3)
                 .map((hospital) => (
                   <div
-                    key={hospital._id}
+                    key={hospital?._id}
                     className="bg-white rounded-lg shadow-md overflow-hidden border border-gray-100 transition-all duration-200 hover:shadow-lg"
                   >
                     <div className="relative h-48 overflow-hidden">

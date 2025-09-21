@@ -11,6 +11,8 @@ import SignInButton from './page/SignInButton';
 import Setting from './page/admin/Setting';
 import DoctorSetting from './page/doctors/DoctorSetting';
 
+import UserProfilePopup from './page/Profile';
+
 
 // import Homes from './pages/Dashboard/Home';
 // import AppLayout from './AdminDashboard/layout/AppLayout'
@@ -87,6 +89,7 @@ function App() {
 
             <Route path='/payment' element={<Payment />} />
             <Route path="/" element={<Home />} />
+            <Route path="profile" element={<UserProfilePopup />} />
             <Route path="/contact" element={<Contact />} />
             <Route path="/hospitals/:hospitalId/doctors" element={<DoctorListPage />} />
             <Route path="/hospitals" element={<HospitalListPage />} />
@@ -96,7 +99,7 @@ function App() {
             <Route path="/confirmation/:appointmentId" element={<ConfirmationPage />} />
             <Route path="/appointment_details_page/:id" element={<AppointmentDetailsPage />} />
             <Route element={<RequireAuth allowedRoles={["doctor", 'hospital', 'admin', 'staff']} />}>
-
+                
               <Route path='/doctor/dashboard' element={<DoctorDashboard />} />
               <Route path='/patient' element={<Patients />} />
               <Route path='/book/appointment' element={<BookAppointment />} />
@@ -123,14 +126,10 @@ function App() {
               <Route path='/doctor/create/:hospitalId' element={<DoctorForm />} />
               <Route path='/hospital' element={<MyHospital />} />
               <Route path='/hospital/:id' element={<HospitalDetails />} />
-
               <Route path='/doctor/:doctorId' element={<DoctorDetailsPage />} />
               <Route path='/update/doctor/:doctorid' element={<UpdateDoctor />} />
               <Route path='/hospital/update/:hospitalid' element={<HospitalUpdateForm />} />
-
             </Route>
-
-
             {/* admin */}
             <Route path="*" element={<NotFoundPage />} />
             <Route path="/denied" element={<Denied />} />

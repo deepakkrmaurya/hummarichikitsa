@@ -127,7 +127,24 @@ export const getAllDoctors = createAsyncThunk(
 const doctordSlice = createSlice({
   name: "doctors",
   initialState,
-  reducers: {}, // Fixed typo (was `reducers` before)
+  reducers: {
+    setDoctors: (state, action) => {
+      state.doctors = action.payload;
+    },
+    updateDoctor: (state, action) => {
+      console.log(action)
+      const index = state.doctors.findIndex(
+        (d) => d._id === action.payload._id
+      );
+      if (index !== -1) {
+        // Existing doctor ko update karo
+        state.doctors[index] = action.payload;
+      } else {
+        // Naya doctor add karo
+        state.doctors.push(action.payload);
+      }
+    },
+  },
   extraReducers: (builder) => {
     builder
       .addCase(getAllDoctors.fulfilled, (state, action) => {
@@ -137,4 +154,8 @@ const doctordSlice = createSlice({
   },
 });
 
+
+
+
+export const { setDoctors, updateDoctor } = doctordSlice.actions;
 export default doctordSlice.reducer;
