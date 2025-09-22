@@ -177,6 +177,29 @@ const Setting = () => {
     }
   };
 
+
+      const [loading, setLoading] = useState(true);
+  
+      useEffect(() => {
+          
+          const timer = setTimeout(() => {
+              setLoading(false);
+          }, 2000);
+  
+          return () => clearTimeout(timer); 
+      }, []);
+  
+      if (loading) {
+          return (
+              <Dashboard>
+                  <div className="flex justify-center items-center h-full">
+                    
+                      <span className="Loader"></span>
+                  </div>
+              </Dashboard>
+          );
+      }
+
   return (
     <Dashboard>
       <div className="min-h-screen bg-slate-50 px-2 md:px-2">

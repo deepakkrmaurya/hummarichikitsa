@@ -119,6 +119,30 @@ const MyHospital = () => {
     }, [hospital]);
 
 
+
+        const [loading, setLoading] = useState(true);
+    
+        useEffect(() => {
+            
+            const timer = setTimeout(() => {
+                setLoading(false);
+            }, 2000);
+    
+            return () => clearTimeout(timer); // cleanup
+        }, []);
+    
+        if (loading) {
+            return (
+                <Dashboard>
+                    <div className="flex justify-center items-center h-full">
+                      
+                        <span className="Loader"></span>
+                    </div>
+                </Dashboard>
+            );
+        }
+
+
     return (
         <Dashboard>
             <motion.div

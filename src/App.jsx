@@ -1,5 +1,6 @@
 
 import './App.css'
+import './Loader.css'
 import { useSelector } from 'react-redux';
 import Loading from './components/Loading';
 import { lazy, Suspense, useEffect } from 'react';
