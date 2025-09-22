@@ -61,9 +61,9 @@ export const UserProfilePopup = () => {
     const handleEditSubmit = async (e) => {
         e.preventDefault();
         await dispatch(AuthUpdate(editForm))
-        setInterval(()=>{
-         setIsEditModalOpen(false);
-        },3000)
+        // setInterval(()=>{
+        //  setIsEditModalOpen(false);
+        // },3000)
     };
 
     const handleLogout = async () => {
