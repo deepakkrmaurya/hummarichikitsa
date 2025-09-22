@@ -93,7 +93,7 @@ const Dashboard = ({ children }) => {
                 <div>
                   <h2 className="font-semibold text-sm sm:text-lg">{data?.user?.name || data?.name || userData?.user?.name || "User"}</h2>
                   <p className="text-blue-100 text-xs sm:text-sm capitalize">{currentRole || 'User'}</p>
-                  <p className="text-blue-100 text-xs sm:text-sm">{data?.hospital?.name || userData?.hospital?.name || ''}</p>
+                  <p className="text-blue-100 text-xs sm:text-sm">{data?.hospital?.name || userData?.hospital?.name || userData?.hospitalId?.name ||''}</p>
                 </div>
               </div>
             </div>
