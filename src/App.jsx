@@ -1,7 +1,6 @@
 
 import './App.css'
 import './Loader.css'
-import { useSelector } from 'react-redux';
 import Loading from './components/Loading';
 import { lazy, Suspense, useEffect } from 'react';
 import { Routes, Route, Navigate } from "react-router-dom";
@@ -11,7 +10,6 @@ import InternetChecker from './components/InternetChecker';
 import SignInButton from './page/SignInButton';
 import Setting from './page/admin/Setting';
 import DoctorSetting from './page/doctors/DoctorSetting';
-
 import UserProfilePopup from './page/Profile';
 
 

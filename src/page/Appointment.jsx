@@ -198,8 +198,8 @@ function Appointment() {
                             const doctor = doctors?.find(d => d._id === appointment?.doctorId?._id);
 
                             const hospitals = hospital.find(h => h._id === appointment?.hospitalId);
-                                //   alert(appointment.status)
-                            if (appointment.status === "Completed") {
+                            //   alert(appointment.status)
+                            if (appointment.status === "completed") {
                                 finalStatus = "Completed";
                             } else {
                                 const today = new Date();
