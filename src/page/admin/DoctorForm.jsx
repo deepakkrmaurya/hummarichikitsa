@@ -36,12 +36,12 @@ const DoctorForm = ({ doctorData }) => {
     email: '',
     specialty: 'Cardiology',
     qualification: '',
-    experience: 0,
+    experience: '',
     photo: '',
     bio: '',
     gender: '',
     rating: 0,
-    consultationFee: 0,
+    consultationFee: '',
     availableSlots: [],
     status: true
   });
@@ -144,13 +144,13 @@ const DoctorForm = ({ doctorData }) => {
           className="flex-1 flex flex-col bg-white rounded-t-xl shadow-lg overflow-hidden"
         >
           {/* Form Header */}
-          <div className="bg-gradient-to-r from-blue-600 to-blue-500 px-4 py-3 text-white">
+          <div className=" px-4 py-3 ">
             <div className="flex justify-between items-center">
               <div>
                 <h1 className="text-xl font-bold">
                   {doctor.id ? 'Edit Doctor Profile' : 'Add New Doctor'}
                 </h1>
-                <p className="text-blue-100 opacity-90 text-sm">
+                <p className=" opacity-90 text-sm">
                   {doctor.id ? `Managing ${doctor.name}` : 'Create a new doctor profile'}
                 </p>
               </div>
@@ -158,7 +158,7 @@ const DoctorForm = ({ doctorData }) => {
                 onClick={() => navigate(-1)}
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
-                className="bg-white bg-opacity-20 hover:bg-opacity-30 text-white px-3 py-1.5 rounded text-xs font-medium transition duration-200 flex items-center"
+                className="bg-opacity-20 hover:bg-opacity-30 text-white px-3 py-1.5 rounded text-xs font-medium transition duration-200 flex items-center"
               >
                 <FaArrowLeft className="mr-1" />
                 Back

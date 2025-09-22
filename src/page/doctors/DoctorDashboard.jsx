@@ -605,7 +605,7 @@ const DoctorDashboard = () => {
       await dispatch(AppointmentConferm(appointment_id));
       // Emit socket event to notify about the update
       socket.emit("appointmentUpdate", { appointment_id });
-      getAppointment(); // Refresh the appointments list
+      // getAppointment();
     } catch (error) {
       console.error("Error confirming appointment:", error);
     }
@@ -816,7 +816,13 @@ const DoctorDashboard = () => {
             {/* Card Header */}
             <div className="px-6 py-4 border-b border-gray-200 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
               <div>
-                <h2 className="text-lg font-semibold text-gray-900">Today's Appointments</h2>
+                <div className="flex items-center space-x-2 mr-4">
+                  <span className="relative flex h-3 w-3">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#009689] opacity-75"></span>
+                    <span className="relative inline-flex rounded-full h-3 w-3 bg-[#009689]"></span>
+                  </span>
+                  <span className="font-semibold text-gray-700">Today's Appointments</span>
+                </div>
                 <p className="text-sm text-gray-600 mt-1">
                   {new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
                 </p>

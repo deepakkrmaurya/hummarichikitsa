@@ -3,7 +3,13 @@ import { useDispatch } from 'react-redux';
 import axiosInstance from '../../Helper/axiosInstance';
 import Dashboard from '../../components/Layout/Dashboard';
 import avatar from '../../../src/assets/logo-def.png';
+import toast from 'react-hot-toast';
+import { ChangePassword } from '../../Redux/doctorSlice';
 const DoctorSetting = () => {
+    const dispatch = useDispatch()
+    const [currentPassword, setCurrentPassword] = useState("");
+    const [newPassword, setNewPassword] = useState("");
+    const [confirmPassword, setConfirmPassword] = useState("");
     const [doctor, setDoctor] = useState(null);
     const [loading, setLoading] = useState(true);
     const [editing, setEditing] = useState(false);
@@ -21,33 +27,16 @@ const DoctorSetting = () => {
             }
         }
         fetchData();
-    }, [showResignModal,successMessage]);
+    }, [showResignModal, successMessage]);
 
-    // Dummy doctor data (replace with actual API call)
-    const dummyDoctor = {
-        _id: 'doc-001',
-        name: 'Dr. Michael Chen',
-        specialty: 'Cardiology',
-        status: true,
-        photo: 'https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?w=200&h=200&fit=crop&crop=face',
-        email: 'dr.chen@hospital.com',
-        phone: '+1 (555) 123-4567',
-        experience: '12 years',
-        education: 'MD, Harvard Medical School',
-        availability: 'Mon, Wed, Fri: 9AM-5PM',
-        bio: 'Board-certified cardiologist with extensive experience in cardiac care and preventive medicine.',
-        department: 'Cardiology',
-        licenseNumber: 'MED123456',
-        joinDate: '2020-01-15'
-    };
+
 
     useEffect(() => {
         const fetchDoctorData = async () => {
             try {
                 setLoading(true);
 
-                setDoctor(dummyDoctor);
-                setFormData(dummyDoctor);
+
                 setLoading(false);
             } catch (error) {
                 console.error("Error fetching doctor data:", error);
@@ -118,7 +107,7 @@ const DoctorSetting = () => {
 
         try {
 
-            const res = await axiosInstance.patch(`/doctor/${doctor._id}/status`, {
+            const res = await axiosInstance.patch(`/doctor/${doctor?._id}/status`, {
                 deactivationReason: resignationReason || ""
             })
             //   // Add API call for resignation here
@@ -135,6 +124,26 @@ const DoctorSetting = () => {
         } catch (error) {
             console.error("Error submitting resignation:", error);
         }
+    };
+
+
+    const handleSubmit = async(e) => {
+        e.preventDefault();
+
+        if (!currentPassword || !newPassword || !confirmPassword) {
+            toast.error("All field are required");
+            return;
+        }
+        if (newPassword !== confirmPassword) {
+            toast.error("New password and confirm password do not match!");
+            return;
+        }
+          
+         await dispatch(ChangePassword({currentPassword,newPassword}))
+        
+        setCurrentPassword("");
+        setNewPassword("");
+        setConfirmPassword("");
     };
 
     if (loading) {
@@ -160,7 +169,7 @@ const DoctorSetting = () => {
                                     Manage your professional profile and availability
                                 </p>
                                 {
-                                    !doctor.status && (
+                                    !doctor?.status && (
                                         <p className="text-red-600 bg-red-100 py-1 px-2 rounded-sm mt-2 text-sm md:text-base">
                                             {doctor?.deactivationReason}
                                         </p>
@@ -169,10 +178,10 @@ const DoctorSetting = () => {
                                 }
                             </div>
                             <div className="mt-4 md:mt-0">
-                                <div className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${doctor.status ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-800'
+                                <div className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${doctor?.status ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-800'
                                     }`}>
-                                    <div className={`h-2 w-2 rounded-full mr-2 ${doctor.status ? 'bg-emerald-500' : 'bg-rose-500'}`}></div>
-                                    {doctor.status ? 'Active' : 'Inactive'}
+                                    <div className={`h-2 w-2 rounded-full mr-2 ${doctor?.status ? 'bg-emerald-500' : 'bg-rose-500'}`}></div>
+                                    {doctor?.status ? 'Active' : 'Inactive'}
                                 </div>
                             </div>
                         </div>
@@ -199,8 +208,8 @@ const DoctorSetting = () => {
                             <div className="flex flex-col md:flex-row gap-6 mb-6">
                                 <div className="flex-shrink-0">
                                     <img
-                                        src={doctor.photo || avatar}
-                                        alt={doctor.name}
+                                        src={doctor?.photo || avatar}
+                                        alt={doctor?.name}
                                         className="w-24 h-24 md:w-32 md:h-32 rounded-full object-cover border-4 border-slate-100" />
                                     {editing && (
                                         <button className="mt-3 text-sm text-blue-600 hover:text-blue-800">
@@ -222,7 +231,7 @@ const DoctorSetting = () => {
                                                     className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                                                 />
                                             ) : (
-                                                <p className="text-slate-900 font-medium">{doctor.name}</p>
+                                                <p className="text-slate-900 font-medium">{doctor?.name}</p>
                                             )}
                                         </div>
 
@@ -237,7 +246,7 @@ const DoctorSetting = () => {
                                                     className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                                                 />
                                             ) : (
-                                                <p className="text-slate-900 font-medium">{doctor.specialty}</p>
+                                                <p className="text-slate-900 font-medium">{doctor?.specialty}</p>
                                             )}
                                         </div>
                                         <div>
@@ -251,7 +260,7 @@ const DoctorSetting = () => {
                                                     className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                                                 />
                                             ) : (
-                                                <p className="text-slate-600">{doctor.email}</p>
+                                                <p className="text-slate-600">{doctor?.email}</p>
                                             )}
                                         </div>
 
@@ -305,7 +314,7 @@ const DoctorSetting = () => {
                                         className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                                     />
                                 ) : (
-                                    <p className="text-slate-600">{doctor.bio}</p>
+                                    <p className="text-slate-600">{doctor?.bio}</p>
                                 )}
                             </div>
 
@@ -317,12 +326,12 @@ const DoctorSetting = () => {
                                         <input
                                             type="text"
                                             name="education"
-                                            value={doctor.qualification}
+                                            value={doctor?.qualification}
                                             onChange={handleInputChange}
                                             className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                                         />
                                     ) : (
-                                        <p className="text-slate-600">{doctor.qualification}</p>
+                                        <p className="text-slate-600">{doctor?.qualification}</p>
                                     )}
                                 </div>
 
@@ -337,7 +346,7 @@ const DoctorSetting = () => {
                                             className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                                         />
                                     ) : (
-                                        <p className="text-slate-600">{doctor.experience}</p>
+                                        <p className="text-slate-600">{doctor?.experience}</p>
                                     )}
                                 </div>
                             </div>
@@ -388,11 +397,11 @@ const DoctorSetting = () => {
                     </button> */}
                                         <button
                                             onClick={handleStatusToggle}
-                                            className={`px-4 py-2 rounded-lg transition-colors ${doctor.status
+                                            className={`px-4 py-2 rounded-lg transition-colors ${doctor?.status
                                                 ? 'bg-rose-100 text-rose-700 hover:bg-rose-200'
                                                 : 'bg-emerald-100 text-emerald-700 hover:bg-emerald-200'
                                                 }`}>
-                                            {doctor.status ? 'Set as Inactive' : 'Set as Active'}
+                                            {doctor?.status ? 'Set as Inactive' : 'Set as Active'}
                                         </button>
                                     </>
                                 )}
@@ -401,27 +410,64 @@ const DoctorSetting = () => {
                     </div>
 
                     {/* Statistics Card */}
-                    {/* <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6 mb-6">
-                        <h2 className="text-lg md:text-xl font-semibold text-slate-800 mb-4">Profile Statistics</h2>
-                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                            <div className="text-center p-4 bg-slate-50 rounded-lg">
-                                <div className="text-2xl font-bold text-blue-600">156</div>
-                                <div className="text-sm text-slate-600">Patients This Month</div>
+                    <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6 mb-6">
+                        <h2 className="text-lg md:text-xl font-semibold text-slate-800 mb-4">
+                            Change Password
+                        </h2>
+                        <form onSubmit={handleSubmit} className="space-y-4">
+                            {/* Current Password */}
+                            <div>
+                                <label className="block text-sm font-medium text-slate-700 mb-1">
+                                    Current Password
+                                </label>
+                                <input
+                                    type="password"
+                                    value={currentPassword}
+                                    onChange={(e) => setCurrentPassword(e.target.value)}
+                                    placeholder="Enter current password"
+                                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                />
                             </div>
-                            <div className="text-center p-4 bg-slate-50 rounded-lg">
-                                <div className="text-2xl font-bold text-green-600">94%</div>
-                                <div className="text-sm text-slate-600">Satisfaction Rate</div>
+
+                            {/* New Password */}
+                            <div>
+                                <label className="block text-sm font-medium text-slate-700 mb-1">
+                                    New Password
+                                </label>
+                                <input
+                                    type="password"
+                                    value={newPassword}
+                                    onChange={(e) => setNewPassword(e.target.value)}
+                                    placeholder="Enter new password"
+                                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                />
                             </div>
-                            <div className="text-center p-4 bg-slate-50 rounded-lg">
-                                <div className="text-2xl font-bold text-purple-600">28</div>
-                                <div className="text-sm text-slate-600">Appointments Today</div>
+
+                            {/* Confirm Password */}
+                            <div>
+                                <label className="block text-sm font-medium text-slate-700 mb-1">
+                                    Confirm New Password
+                                </label>
+                                <input
+                                    type="password"
+                                    value={confirmPassword}
+                                    onChange={(e) => setConfirmPassword(e.target.value)}
+                                    placeholder="Confirm new password"
+                                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                />
                             </div>
-                            <div className="text-center p-4 bg-slate-50 rounded-lg">
-                                <div className="text-2xl font-bold text-orange-600">5.2</div>
-                                <div className="text-sm text-slate-600">Avg. Rating</div>
+
+                            {/* Submit Button */}
+                            <div className="pt-2">
+                                <button
+                                    type="submit"
+                                    className="w-full bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                >
+                                    Update Password
+                                </button>
                             </div>
-                        </div>
-                    </div> */}
+                        </form>
+                    </div>
 
                     {/* Quick Actions */}
                     {/* <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6">

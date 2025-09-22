@@ -3,8 +3,8 @@ import { useDispatch, useSelector } from "react-redux";
 import { getAllHospital } from "../Redux/hospitalSlice";
 import { Link, useNavigate } from "react-router-dom";
 import { Search, Calendar, CreditCard, CheckCircle, Star, MapPin, Clock, Phone, HeartPulse, Stethoscope, Shield, Ambulance } from 'lucide-react';
-import { AppointmentCancelled, getAllAppointment } from "../Redux/appointment";
-import { getAllDoctors, updateDoctor } from "../Redux/doctorSlice";
+import {  getAllAppointment } from "../Redux/appointment";
+import { getAllDoctors} from "../Redux/doctorSlice";
 import Layout from "../components/Layout/Layout";
 import { useState } from "react";
 import hospital_img from '../../src/assets/hospital_image.png';
@@ -12,9 +12,6 @@ import deepak from '../../src/assets/deepak.jpg';
 import abhay from '../../src/assets/abjay.jpg';
 import rohit from '../../src/assets/rohit.jpg';
 import AppointmentsSection from "../components/AppointmentsSection";
-// import io from "socket.io-client";
-// const socket = io("http://localhost:5000");
-import Profile from "./Profile";
 import socket from "../Helper/socket";
 
 // Skeleton Components

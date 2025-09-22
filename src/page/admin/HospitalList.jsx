@@ -34,10 +34,12 @@ const HospitalList = () => {
 
     // Filter hospitals based on search and status
     const filteredHospitals = hospitals?.filter(hospital => {
+        // alert(hospital.status === statusFilter)/
+        
         const matchesSearch = hospital.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
             hospital.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
             hospital.city.toLowerCase().includes(searchTerm.toLowerCase());
-        const matchesStatus = statusFilter === 'all' || hospital.status === statusFilter;
+        const matchesStatus = statusFilter === 'all' ||  statusFilter;
         return matchesSearch && matchesStatus;
     });
 
@@ -110,11 +112,11 @@ const HospitalList = () => {
                     initial={{ opacity: 0, y: -10 }}
                     animate={{ opacity: 1, y: 0 }}
                     className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 p-4"
-                    style={{ backgroundColor: colors.primary }}
+                   
                 >
                     <div>
-                        <h1 className="text-xl font-bold text-white">Hospital Management</h1>
-                        <p className="mt-1 text-xs" style={{ color: `${colors.card}90` }}>
+                        <h1 className="text-xl font-bold ">Hospital Management</h1>
+                        <p className="mt-1 text-xs" >
                             Manage all registered hospitals
                         </p>
                     </div>
@@ -171,8 +173,8 @@ const HospitalList = () => {
                                 onChange={(e) => setStatusFilter(e.target.value)}
                             >
                                 <option value="all">All Status</option>
-                                <option value="active">Active</option>
-                                <option value="deactive">Inactive</option>
+                                <option value="true">Active</option>
+                                <option value="false">Inactive</option>
                             </select>
                             <motion.button
                                 whileHover={{ scale: 1.02 }}
@@ -203,11 +205,11 @@ const HospitalList = () => {
                     </div>
                     <div className="text-center p-2 rounded-md bg-green-50">
                         <p className="text-xs text-green-700">Active</p>
-                        <p className="font-bold text-green-900">{hospitals?.filter(h => h.status === 'active').length || 0}</p>
+                        <p className="font-bold text-green-900">{hospitals?.filter(h => h.status).length || 0}</p>
                     </div>
                     <div className="text-center p-2 rounded-md bg-red-50">
                         <p className="text-xs text-red-700">Inactive</p>
-                        <p className="font-bold text-red-900">{hospitals?.filter(h => h.status === 'deactive').length || 0}</p>
+                        <p className="font-bold text-red-900">{hospitals?.filter(h => !h.status).length || 0}</p>
                     </div>
                 </motion.div>
 

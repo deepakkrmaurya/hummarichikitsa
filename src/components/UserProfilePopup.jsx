@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { getAllAppointment } from "../Redux/appointment";
 import { Menu, X, User, Calendar, LogOut, Settings, Mail, Phone } from 'lucide-react';
 import axiosInstance from "../Helper/axiosInstance";
+import { AuthUpdate } from "../Redux/authSlice";
 
 export const UserProfilePopup = () => {
     const { data } = useSelector((state) => state.auth || {});
@@ -12,17 +13,20 @@ export const UserProfilePopup = () => {
     const dispatch = useDispatch()
     const [isPopupOpen, setIsPopupOpen] = useState(false);
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-    
+
     // Get user data directly from currentUser without local state
-    const userName = (currentUser.user_first_name || '') + ' ' + (currentUser.user_last_name || '') || 'User Name';
-    const userMobile =currentUser?.userid || '+91 00000 00000';
+    const userName = (currentUser.user_first_name || currentUser?.name || '') + ' ' + (currentUser.user_last_name || '') || 'User Name';
+    const userMobile = currentUser?.userid || currentUser?.mobile || currentUser?.phone || '';
     const userEmail = currentUser.email || '';
     const [editForm, setEditForm] = useState({
-        name: userName,
-        mobile: userMobile,
+        user_first_name: currentUser?.user_first_name,
+        user_last_name: currentUser?.user_last_name,
         email: userEmail
     });
     
+
+
+
     const popupRef = useRef(null);
     const modalRef = useRef(null);
 
@@ -47,19 +51,19 @@ export const UserProfilePopup = () => {
     useEffect(() => {
         if (isEditModalOpen) {
             setEditForm({
-                name: userName,
-                mobile: userMobile,
+                user_first_name: currentUser?.user_first_name,
+                user_last_name: currentUser?.user_last_name,
                 email: userEmail
             });
         }
     }, [isEditModalOpen, userName, userMobile, userEmail]);
 
-    const handleEditSubmit = async(e) => {
+    const handleEditSubmit = async (e) => {
         e.preventDefault();
-         const res = await axiosInstance.put('/user/update',editForm)
-        // Here you would typically dispatch an action to update the user profile
-        // For now, just close the modal
-        setIsEditModalOpen(false);
+        await dispatch(AuthUpdate(editForm))
+        setInterval(()=>{
+         setIsEditModalOpen(false);
+        },3000)
     };
 
     const handleLogout = async () => {
@@ -171,15 +175,31 @@ export const UserProfilePopup = () => {
                         <form onSubmit={handleEditSubmit} className="p-4">
                             <div className="space-y-4">
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">Name</label>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">First Name</label>
                                     <div className="relative">
                                         <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                                             <User size={18} className="text-gray-400" />
                                         </div>
                                         <input
                                             type="text"
-                                            name="name"
-                                            value={editForm.name}
+                                            name="user_first_name"
+                                            value={editForm.user_first_name}
+                                            onChange={handleInputChange}
+                                            className="pl-10 w-full rounded-md border border-gray-300 py-2 px-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                            required
+                                        />
+                                    </div>
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">Last Name</label>
+                                    <div className="relative">
+                                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                            <User size={18} className="text-gray-400" />
+                                        </div>
+                                        <input
+                                            type="text"
+                                            name="user_last_name"
+                                            value={editForm.user_last_name}
                                             onChange={handleInputChange}
                                             className="pl-10 w-full rounded-md border border-gray-300 py-2 px-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
                                             required
@@ -195,8 +215,9 @@ export const UserProfilePopup = () => {
                                         </div>
                                         <input
                                             type="tel"
+                                            disabled={true}
                                             name="mobile"
-                                            value={editForm.mobile}
+                                            value={currentUser.userid}
                                             onChange={handleInputChange}
                                             className="pl-10 w-full rounded-md border border-gray-300 py-2 px-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
                                             required

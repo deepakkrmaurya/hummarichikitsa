@@ -29,7 +29,7 @@ const Dashboard = ({ children }) => {
           console.error("Error fetching user data:", error);
         });
     } else {
-      // Use data from Redux
+    
       setUserData(data);
       if (data.user && data.user.role) {
         setUserRole(data.user.role);
@@ -52,7 +52,7 @@ const Dashboard = ({ children }) => {
   };
 
   // Get role from multiple possible sources
-  const currentRole = userRole || data?.user?.role || role || '';
+  const currentRole = userRole || userData.role || data?.user?.role || role || '';
   // console.log("Current role:", currentRole);
   // console.log("Redux data:", data);
   // console.log("User data:", userData);
@@ -224,7 +224,7 @@ const Dashboard = ({ children }) => {
         </div>
 
         {/* Main Content */}
-        <div className="flex-1 p-4 lg:p-6 overflow-auto">
+        <div className="flex-1  overflow-auto">
           {children}
         </div>
       </div>

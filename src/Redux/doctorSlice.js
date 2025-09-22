@@ -110,6 +110,14 @@ export const GetDoctorHospitalId = createAsyncThunk('/get/doctor/hospital', asyn
     toast.error(error?.response?.data?.message)
   }
 })
+export const ChangePassword = createAsyncThunk('/doctor/change/password', async (data) => {
+  try {
+    const response = axiosInstance.put(`/doctor/change/password`,data)
+    return (await response)?.data
+  } catch (error) {
+    toast.error(error?.response?.data?.message)
+  }
+})
 
 export const getAllDoctors = createAsyncThunk(
   "doctors/getAll", // Changed to match slice name
@@ -124,24 +132,35 @@ export const getAllDoctors = createAsyncThunk(
   }
 );
 
+
 const doctordSlice = createSlice({
   name: "doctors",
   initialState,
+  // reducers: {
+  //   setDoctors: (state, action) => {
+  //     state.doctors = action.payload;
+  //   },
+  //   updateDoctor: (state, action) => {
+  //     const index = state.doctors.findIndex(
+  //       (d) => d._id === action.payload._id
+  //     );
+  //     if (index !== -1) {
+  //       // Existing doctor ko update karo
+  //       state.doctors[index] = action.payload;
+  //     } else {
+  //       // Naya doctor add karo
+  //       state.doctors.push(action.payload);
+  //     }
+  //   },
+  // },
   reducers: {
-    setDoctors: (state, action) => {
-      state.doctors = action.payload;
-    },
-    updateDoctor: (state, action) => {
-      console.log(action)
-      const index = state.doctors.findIndex(
-        (d) => d._id === action.payload._id
-      );
+    updateDoctorStatus: (state, action) => {
+      const updatedDoctor = action.payload;
+      const index = state.doctors.findIndex(d => d._id === updatedDoctor._id);
       if (index !== -1) {
-        // Existing doctor ko update karo
-        state.doctors[index] = action.payload;
+        state.doctors[index] = updatedDoctor; // replace existing
       } else {
-        // Naya doctor add karo
-        state.doctors.push(action.payload);
+        state.doctors.push(updatedDoctor); // add new if not exists
       }
     },
   },
@@ -157,5 +176,5 @@ const doctordSlice = createSlice({
 
 
 
-export const { setDoctors, updateDoctor } = doctordSlice.actions;
+export const { updateDoctorStatus } = doctordSlice.actions;
 export default doctordSlice.reducer;

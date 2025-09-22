@@ -3,12 +3,13 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { Filter, Star, CalendarDays, ChevronLeft } from 'lucide-react';
 import { useDispatch, useSelector } from 'react-redux';
 import { getAllHospital } from '../Redux/hospitalSlice';
-import { getAllDoctors } from '../Redux/doctorSlice';
+import { getAllDoctors, updateDoctorStatus } from '../Redux/doctorSlice';
 import Layout from '../components/Layout/Layout';
 import Skeleton from 'react-loading-skeleton';
 import 'react-loading-skeleton/dist/skeleton.css';
 import hospital_img from '../../src/assets/hospital_image.png';
 import avatar from '../../src/assets/logo-def.png';
+import socket from '../Helper/socket';
 const DoctorListPage = () => {
   const navigate = useNavigate();
   const { hospitalId } = useParams();
@@ -18,7 +19,7 @@ const DoctorListPage = () => {
   const hospitals = useSelector((state) => state.hospitals.hospitals);
   const { doctors, loading: doctorsLoading } = useSelector((state) => state.doctors);
   const { loading: hospitalsLoading } = useSelector((state) => state.hospitals);
-
+  console.log(doctors)
   // Local state
   const [selectedSpecialty, setSelectedSpecialty] = useState('');
   const [isFilterOpen, setIsFilterOpen] = useState(false);
@@ -75,7 +76,18 @@ const DoctorListPage = () => {
     window.scrollTo(0, 0); // Scrolls to top when page/component mounts
   }, []);
 
-  
+  useEffect(() => {
+    socket.on("doctorStatusUpdate", (data) => {
+      console.log("🔄 Doctor status update:", data);
+      dispatch(updateDoctorStatus(data));
+    });
+
+    return () => {
+      socket.off("doctorStatusUpdate");
+    };
+  }, [dispatch]);
+
+
   if (isLoading || hospitalsLoading || doctorsLoading) {
     return (
       <Layout>
@@ -280,6 +292,14 @@ const DoctorListPage = () => {
                   <div className="p-6 md:w-3/4">
                     <div className="flex flex-col md:flex-row md:justify-between md:items-start">
                       <div>
+                        {doctor?.deactivationReason && (
+                          <div className="bg-red-100 border border-red-300 text-red-700 px-4 py-2 rounded-md mb-3">
+                            <p className="text-sm font-medium">
+                               Reason: {doctor.deactivationReason}
+                            </p>
+                          </div>
+                        )}
+
                         <h2 className="text-xl font-semibold text-gray-800 mb-1">
                           Dr. {doctor.name}
                         </h2>
@@ -325,11 +345,22 @@ const DoctorListPage = () => {
                         </span>
                       </div>
                       <button
+                      onClick={() => navigate(`/doctors/${doctor._id}`)}
+                        disabled={!doctor.status}
+                        className={`cursor-pointer w-full sm:w-auto px-6 py-2 rounded-md transition
+                            ${doctor.status
+                            ? 'bg-blue-600 text-white hover:bg-blue-700'
+                            : 'bg-gray-400 text-white cursor-not-allowed'}`}
+                      >
+                        {doctor.status ? 'Book Appointment' : 'Unavailable'}
+                      </button>
+
+                      {/* <button
                         onClick={() => navigate(`/doctors/${doctor._id}`)}
                         className="w-full sm:w-auto bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700 transition focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
                       >
                         Book Appointment
-                      </button>
+                      </button> */}
                     </div>
                   </div>
                 </div>

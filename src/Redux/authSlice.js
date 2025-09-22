@@ -74,6 +74,26 @@ export const AuthRegister = createAsyncThunk("auth/register", async (data) => {
     }
 }
 );
+export const AuthUpdate = createAsyncThunk("auth/update", async (data) => {
+    try {
+
+        const response = axiosInstance.put('/user/update', data);
+        toast.promise(response, {
+            loading: "Wait! Update your profile",
+            success: (data) => {
+                return data?.data?.message;
+            },
+            error: "Failed to update account",
+        });
+        
+        return (await response)?.data;
+    } catch (error) {
+        //   return rejectWithValue(error.response?.data?.message || "Failed to fetch hospitals");
+    }
+}
+);
+
+
 
 const authSlice = createSlice({
     name: "auth",
@@ -91,6 +111,19 @@ const authSlice = createSlice({
                 state.role = action?.payload?.user?.role;
                 state.token = action?.payload?.token;
 
+            })
+            .addCase(AuthUpdate.fulfilled, (state, action) => {
+                if (action?.payload?.user) {
+                    state.data = action.payload.user;
+                    // Also update localStorage if needed
+                    localStorage.setItem("data", JSON.stringify(action.payload.user));
+                    
+                    // Update role if it changed
+                    if (action.payload.user.role) {
+                        state.role = action.payload.user.role;
+                        localStorage.setItem("role", action.payload.user.role);
+                    }
+                }
             })
     },
 });

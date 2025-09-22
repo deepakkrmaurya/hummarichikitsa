@@ -18,7 +18,7 @@ function BookAppointment() {
     mobile: '',
     dob: '',
     doctorId: '',
-    booking_amount: 0,
+    booking_amount: '',
     paymentStatus: 'Cash'
   });
 
@@ -363,6 +363,7 @@ function BookAppointment() {
                         type="text"
                         name="booking_amount"
                         value={formData.booking_amount}
+                        placeholder='0'
                         onChange={(e) => {
                           const value = e.target.value;
                           if (/^\d*$/.test(value)) {
@@ -370,7 +371,7 @@ function BookAppointment() {
                           }
                         }}
                         className={`w-full pl-8 pr-3 py-2 border rounded-lg focus:outline-none focus:ring-1 text-sm ${errors.booking_amount ? 'border-red-300 focus:ring-red-500' : 'border-gray-300 focus:ring-blue-500'}`}
-                        min="0"
+                        min=""
                         step="0.01"
                       />
                       {errors.booking_amount && <p className="mt-1 text-xs text-red-600">{errors.booking_amount}</p>}

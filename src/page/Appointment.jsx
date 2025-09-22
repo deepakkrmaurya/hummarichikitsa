@@ -198,8 +198,8 @@ function Appointment() {
                             const doctor = doctors?.find(d => d._id === appointment?.doctorId?._id);
 
                             const hospitals = hospital.find(h => h._id === appointment?.hospitalId);
-
-                            if (appointment.status === "completed") {
+                                //   alert(appointment.status)
+                            if (appointment.status === "Completed") {
                                 finalStatus = "Completed";
                             } else {
                                 const today = new Date();
@@ -208,7 +208,7 @@ function Appointment() {
                                 const appointmentDate = new Date(appointment.date);
                                 appointmentDate.setHours(0, 0, 0, 0);
 
-                                finalStatus = appointmentDate >= today ? "Active" : "Past";
+                                finalStatus = appointmentDate >= today ? "Active" : "Completed";
                             }
 
                             return (
@@ -290,7 +290,7 @@ function Appointment() {
                                                 </div>
                                             </div>
 
-                                            <div className="bg-gray-50 rounded-xl p-4 flex items-center">
+                                            {/* <div className="bg-gray-50 rounded-xl p-4 flex items-center">
                                                 <div className="bg-blue-100 p-2.5 rounded-lg mr-3">
                                                     <Clock className="w-5 h-5 text-blue-600" />
                                                 </div>
@@ -298,7 +298,7 @@ function Appointment() {
                                                     <p className="text-xs text-gray-500 font-medium">Time Slot</p>
                                                     <p className="font-semibold text-gray-900">{appointment.slot}</p>
                                                 </div>
-                                            </div>
+                                            </div> */}
 
                                             <div className="bg-gray-50 rounded-xl p-4 flex items-center">
                                                 <div className="bg-blue-100 p-2.5 rounded-lg mr-3">
@@ -327,7 +327,7 @@ function Appointment() {
                                         <div className="flex justify-center">
                                             <Link
                                                 to={`/appointment_details_page/${appointment?._id}`}
-                                                className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white text-center py-3 px-4 rounded-xl font-medium transition-all duration-300 shadow-md hover:shadow-lg"
+                                                className="w-full bg-[#009689] text-white text-center py-3 px-4 rounded-xl font-medium transition-all duration-300 shadow-md hover:shadow-lg"
                                             >
                                                 View Full Details
                                             </Link>
