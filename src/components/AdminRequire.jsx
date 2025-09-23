@@ -18,7 +18,10 @@ const RequireAuth = ({ allowedRoles }) => {
                 console.error("Error fetching data:", error);
             }
         }
-        fetchData();
+        if(isLoggedIn){
+
+            fetchData();
+        }
     }, []);
 
     // Still loading role
