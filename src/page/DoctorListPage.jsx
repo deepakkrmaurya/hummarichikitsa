@@ -334,7 +334,7 @@ const DoctorListPage = () => {
                     </p>
 
                     <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-                      <div className="flex items-center">
+                      {/* <div className="flex items-center">
                         <CalendarDays className="h-5 w-5 text-blue-600 mr-2 flex-shrink-0" />
                         <span className="text-gray-700">
                           {doctor.availableSlots?.length > 0 ? (
@@ -343,7 +343,7 @@ const DoctorListPage = () => {
                             'No available slots'
                           )}
                         </span>
-                      </div>
+                      </div> */}
                       <button
                       onClick={() => navigate(`/doctors/${doctor._id}`)}
                         disabled={!doctor.status}
