@@ -155,7 +155,7 @@ export const UserProfilePopup = () => {
 
             {/* Edit Profile Modal */}
             {isEditModalOpen && (
-                <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+                <div className="fixed inset-0 bg-indigo-600/40 bg-opacity-50 z-50 flex items-center justify-center p-4">
                     <div
                         ref={modalRef}
                         className="bg-white rounded-lg shadow-xl w-96 max-w-full animate-scale-in"

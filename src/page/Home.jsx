@@ -140,12 +140,25 @@ const Home = () => {
         return [...prev, data];
       });
     })
+    socket.on("doctoractive", (data) => {
+      setdoctors((prev) => {
+        const exists = prev.some((a) => a._id === data._id);
+        console.log(exists)
+        if (exists) {
+          return prev.map((a) => (a._id === data._id ? data : a));
+        }
+        return [...prev, data];
+      });
+    })
 
     return () => {
       socket.off("appointmentUpdate");
       socket.off("doctorUpdate");
+      socket.off("doctoractive");
     };
   }, [dispatch]);
+
+
 
 
   const backgroundImages = [

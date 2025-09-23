@@ -110,6 +110,7 @@ export const GetDoctorHospitalId = createAsyncThunk('/get/doctor/hospital', asyn
     toast.error(error?.response?.data?.message)
   }
 })
+
 export const ChangePassword = createAsyncThunk('/doctor/change/password', async (data) => {
   try {
     const response = axiosInstance.put(`/doctor/change/password`,data)
@@ -158,9 +159,9 @@ const doctordSlice = createSlice({
       const updatedDoctor = action.payload;
       const index = state.doctors.findIndex(d => d._id === updatedDoctor._id);
       if (index !== -1) {
-        state.doctors[index] = updatedDoctor; // replace existing
+        state.doctors[index] = updatedDoctor;
       } else {
-        state.doctors.push(updatedDoctor); // add new if not exists
+        state.doctors.push(updatedDoctor);
       }
     },
   },

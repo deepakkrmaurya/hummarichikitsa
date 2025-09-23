@@ -545,7 +545,6 @@ import { useDispatch, useSelector } from 'react-redux';
 import Dashboard from '../../components/Layout/Dashboard';
 import axiosInstance from '../../Helper/axiosInstance';
 import socket from '../../Helper/socket';
-
 const DoctorDashboard = () => {
   const dispatch = useDispatch();
   const [appointments, setAppointments] = useState([]);
@@ -553,6 +552,9 @@ const DoctorDashboard = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [filterStatus, setFilterStatus] = useState('all');
   const [showFilters, setShowFilters] = useState(false);
+  const [active, setactive] = useState(true)
+
+  const currentUser = useSelector((state) => state.auth)
 
   // Get appointments from Redux store
   const reduxAppointments = useSelector((state) => state.appointment?.appointment || []);
@@ -648,8 +650,26 @@ const DoctorDashboard = () => {
     };
   }, []);
 
+  const ActiveDoctor = async () => {
+    const res = await axiosInstance.put(`/doctor/${currentUser?.data?._id}/active/doctor`)
+    localStorage.setItem("data", JSON.stringify(res?.data?.getDoctor));
+    setactive(res?.data?.getDoctor?.active)
+  }
+
+  useEffect(() => {
+    // setactive(currentUser.data.active)
+    // console.log("as",currentUser.data)
+    // setcurrentUser(current)
+  }, [])
+
+  // console.log(active)
+
+
+
+  // console.log(current.data)
   // Initial data loading
   useEffect(() => {
+
     const fetchData = async () => {
       try {
         await axiosInstance.patch('/appointment/hospital/patient');
@@ -821,223 +841,236 @@ const DoctorDashboard = () => {
                     <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#009689] opacity-75"></span>
                     <span className="relative inline-flex rounded-full h-3 w-3 bg-[#009689]"></span>
                   </span>
+
                   <span className="font-semibold text-gray-700">Today's Appointments</span>
-                </div>
-                <p className="text-sm text-gray-600 mt-1">
-                  {new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
-                </p>
+                  {
+                    currentUser?.data?.role === 'doctor' && (
+                      <button onClick={ActiveDoctor}
+                        className={`px-4 py-1 rounded-sm font-semibold shadow-md transition-all duration-300 
+                             ${active
+                            ? "bg-gradient-to-r from-red-500 to-red-700 text-white hover:scale-105 hover:shadow-lg"
+                            : "bg-[#009689] text-white hover:scale-105 hover:shadow-lg"
+                          }`}>
+                        {active ? "In Active" : "Active"}
+                        </button>
+                )
+                  }
               </div>
-
-              <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
-                <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <Search className="h-4 w-4 text-gray-400" />
-                  </div>
-                  <input
-                    type="text"
-                    placeholder="Search appointments..."
-                    className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm w-full"
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                  />
-                </div>
-
-                <div className="relative">
-                  <button
-                    onClick={() => setShowFilters(!showFilters)}
-                    className="flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg text-sm text-gray-700 hover:bg-gray-50 w-full sm:w-auto"
-                  >
-                    <Filter size={16} />
-                    Filter
-                    {filterStatus !== 'all' && (
-                      <span className="bg-blue-100 text-blue-800 text-xs px-2 py-0.5 rounded-full">
-                        {filterStatus}
-                      </span>
-                    )}
-                  </button>
-
-                  <AnimatePresence>
-                    {showFilters && (
-                      <motion.div
-                        initial={{ opacity: 0, y: -10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: -10 }}
-                        className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg z-10 border border-gray-200"
-                      >
-                        <div className="py-1">
-                          {['all', 'active', 'pending', 'completed'].map((status) => (
-                            <button
-                              key={status}
-                              onClick={() => {
-                                setFilterStatus(status);
-                                setShowFilters(false);
-                              }}
-                              className={`block w-full text-left px-4 py-2 text-sm ${filterStatus === status
-                                ? 'bg-blue-50 text-blue-700'
-                                : 'text-gray-700 hover:bg-gray-100'
-                                }`}
-                            >
-                              {status.charAt(0).toUpperCase() + status.slice(1)}
-                            </button>
-                          ))}
-                        </div>
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
-                </div>
-              </div>
+              <p className="text-sm text-gray-600 mt-1">
+                {new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
+              </p>
             </div>
 
-            {/* Appointments Table */}
-            {isLoading ? (
-              <div className="p-8 flex justify-center">
-                <span class="Loader"></span>
+            <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <Search className="h-4 w-4 text-gray-400" />
+                </div>
+                <input
+                  type="text"
+                  placeholder="Search appointments..."
+                  className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm w-full"
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                />
               </div>
-            ) : (
-              <div className="overflow-x-auto">
-                <div className="overflow-auto rounded-xl max-h-96">
-                  <table className="min-w-full divide-y divide-gray-200">
-                    <thead className="bg-gray-50 sticky top-0 z-10">
-                      <tr>
-                        <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          Patient
-                        </th>
-                        <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          Time
-                        </th>
-                        <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          Token
-                        </th>
-                        <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          Status
-                        </th>
-                        <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          Payment
-                        </th>
-                        <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          Actions
-                        </th>
-                      </tr>
-                    </thead>
-                    <tbody className="bg-white divide-y divide-gray-200">
-                      <AnimatePresence>
-                        {filteredAppointments?.length > 0 ? (
-                          filteredAppointments.map((appointment, index) => {
-                            const status = getStatus(appointment);
-                            const statusStyle = statusConfig[status];
 
-                            return (
-                              <motion.tr
-                                key={appointment._id}
-                                initial={{ opacity: 0 }}
-                                animate={{ opacity: 1 }}
-                                exit={{ opacity: 0 }}
-                                transition={{ duration: 0.2 }}
-                                className="hover:bg-gray-50"
-                              >
-                                <td className="px-6 py-4 whitespace-nowrap">
-                                  <div className="flex items-center">
-                                    <div className="h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center">
-                                      <User className="h-5 w-5 text-blue-600" />
-                                    </div>
-                                    <div className="ml-4">
-                                      <div className="text-sm font-medium text-gray-900">
-                                        {appointment.patient || `Patient ${index + 1}`}
-                                      </div>
-                                      <div className="text-sm text-gray-500">
-                                        ID: {appointment?.appointmentNumber}
-                                      </div>
-                                    </div>
-                                  </div>
-                                </td>
-                                <td className="px-6 py-4 whitespace-nowrap">
-                                  <div className="text-sm font-medium text-gray-900">{appointment?.slot}</div>
-                                  <div className="text-sm text-gray-500">{appointment?.date}</div>
-                                </td>
-                                <td className="px-6 py-4 whitespace-nowrap">
-                                  <div className="text-sm text-gray-900 font-mono">{appointment?.token}</div>
-                                </td>
-                                <td className="px-6 py-4 whitespace-nowrap">
-                                  <div
-                                    className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium"
-                                    style={{
-                                      backgroundColor: statusStyle.bgColor,
-                                      color: statusStyle.textColor
-                                    }}
-                                  >
-                                    {statusStyle.icon}
-                                    <span className="ml-1">{statusStyle.text}</span>
-                                  </div>
-                                </td>
-                                <td className="px-6 py-4 whitespace-nowrap">
-                                  <span className={`inline-flex px-2.5 py-0.5 rounded-full text-xs font-medium ${appointment?.paymentStatus === 'completed'
-                                    ? 'bg-green-100 text-green-800'
-                                    : 'bg-yellow-100 text-yellow-800'
-                                    }`}>
-                                    {appointment?.paymentStatus?.charAt(0).toUpperCase() + appointment?.paymentStatus?.slice(1)}
-                                  </span>
-                                </td>
-                                <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                  <div className="flex items-center justify-end space-x-2">
-                                    <Link to={`/appointment/${appointment?._id}`}>
-                                      <motion.button
-                                        whileHover={{ scale: 1.05 }}
-                                        whileTap={{ scale: 0.95 }}
-                                        className="px-3 py-1.5 bg-blue-100 text-blue-700 rounded-lg text-sm font-medium hover:bg-blue-200 transition-colors"
-                                      >
-                                        View
-                                      </motion.button>
-                                    </Link>
-                                    {appointment.status !== 'completed' && (
-                                      <motion.button
-                                        onClick={() => {
-                                          if (window.confirm("Are you sure you want to mark this appointment as completed?")) {
-                                            ConfirmAppointment(appointment?._id);
-                                          }
-                                        }}
-                                        whileHover={{ scale: 1.05 }}
-                                        whileTap={{ scale: 0.95 }}
-                                        className="px-3 py-1.5 bg-green-100 text-green-700 rounded-lg text-sm font-medium hover:bg-green-200 transition-colors"
-                                      >
-                                        Complete
-                                      </motion.button>
-                                    )}
-                                  </div>
-                                </td>
-                              </motion.tr>
-                            );
-                          })
-                        ) : (
+              <div className="relative">
+                <button
+                  onClick={() => setShowFilters(!showFilters)}
+                  className="flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg text-sm text-gray-700 hover:bg-gray-50 w-full sm:w-auto"
+                >
+                  <Filter size={16} />
+                  Filter
+                  {filterStatus !== 'all' && (
+                    <span className="bg-blue-100 text-blue-800 text-xs px-2 py-0.5 rounded-full">
+                      {filterStatus}
+                    </span>
+                  )}
+                </button>
+
+                <AnimatePresence>
+                  {showFilters && (
+                    <motion.div
+                      initial={{ opacity: 0, y: -10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -10 }}
+                      className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg z-10 border border-gray-200"
+                    >
+                      <div className="py-1">
+                        {['all', 'active', 'pending', 'completed'].map((status) => (
+                          <button
+                            key={status}
+                            onClick={() => {
+                              setFilterStatus(status);
+                              setShowFilters(false);
+                            }}
+                            className={`block w-full text-left px-4 py-2 text-sm ${filterStatus === status
+                              ? 'bg-blue-50 text-blue-700'
+                              : 'text-gray-700 hover:bg-gray-100'
+                              }`}
+                          >
+                            {status.charAt(0).toUpperCase() + status.slice(1)}
+                          </button>
+                        ))}
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+            </div>
+        </div>
+
+        {/* Appointments Table */}
+        {isLoading ? (
+          <div className="p-8 flex justify-center">
+            <span class="Loader"></span>
+          </div>
+        ) : (
+          <div className="overflow-x-auto">
+            <div className="overflow-auto rounded-xl max-h-96">
+              <table className="min-w-full divide-y divide-gray-200">
+                <thead className="bg-gray-50 sticky top-0 z-10">
+                  <tr>
+                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Patient
+                    </th>
+                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Time
+                    </th>
+                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Token
+                    </th>
+                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Status
+                    </th>
+                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Payment
+                    </th>
+                    <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Actions
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="bg-white divide-y divide-gray-200">
+                  <AnimatePresence>
+                    {filteredAppointments?.length > 0 ? (
+                      filteredAppointments.map((appointment, index) => {
+                        const status = getStatus(appointment);
+                        const statusStyle = statusConfig[status];
+
+                        return (
                           <motion.tr
+                            key={appointment._id}
                             initial={{ opacity: 0 }}
                             animate={{ opacity: 1 }}
                             exit={{ opacity: 0 }}
+                            transition={{ duration: 0.2 }}
+                            className="hover:bg-gray-50"
                           >
-                            <td colSpan="6" className="px-6 py-12 text-center">
-                              <div className="flex flex-col items-center justify-center">
-                                <FileText className="h-12 w-12 mb-4 text-gray-400" />
-                                <h3 className="text-lg font-medium text-gray-900 mb-1">
-                                  No appointments found
-                                </h3>
-                                <p className="text-sm text-gray-500">
-                                  {searchTerm || filterStatus !== 'all'
-                                    ? 'Try adjusting your search or filter criteria'
-                                    : 'No appointments scheduled for today'}
-                                </p>
+                            <td className="px-6 py-4 whitespace-nowrap">
+                              <div className="flex items-center">
+                                <div className="h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center">
+                                  <User className="h-5 w-5 text-blue-600" />
+                                </div>
+                                <div className="ml-4">
+                                  <div className="text-sm font-medium text-gray-900">
+                                    {appointment.patient || `Patient ${index + 1}`}
+                                  </div>
+                                  <div className="text-sm text-gray-500">
+                                    ID: {appointment?.appointmentNumber}
+                                  </div>
+                                </div>
+                              </div>
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap">
+                              <div className="text-sm font-medium text-gray-900">{appointment?.slot}</div>
+                              <div className="text-sm text-gray-500">{appointment?.date}</div>
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap">
+                              <div className="text-sm text-gray-900 font-mono">{appointment?.token}</div>
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap">
+                              <div
+                                className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium"
+                                style={{
+                                  backgroundColor: statusStyle.bgColor,
+                                  color: statusStyle.textColor
+                                }}
+                              >
+                                {statusStyle.icon}
+                                <span className="ml-1">{statusStyle.text}</span>
+                              </div>
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap">
+                              <span className={`inline-flex px-2.5 py-0.5 rounded-full text-xs font-medium ${appointment?.paymentStatus === 'completed'
+                                ? 'bg-green-100 text-green-800'
+                                : 'bg-yellow-100 text-yellow-800'
+                                }`}>
+                                {appointment?.paymentStatus?.charAt(0).toUpperCase() + appointment?.paymentStatus?.slice(1)}
+                              </span>
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                              <div className="flex items-center justify-end space-x-2">
+                                <Link to={`/appointment/${appointment?._id}`}>
+                                  <motion.button
+                                    whileHover={{ scale: 1.05 }}
+                                    whileTap={{ scale: 0.95 }}
+                                    className="px-3 py-1.5 bg-blue-100 text-blue-700 rounded-lg text-sm font-medium hover:bg-blue-200 transition-colors"
+                                  >
+                                    View
+                                  </motion.button>
+                                </Link>
+                                {appointment.status !== 'completed' && (
+                                  <motion.button
+                                    onClick={() => {
+                                      if (window.confirm("Are you sure you want to mark this appointment as completed?")) {
+                                        ConfirmAppointment(appointment?._id);
+                                      }
+                                    }}
+                                    whileHover={{ scale: 1.05 }}
+                                    whileTap={{ scale: 0.95 }}
+                                    className="px-3 py-1.5 bg-green-100 text-green-700 rounded-lg text-sm font-medium hover:bg-green-200 transition-colors"
+                                  >
+                                    Complete
+                                  </motion.button>
+                                )}
                               </div>
                             </td>
                           </motion.tr>
-                        )}
-                      </AnimatePresence>
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-            )}
-          </motion.div>
-        </div>
-      </div>
-    </Dashboard>
+                        );
+                      })
+                    ) : (
+                      <motion.tr
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                      >
+                        <td colSpan="6" className="px-6 py-12 text-center">
+                          <div className="flex flex-col items-center justify-center">
+                            <FileText className="h-12 w-12 mb-4 text-gray-400" />
+                            <h3 className="text-lg font-medium text-gray-900 mb-1">
+                              No appointments found
+                            </h3>
+                            <p className="text-sm text-gray-500">
+                              {searchTerm || filterStatus !== 'all'
+                                ? 'Try adjusting your search or filter criteria'
+                                : 'No appointments scheduled for today'}
+                            </p>
+                          </div>
+                        </td>
+                      </motion.tr>
+                    )}
+                  </AnimatePresence>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
+      </motion.div>
+    </div>
+      </div >
+    </Dashboard >
   );
 };
 

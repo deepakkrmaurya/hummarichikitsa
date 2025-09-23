@@ -50,9 +50,21 @@ function Appointment() {
             });
         })
 
+         socket.on("doctoractive", (data) => {
+              setdoctors((prev) => {
+                const exists = prev.some((a) => a._id === data._id);
+                console.log(exists)
+                if (exists) {
+                  return prev.map((a) => (a._id === data._id ? data : a));
+                }
+                return [...prev, data];
+              });
+            })
+
         return () => {
             socket.off("appointmentUpdate");
             socket.off("doctorUpdate");
+            socket.off("doctoractive");
         };
     }, [dispatch]);
     useEffect(() => {
@@ -212,10 +224,34 @@ function Appointment() {
                             }
 
                             return (
-                                <div key={index} className="bg-white rounded-2xl shadow-lg overflow-hidden border border-gray-100 transition-all duration-300 hover:shadow-xl hover:-translate-y-1">
+                                <div
+                                    key={index}
+                                    className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden transition-all duration-300 hover:shadow-xl hover:-translate-y-1"
+                                >
                                     <div className="p-6">
-                                        {/* Header Section */}
-                                        <div className="flex items-start justify-between mb-5">
+
+                                        {/* ✅ Live Status Section (Top) */}
+                                        {finalStatus !== 'Completed' && doctor.active && (
+                                            <div className="bg-gradient-to-r from-green-50 to-teal-50 rounded-xl p-4 mb-6 border border-green-100 shadow-sm">
+                                                <div className="flex items-center justify-between">
+                                                    <div className="flex items-center space-x-3">
+                                                        <span className="relative flex h-3 w-3">
+                                                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-500 opacity-75"></span>
+                                                            <span className="relative inline-flex rounded-full h-3 w-3 bg-green-600"></span>
+                                                        </span>
+                                                        <p className="text-sm font-medium text-gray-700">
+                                                            Current: <span className="text-green-700 font-bold">#{doctor?.currentAppointment}</span>
+                                                        </p>
+                                                    </div>
+                                                    <p className="text-sm font-medium text-gray-700">
+                                                        Your No: <span className="text-teal-700 font-bold">#{appointment?.appointmentNumber}</span>
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        )}
+
+                                        {/* ✅ Header Section */}
+                                        <div className="flex items-start justify-between mb-6">
                                             <div className="flex items-center space-x-4">
                                                 <div className="relative">
                                                     <img
@@ -223,62 +259,38 @@ function Appointment() {
                                                         className="w-16 h-16 rounded-xl object-cover border-2 border-white shadow-md"
                                                         alt={`${doctor?.name}'s profile`}
                                                     />
-                                                    <div className="absolute -bottom-1 -right-1 w-6 h-6 bg-blue-600 rounded-full flex items-center justify-center">
+                                                    <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-green-600 rounded-full flex items-center justify-center shadow">
                                                         <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
                                                             <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd"></path>
                                                         </svg>
                                                     </div>
                                                 </div>
-                                                <div className="min-w-0">
-                                                    <h3 className="font-bold text-gray-900 text-lg truncate">{doctor?.name}</h3>
-                                                    <p className="text-sm text-gray-600 truncate">{doctor?.specialty}</p>
+                                                <div>
+                                                    <h3 className="font-bold text-gray-900 text-lg">{doctor?.name}</h3>
+                                                    <p className="text-sm text-gray-600">{doctor?.specialty}</p>
                                                     <div className="mt-1 flex items-center text-sm text-gray-500">
-                                                        <svg className="w-4 h-4 mr-1 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <svg className="w-4 h-4 mr-1 text-teal-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
                                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
                                                         </svg>
-                                                        <span className="truncate">{hospitals?.name}</span>
+                                                        <span>{hospitals?.name}</span>
                                                     </div>
                                                 </div>
                                             </div>
-                                            <span className={`px-3 py-1.5 text-xs font-semibold rounded-full ${finalStatus === 'Active' ? 'bg-green-100 text-green-800' :
-                                                finalStatus === 'Completed' ? 'bg-blue-100 text-blue-800' :
-                                                    'bg-gray-100 text-gray-800'
-                                                }`}>
+
+                                            <span
+                                                className={`px-3 py-1.5 text-xs font-semibold rounded-full ${finalStatus === 'Active'
+                                                        ? 'bg-green-100 text-green-700'
+                                                        : finalStatus === 'Completed'
+                                                            ? 'bg-blue-100 text-blue-700'
+                                                            : 'bg-gray-100 text-gray-700'
+                                                    }`}
+                                            >
                                                 {finalStatus}
                                             </span>
                                         </div>
-                                        {
-                                            finalStatus != 'Completed' && (
-                                                <>
-                                                    {/* Live Status Bar */}
-                                                    <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-4 mb-5 border border-blue-100">
-                                                        <div className="flex items-center justify-between">
-                                                            <div className="flex items-center space-x-3">
-                                                                <div className="flex items-center space-x-2">
-                                                                    <span className="relative flex h-3 w-3">
-                                                                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#009689] opacity-75"></span>
-                                                                        <span className="relative inline-flex rounded-full h-3 w-3 bg-[#009689]"></span>
-                                                                    </span>
-                                                                </div>
-                                                                <div className="text-sm text-gray-700">
-                                                                    Current: <strong className="text-green-600">#{doctor?.currentAppointment}</strong>
-                                                                </div>
 
-                                                            </div>
-                                                            <div className="text-sm text-gray-700">
-                                                                Your Token: <strong className="text-blue-600">#{appointment?.appointmentNumber}</strong>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-
-                                                </>
-                                            )
-                                        }
-
-
-
-                                        {/* Appointment Details Grid */}
+                                        {/* ✅ Appointment Details */}
                                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
                                             <div className="bg-gray-50 rounded-xl p-4 flex items-center">
                                                 <div className="bg-blue-100 p-2.5 rounded-lg mr-3">
@@ -290,23 +302,15 @@ function Appointment() {
                                                 </div>
                                             </div>
 
-                                            {/* <div className="bg-gray-50 rounded-xl p-4 flex items-center">
-                                                <div className="bg-blue-100 p-2.5 rounded-lg mr-3">
-                                                    <Clock className="w-5 h-5 text-blue-600" />
-                                                </div>
-                                                <div>
-                                                    <p className="text-xs text-gray-500 font-medium">Time Slot</p>
-                                                    <p className="font-semibold text-gray-900">{appointment.slot}</p>
-                                                </div>
-                                            </div> */}
-
                                             <div className="bg-gray-50 rounded-xl p-4 flex items-center">
                                                 <div className="bg-blue-100 p-2.5 rounded-lg mr-3">
                                                     <CreditCard className="w-5 h-5 text-blue-600" />
                                                 </div>
                                                 <div>
                                                     <p className="text-xs text-gray-500 font-medium">Payment</p>
-                                                    <p className="font-semibold text-gray-900">₹{appointment.booking_amount} • {appointment.paymentMethod}</p>
+                                                    <p className="font-semibold text-gray-900">
+                                                        ₹{appointment.booking_amount} • {appointment.paymentMethod}
+                                                    </p>
                                                 </div>
                                             </div>
 
@@ -323,17 +327,17 @@ function Appointment() {
                                             </div>
                                         </div>
 
-                                        {/* Action Button */}
+                                        {/* ✅ Action Button */}
                                         <div className="flex justify-center">
                                             <Link
                                                 to={`/appointment_details_page/${appointment?._id}`}
-                                                className="w-full bg-[#009689] text-white text-center py-3 px-4 rounded-xl font-medium transition-all duration-300 shadow-md hover:shadow-lg"
-                                            >
+                                                className="w-full bg-[#009689] text-white text-center py-3 px-4 rounded-xl font-semibold transition-all duration-300 shadow-md hover:shadow-lg hover:scale-[1.02]">  
                                                 View Full Details
                                             </Link>
                                         </div>
                                     </div>
                                 </div>
+
                             );
                         })}
                     </div>

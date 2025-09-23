@@ -11,6 +11,7 @@ import SignInButton from './page/SignInButton';
 import Setting from './page/admin/Setting';
 import DoctorSetting from './page/doctors/DoctorSetting';
 import UserProfilePopup from './page/Profile';
+import AdminRequire from './components/AdminRequire';
 
 
 // import Homes from './pages/Dashboard/Home';
@@ -70,7 +71,7 @@ function App() {
   //     document.removeEventListener("keydown", handleKeyDown);
   //   };
   // }, []);
- 
+
   return (
 
     <>
@@ -87,18 +88,23 @@ function App() {
             </Route>
 
             <Route path='/payment' element={<Payment />} />
-            <Route path="/" element={<Home />} />
-            <Route path="profile" element={<UserProfilePopup />} />
-            <Route path="/contact" element={<Contact />} />
-            <Route path="/hospitals/:hospitalId/doctors" element={<DoctorListPage />} />
-            <Route path="/hospitals" element={<HospitalListPage />} />
-            <Route path="/doctors/:doctorId" element={<DoctorDetailPage />} />
-            <Route path="/appointments" element={<Appointment />} />
-            <Route path="/payment/:appointmentId" element={<PaymentPage />} />
-            <Route path="/confirmation/:appointmentId" element={<ConfirmationPage />} />
-            <Route path="/appointment_details_page/:id" element={<AppointmentDetailsPage />} />
+            <Route element={<AdminRequire allowedRoles={["doctor", 'hospital', 'admin', 'staff']} />}>
+              <Route path="/" element={<Home />} />
+              <Route path="profile" element={<UserProfilePopup />} />
+              <Route path="/contact" element={<Contact />} />
+              <Route path="/hospitals/:hospitalId/doctors" element={<DoctorListPage />} />
+              <Route path="/hospitals" element={<HospitalListPage />} />
+              <Route path="/doctors/:doctorId" element={<DoctorDetailPage />} />
+              <Route path="/appointments" element={<Appointment />} />
+              <Route path="/payment/:appointmentId" element={<PaymentPage />} />
+              <Route path="/confirmation/:appointmentId" element={<ConfirmationPage />} />
+              <Route path="/appointment_details_page/:id" element={<AppointmentDetailsPage />} />
+            </Route>
+
+
+
             <Route element={<RequireAuth allowedRoles={["doctor", 'hospital', 'admin', 'staff']} />}>
-                
+
               <Route path='/doctor/dashboard' element={<DoctorDashboard />} />
               <Route path='/patient' element={<Patients />} />
               <Route path='/book/appointment' element={<BookAppointment />} />
@@ -129,6 +135,8 @@ function App() {
               <Route path='/update/doctor/:doctorid' element={<UpdateDoctor />} />
               <Route path='/hospital/update/:hospitalid' element={<HospitalUpdateForm />} />
             </Route>
+
+
             {/* admin */}
             <Route path="*" element={<NotFoundPage />} />
             <Route path="/denied" element={<Denied />} />
