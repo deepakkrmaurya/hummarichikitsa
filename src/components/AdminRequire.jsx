@@ -5,24 +5,25 @@ import axiosInstance from "../Helper/axiosInstance";
 
 const RequireAuth = ({ allowedRoles }) => {
     const location = useLocation();
-    const [role, setRole] = useState(null);
+    // const [role, setRole] = useState(null);
     const isLoggedIn = localStorage.getItem("isLoggedIn");
+    const role = localStorage.getItem("role");
+     
+    // useEffect(() => {
+    //     async function fetchData() {
+    //         try {
+    //             const response = await axiosInstance.get("/user/me");
+    //             // console.log(response.data.role);
+    //             setRole(response.data.user.role);
+    //         } catch (error) {
+    //             console.error("Error fetching data:", error);
+    //         }
+    //     }
+        
 
-    useEffect(() => {
-        async function fetchData() {
-            try {
-                const response = await axiosInstance.get("/user/me");
-                // console.log(response.data.role);
-                setRole(response.data.user.role);
-            } catch (error) {
-                console.error("Error fetching data:", error);
-            }
-        }
-        if(isLoggedIn){
-
-            fetchData();
-        }
-    }, []);
+    //         fetchData();
+      
+    // }, []);
 
     // Still loading role
     if (isLoggedIn && role === null) {
