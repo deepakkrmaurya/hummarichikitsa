@@ -148,15 +148,42 @@ const DoctorDetailPage = () => {
             booking_amount: doctor?.consultationFee,
             createdAt: new Date().toISOString()
         };
-        
+
         const res = await dispatch(AppointmentCreate(newAppointment));
-           
+
         if (res?.payload?.success) {
-           
-                setLoading(false)
-                navigate(`/confirmation/${res.payload?.savedAppointment?._id}`);
-                return;
-          
+             console.log(res?.payload.savedAppointment.mobile)
+            // Patient ka mobile number (country code ke sath, e.g. 91 for India)
+            const mobileNumber = 91+res?.payload.savedAppointment.mobile; // e.g. "919876543210"
+            console.log(res?.payload.savedAppointment)
+            // Message banate hain
+const message = `
+Hello ${res?.payload.savedAppointment.patient},
+📅 *Appointment Details*
+───────────────────────
+🧾 Token No: ${res?.payload.savedAppointment.token}
+📋 Serial No: ${res?.payload.savedAppointment.appointmentNumber}
+📱 Mobile No: ${res?.payload.savedAppointment.mobile}
+📅 Date: ${res?.payload.savedAppointment.date}
+✅ Please reach on time.
+`;
+                                // //  👨‍⚕️ Doctor: ${"doctor?.name"}
+                                //  🏥 Hospital: ${"hospital?.name"}
+
+            // Encode karna zaruri hai warna space/emoji break karenge
+            const encodedMessage = encodeURIComponent(message);
+
+            // WhatsApp URL
+            const whatsappURL = `https://wa.me/${mobileNumber}?text=${encodedMessage}`;
+
+            // Auto redirect / auto click
+            window.open(whatsappURL, "_blank");
+
+
+            setLoading(false)
+            navigate(`/confirmation/${res.payload?.savedAppointment?._id}`);
+            return;
+
 
             // const loadRazorpayScript = () => {
             //     return new Promise((resolve) => {
@@ -731,7 +758,7 @@ const DoctorDetailPage = () => {
                                             setLoading(true)
                                         }}
                                         // !selectedDate || !selectedSlot ||
-                                        disabled={!patient  ||!mobile || mobile.length !== 10}
+                                        disabled={!patient || !mobile || mobile.length !== 10}
                                         className={`w-full py-3 rounded-lg font-medium flex items-center justify-center transition
                                     ${!patient || !selectDate || !mobile || mobile.length !== 10
                                                 ? 'bg-gray-300 text-gray-500 cursor-not-allowed'

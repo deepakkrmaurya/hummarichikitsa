@@ -19,7 +19,7 @@ const DoctorListPage = () => {
   const hospitals = useSelector((state) => state.hospitals.hospitals);
   const { doctors, loading: doctorsLoading } = useSelector((state) => state.doctors);
   const { loading: hospitalsLoading } = useSelector((state) => state.hospitals);
-  console.log(doctors)
+  // console.log(doctors)
   // Local state
   const [selectedSpecialty, setSelectedSpecialty] = useState('');
   const [isFilterOpen, setIsFilterOpen] = useState(false);
