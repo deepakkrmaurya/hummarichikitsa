@@ -150,7 +150,7 @@ const DoctorDetailPage = () => {
         };
         
         const res = await dispatch(AppointmentCreate(newAppointment));
-
+           
         if (res?.payload?.success) {
            
                 setLoading(false)
@@ -248,6 +248,7 @@ const DoctorDetailPage = () => {
             //     }
             // };
         }
+        setLoading(false)
     };
 
     // Fetch data on component mount
