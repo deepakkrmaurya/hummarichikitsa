@@ -320,6 +320,7 @@ const DoctorForm = ({ doctorData }) => {
                               onChange={handleChange}
                               className="w-full px-3 py-2 border rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 border-gray-300 bg-gray-50"
                             >
+                              <option>Select Status</option>
                               <option value="true">Active</option>
                               <option value="false">Inactive</option>
                               {/* <option value="onleave">On Leave</option> */}
@@ -335,7 +336,8 @@ const DoctorForm = ({ doctorData }) => {
                               value={doctor.gender}
                               onChange={handleChange}
                               className="w-full px-3 py-2 border rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 border-gray-300 bg-gray-50"
-                            >
+                            > 
+                              <option >Select Gender</option>
                               <option value="male">Male</option>
                               <option value="female">Female</option>
                             </select>
