@@ -209,8 +209,8 @@ const Home = () => {
     } else {
       setHospitalsLoading(false);
     }
-  }, [dispatch, hospital]);
-
+  }, );
+[dispatch, hospital]
   return (
     <Layout>
       <section className="relative bg-gradient-to-r from-blue-900 to-teal-800 text-white py-24">
