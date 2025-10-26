@@ -12,6 +12,7 @@ import Setting from './page/admin/Setting';
 import DoctorSetting from './page/doctors/DoctorSetting';
 import UserProfilePopup from './page/Profile';
 import AdminRequire from './components/AdminRequire';
+import AnalyticsDashboard from './page/admin/Analytics';
 
 
 // import Homes from './pages/Dashboard/Home';
@@ -84,7 +85,6 @@ function App() {
               {/* <Route path="/login" element={<MobileOTPLogin />} /> */}
               <Route path="/login" element={<SignInButton />} />
               <Route path='/doctor/login' element={<DoctorLogin />} />
-
             </Route>
 
             <Route path='/payment' element={<Payment />} />
@@ -101,6 +101,7 @@ function App() {
               <Route path="/appointment_details_page/:id" element={<AppointmentDetailsPage />} />
             </Route>
 
+              <Route path="/analytics/dashboard" element={<AnalyticsDashboard />} />
 
 
             <Route element={<RequireAuth allowedRoles={["doctor", 'hospital', 'admin', 'staff']} />}>
