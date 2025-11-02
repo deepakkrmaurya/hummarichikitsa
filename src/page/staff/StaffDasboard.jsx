@@ -4,27 +4,25 @@ import { Calendar, Clock, User, FileText, Search, CheckCircle, XCircle, ChevronR
 import { motion, AnimatePresence } from 'framer-motion';
 import { AppointmentConferm, getAllAppointment, todayAppointment } from '../../Redux/appointment';
 import { getAllHospital } from '../../Redux/hospitalSlice';
-import { getAllDoctors, GetDoctorHospitalId } from '../../Redux/doctorSlice';
+import { getAllDoctors } from '../../Redux/doctorSlice';
 import { useDispatch, useSelector } from 'react-redux';
 import Dashboard from '../../components/Layout/Dashboard';
 import axiosInstance from '../../Helper/axiosInstance';
 import socket from '../../Helper/socket';
 import { AuthMe } from '../../Redux/AuthLoginSlice';
 
-const DoctorDashboard = () => {
+const StaffDasboard = () => {
   const dispatch = useDispatch();
   const [appointments, setAppointments] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [isLoading, setIsLoading] = useState(true);
   const [filterStatus, setFilterStatus] = useState('all');
-  const [filterDoctor, setFilterDoctor] = useState('all');
   const [showFilters, setShowFilters] = useState(false);
-  const [Doctors, setDoctors] = useState([]);
   const [active, setactive] = useState(true);
 
   const { isLoggedIn, data } = useSelector((store) => store.LoginAuth || {});
   const currentUser = data?.user || {};
-
+  
   // Use ref for filter dropdown
   const filterRef = useRef(null);
 
@@ -42,20 +40,17 @@ const DoctorDashboard = () => {
     border: '#E2E8F0'
   };
 
-  // Filter appointments based on search, filter status, and doctor
+  // Filter appointments based on search and filter status
   const filteredAppointments = appointments?.filter(appointment => {
-    console.log("filter",appointment.doctorId._id)
     const matchesSearch =
       appointment?.token?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       appointment._id.toLowerCase().includes(searchTerm.toLowerCase()) ||
       appointment.patient?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       appointment?.mobile?.toLowerCase().includes(searchTerm.toLowerCase());
-      
-    const matchesFilter = filterStatus === 'all' || appointment.status === filterStatus;
-    
-    const matchesDoctor = filterDoctor === 'all' || appointment.doctorId._id === filterDoctor;
 
-    return matchesSearch && matchesFilter && matchesDoctor;
+    const matchesFilter = filterStatus === 'all' || appointment.status === filterStatus;
+
+    return matchesSearch && matchesFilter;
   });
 
   // Get appointments with status filter
@@ -80,11 +75,6 @@ const DoctorDashboard = () => {
     setFilterStatus(status);
     setShowFilters(false);
     getAppointment(status === 'all' ? 'all' : status);
-  };
-
-  // Handle doctor filter change
-  const handleDoctorFilterChange = (doctorId) => {
-    setFilterDoctor(doctorId);
   };
 
   const ConfirmAppointment = async (appointment_id) => {
@@ -146,35 +136,19 @@ const DoctorDashboard = () => {
 
   const ActiveDoctor = async () => {
     const res = await axiosInstance.put(`/doctor/${currentUser?.data?._id}/active/doctor`)
+    localStorage.setItem("data", JSON.stringify(res?.data?.getDoctor));
     setactive(res?.data?.getDoctor?.active)
+    
   }
 
   useEffect(() => {
-    const fetchDoctors = async () => {
-      try {
-        const response = await axiosInstance.get("/user/me");
-        var hospitalId = response?.data?.hospital?._id;
-        if (hospitalId === undefined) {
-          hospitalId = response?.data?.user?._id
-        }
-        
-        const doctorsResponse = await dispatch(GetDoctorHospitalId(hospitalId));
-        setDoctors(doctorsResponse?.payload || []);
-      } catch (err) {
-        console.error("Failed to load doctors:", err);
-      }
-    };
-
-    fetchDoctors();
+   (async()=>{
+    const res = await dispatch(AuthMe());
+   setactive(res.payload.user.active)
+   })()
   }, []);
-
-  useEffect(() => {
-    (async () => {
-      const res = await dispatch(AuthMe());
-      setactive(res.payload.user.active)
-    })()
-  }, []);
-
+   console.log()
+  // Initial data loading
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -363,7 +337,7 @@ const DoctorDashboard = () => {
             className="bg-white rounded-xl shadow-sm overflow-visible"
           >
             {/* Card Header */}
-            <div className="px-6 py-4 border-b border-gray-200 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 relative">
+            <div className="px-6 py-4 border-b border-gray-200 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 relative"> 
               <div>
                 <div className="flex items-center space-x-2 mr-4">
                   <span className="relative flex h-3 w-3">
@@ -393,7 +367,6 @@ const DoctorDashboard = () => {
               </div>
 
               <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
-                {/* Search Input */}
                 <div className="relative">
                   <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                     <Search className="h-4 w-4 text-gray-400" />
@@ -407,31 +380,7 @@ const DoctorDashboard = () => {
                   />
                 </div>
 
-                {/* Doctor Filter Dropdown */}
-                {
-                  currentUser?.role ==='staff' && (
-                      <div className="relative">
-                  <select
-                    value={filterDoctor}
-                    onChange={(e) => handleDoctorFilterChange(e.target.value)}
-                    className="pl-3 pr-8 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm w-full bg-white appearance-none"
-                  >
-                    <option value="all">All Doctors</option>
-                    {Doctors?.map((doctor) => (
-                      <option key={doctor?._id} value={doctor?._id}>
-                        {doctor?.name}
-                      </option>
-                    ))}
-                  </select>
-                  <div className="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none">
-                    <ChevronRight className="h-4 w-4 text-gray-400 transform rotate-90" />
-                  </div>
-                </div>
-                  )
-                }
-                
-
-                {/* Status Filter Dropdown */}
+                {/* Fixed Filter Dropdown - Responsive for all devices */}
                 <div className="relative z-50" ref={filterRef}>
                   <button
                     onClick={() => setShowFilters(!showFilters)}
@@ -453,8 +402,9 @@ const DoctorDashboard = () => {
                         animate={{ opacity: 1, y: 0, scale: 1 }}
                         exit={{ opacity: 0, y: -10, scale: 0.95 }}
                         className="absolute right-0 mt-2 w-64 bg-white rounded-md shadow-xl z-[100] border border-gray-200"
+                        // Mobile view ke liye fixed positioning hatayi aur normal absolute rakha
                       >
-                        <div className="py-1 max-h-60 overflow-y-auto">
+                        <div className="py-1 max-h-60 overflow-y-auto"> {/* Scroll agar options zyada ho */}
                           {filterOptions.map((option) => (
                             <button
                               key={option.value}
@@ -521,11 +471,6 @@ const DoctorDashboard = () => {
                                     <div className="text-xs text-gray-500 mt-1">
                                       {appointment?.mobile || 'No contact'}
                                     </div>
-                                    {appointment.doctor?.name && (
-                                      <div className="text-xs text-blue-600 font-medium mt-1">
-                                        Dr. {appointment.doctor.name}
-                                      </div>
-                                    )}
                                   </div>
                                 </div>
                                 <div
@@ -575,9 +520,9 @@ const DoctorDashboard = () => {
                                     whileTap={{ scale: 0.98 }}
                                     className="flex-1 px-3 py-2 bg-green-100 text-green-700 rounded-lg text-sm font-medium hover:bg-green-200 transition-colors border border-green-200"
                                   >
-                                    {appointment.status === 'check-in' ? 'Check-in' :
-                                      appointment.status === 'confirmed' ? 'Complete' :
-                                        'Confirm'}
+                                    {appointment.status === 'check-in' ? 'Check-in' : 
+                                     appointment.status === 'confirmed' ? 'Complete' : 
+                                     'Confirm'}
                                   </motion.button>
                                 )}
                               </div>
@@ -596,16 +541,15 @@ const DoctorDashboard = () => {
                             No appointments found
                           </h3>
                           <p className="text-sm text-gray-500 mb-4">
-                            {searchTerm || filterStatus !== 'all' || filterDoctor !== 'all'
+                            {searchTerm || filterStatus !== 'all'
                               ? 'Try adjusting your search or filter criteria'
                               : 'No appointments found for the selected filter'}
                           </p>
-                          {(searchTerm || filterStatus !== 'all' || filterDoctor !== 'all') && (
+                          {(searchTerm || filterStatus !== 'all') && (
                             <button
                               onClick={() => {
                                 setSearchTerm('');
                                 setFilterStatus('all');
-                                setFilterDoctor('all');
                               }}
                               className="px-4 py-2 bg-blue-500 text-white rounded-lg text-sm font-medium hover:bg-blue-600 transition-colors"
                             >
@@ -624,9 +568,6 @@ const DoctorDashboard = () => {
                         <tr>
                           <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                             Patient
-                          </th>
-                          <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Doctor
                           </th>
                           <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                             Time
@@ -673,11 +614,6 @@ const DoctorDashboard = () => {
                                       </div>
                                     </div>
                                   </td>
-                                  <td className="px-6 py-4">
-                                    <div className="text-sm font-medium text-gray-900">
-                                      {appointment.doctor?.name ? `Dr. ${appointment.doctor.name}` : 'Not assigned'}
-                                    </div>
-                                  </td>
                                   <td className="px-6 py-4 whitespace-nowrap">
                                     <div className="text-sm font-medium text-gray-900">{appointment?.slot}</div>
                                     <div className="text-sm text-gray-500">{appointment?.date}</div>
@@ -722,9 +658,9 @@ const DoctorDashboard = () => {
                                           whileTap={{ scale: 0.95 }}
                                           className="px-3 py-1.5 bg-green-100 text-green-700 rounded-lg text-sm font-medium hover:bg-green-200 transition-colors border border-green-200"
                                         >
-                                          {appointment.status === 'check-in' ? 'Check-in' :
-                                            appointment.status === 'confirmed' ? 'Complete' :
-                                              'Confirm'}
+                                          {appointment.status === 'check-in' ? 'Check-in' : 
+                                           appointment.status === 'confirmed' ? 'Complete' : 
+                                           'Confirm'}
                                         </motion.button>
                                       )}
                                     </div>
@@ -738,23 +674,22 @@ const DoctorDashboard = () => {
                               animate={{ opacity: 1 }}
                               exit={{ opacity: 0 }}
                             >
-                              <td colSpan="6" className="px-6 py-12 text-center">
+                              <td colSpan="5" className="px-6 py-12 text-center">
                                 <div className="flex flex-col items-center justify-center">
                                   <FileText className="h-16 w-16 mb-4 text-gray-400" />
                                   <h3 className="text-lg font-medium text-gray-900 mb-2">
                                     No appointments found
                                   </h3>
                                   <p className="text-sm text-gray-500 mb-4">
-                                    {searchTerm || filterStatus !== 'all' || filterDoctor !== 'all'
+                                    {searchTerm || filterStatus !== 'all'
                                       ? 'Try adjusting your search or filter criteria'
                                       : 'No appointments found for the selected filter'}
                                   </p>
-                                  {(searchTerm || filterStatus !== 'all' || filterDoctor !== 'all') && (
+                                  {(searchTerm || filterStatus !== 'all') && (
                                     <button
                                       onClick={() => {
                                         setSearchTerm('');
                                         setFilterStatus('all');
-                                        setFilterDoctor('all');
                                       }}
                                       className="px-4 py-2 bg-blue-500 text-white rounded-lg text-sm font-medium hover:bg-blue-600 transition-colors"
                                     >
@@ -779,4 +714,4 @@ const DoctorDashboard = () => {
   );
 };
 
-export default DoctorDashboard;
+export default StaffDasboard;

@@ -1,111 +1,86 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { 
-  AreaChart, Area, BarChart, Bar, PieChart, Pie, Cell,
-  XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend 
+  PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend 
 } from 'recharts';
-
-// Mock data generator - Replace with actual API calls
-const generateMockData = () => {
-  // Generate 30 days of appointment data
-  const appointmentsOverTime = Array.from({ length: 30 }, (_, i) => {
-    const date = new Date();
-    date.setDate(date.getDate() - (29 - i));
-    const total = Math.floor(Math.random() * 50) + 30;
-    const completed = Math.floor(total * 0.6);
-    const active = Math.floor(total * 0.3);
-    const pending = total - completed - active;
-    
-    return {
-      date: date.toISOString().split('T')[0],
-      total,
-      completed,
-      active,
-      pending,
-    };
-  });
-
-  // Hospital-wise data
-  const hospitals = ['General Hospital', 'City Medical', 'Community Health', 'University Medical'];
-  const appointmentsByHospital = hospitals.map(hospital => ({
-    hospital,
-    completed: Math.floor(Math.random() * 150) + 50,
-    active: Math.floor(Math.random() * 80) + 20,
-    total: Math.floor(Math.random() * 200) + 100,
-  }));
-
-  // Status distribution for pie chart
-  const totalCompleted = appointmentsOverTime.reduce((sum, day) => sum + day.completed, 0);
-  const totalActive = appointmentsOverTime.reduce((sum, day) => sum + day.active, 0);
-  const totalPending = appointmentsOverTime.reduce((sum, day) => sum + day.pending, 0);
-
-  const appointmentStatusData = [
-    { name: 'Completed', value: totalCompleted, color: '#10B981' },
-    { name: 'Active', value: totalActive, color: '#3B82F6' },
-    { name: 'Pending', value: totalPending, color: '#F59E0B' },
-  ];
-
-  return {
-    appointmentsOverTime,
-    appointmentsByHospital,
-    appointmentStatusData,
-    hospitals,
-  };
-};
+import Dashboard from '../../components/Layout/Dashboard';
+import axiosInstance from '../../Helper/axiosInstance';
 
 const AnalyticsDashboard = () => {
+  const [dashboardData, setDashboardData] = useState(null);
+  const [loading, setLoading] = useState(true);
   const [dateRange, setDateRange] = useState({
-    from: new Date(Date.now() - 14 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-    to: new Date().toISOString().split('T')[0]
+    start_date: '',
+    end_date: ''
   });
 
-  // Generate mock data - REPLACE WITH API CALL
-  const mockData = useMemo(() => generateMockData(), []);
-  const { appointmentsOverTime, appointmentsByHospital, appointmentStatusData, hospitals } = mockData;
+  useEffect(() => {
+    fetchDashboardData();
+  }, []);
 
-  // Filter data based on date range
-  const filteredData = useMemo(() => {
-    const filteredAppointments = appointmentsOverTime.filter(apt => 
-      apt.date >= dateRange.from && apt.date <= dateRange.to
-    );
+  const fetchDashboardData = async (startDate = '', endDate = '') => {
+    try {
+      setLoading(true);
+      const params = {};
+      if (startDate) params.start_date = startDate;
+      if (endDate) params.end_date = endDate;
+      
+      const res = await axiosInstance.get('/dashboard', { params });
+      console.log('Dashboard Data:', res.data.data);
+      setDashboardData(res.data.data);
+    } catch (error) {
+      console.error('Error fetching dashboard data:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
-    const filteredHospitalData = appointmentsByHospital.map(hospital => ({
-      ...hospital,
-      completed: Math.floor(hospital.completed * (filteredAppointments.length / appointmentsOverTime.length)),
-      active: Math.floor(hospital.active * (filteredAppointments.length / appointmentsOverTime.length)),
-    }));
+  const handleDateFilter = () => {
+    if (dateRange.start_date && dateRange.end_date) {
+      fetchDashboardData(dateRange.start_date, dateRange.end_date);
+    }
+  };
 
-    const totalCompleted = filteredAppointments.reduce((sum, day) => sum + day.completed, 0);
-    const totalActive = filteredAppointments.reduce((sum, day) => sum + day.active, 0);
-    const totalPending = filteredAppointments.reduce((sum, day) => sum + day.pending, 0);
+  const handleClearFilter = () => {
+    setDateRange({ start_date: '', end_date: '' });
+    fetchDashboardData();
+  };
 
-    const filteredStatusData = [
-      { name: 'Completed', value: totalCompleted, color: '#10B981' },
-      { name: 'Active', value: totalActive, color: '#3B82F6' },
-      { name: 'Pending', value: totalPending, color: '#F59E0B' },
+  // Prepare chart data from actual API response
+  const chartData = useMemo(() => {
+    if (!dashboardData) return null;
+
+    const { total_appointments, today_appointments, completed_appointments, check_in_appointments, confirmed_appointments, total_revenue, revenue_by_status } = dashboardData;
+
+    // Status distribution for pie chart
+    const appointmentStatusData = [
+      { name: 'Completed', value: completed_appointments, color: '#10B981' },
+      { name: 'Check-in', value: check_in_appointments, color: '#3B82F6' },
+      { name: 'Confirmed', value: confirmed_appointments, color: '#F59E0B' },
+    ];
+
+    // Revenue by status for bar chart
+    const revenueData = [
+      { name: 'Check-in', revenue: revenue_by_status.check_in, color: '#3B82F6' },
+      { name: 'Confirmed', revenue: revenue_by_status.confirmed, color: '#F59E0B' },
+      { name: 'Completed', revenue: revenue_by_status.completed, color: '#10B981' },
+    ];
+
+    // Appointment distribution for bar chart
+    const appointmentDistributionData = [
+      { name: 'Total', count: total_appointments, color: '#6366F1' },
+      { name: 'Today', count: today_appointments, color: '#8B5CF6' },
+      { name: 'Completed', count: completed_appointments, color: '#10B981' },
+      // { name: 'Check-in', count: check_in_appointments, color: '#3B82F6' },
+      // { name: 'Confirmed', count: confirmed_appointments, color: '#F59E0B' },
     ];
 
     return {
-      appointmentsOverTime: filteredAppointments,
-      appointmentsByHospital: filteredHospitalData,
-      appointmentStatusData: filteredStatusData,
+      appointmentStatusData,
+      revenueData,
+      appointmentDistributionData,
     };
-  }, [dateRange, appointmentsOverTime, appointmentsByHospital]);
-
-  // Calculate KPIs
-  const kpis = useMemo(() => {
-    const totalAppointments = filteredData.appointmentsOverTime.reduce((sum, day) => sum + day.total, 0);
-    const completedAppointments = filteredData.appointmentsOverTime.reduce((sum, day) => sum + day.completed, 0);
-    const activeAppointments = filteredData.appointmentsOverTime.reduce((sum, day) => sum + day.active, 0);
-    const pendingAppointments = filteredData.appointmentsOverTime.reduce((sum, day) => sum + day.pending, 0);
-
-    return {
-      totalAppointments,
-      completedAppointments,
-      activeAppointments,
-      pendingAppointments,
-    };
-  }, [filteredData]);
+  }, [dashboardData]);
 
   // Animation variants
   const containerVariants = {
@@ -130,163 +105,176 @@ const AnalyticsDashboard = () => {
     },
   };
 
-  // KPI Cards
-  const KPICard = ({ title, value, color, change }) => (
+  // KPI Cards Component
+  const KPICard = ({ title, value, color, prefix = '', suffix = '' }) => (
     <motion.div
       variants={itemVariants}
       className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 hover:shadow-md transition-shadow duration-300"
       whileHover={{ y: -2 }}
     >
       <h3 className="text-gray-600 text-sm font-medium mb-2">{title}</h3>
-      <p className={`text-2xl font-bold text-${color}-600 mb-1`}>{value.toLocaleString()}</p>
-      {change && (
-        <p className={`text-sm text-${color}-500`}>
-          {change > 0 ? '+' : ''}{change}% from last period
-        </p>
-      )}
+      <p className={`text-2xl font-bold text-${color}-600 mb-1`}>
+        {prefix}{typeof value === 'number' ? value.toLocaleString() : value}{suffix}
+      </p>
     </motion.div>
   );
 
-  return (
-    <div className="min-h-screen bg-gray-50 p-4 md:p-6">
-      <motion.div
-        variants={containerVariants}
-        initial="hidden"
-        animate="visible"
-        className="max-w-7xl mx-auto"
-      >
-        {/* Header */}
-        <motion.div variants={itemVariants} className="mb-8">
-          <div className="flex flex-col md:flex-row md:items-center md:justify-between">
-            <div>
-              <h1 className="text-2xl md:text-3xl font-bold text-gray-900">
-                Appointment Analytics
-              </h1>
-              <p className="text-gray-600 mt-2">
-                Track complete and active appointments across your hospitals
-              </p>
-            </div>
-            
-            {/* Date Range Filter */}
-            <div className="mt-4 md:mt-0 flex flex-col sm:flex-row gap-4">
-              <div>
-                <label htmlFor="from-date" className="block text-sm font-medium text-gray-700 mb-1">
-                  From Date
-                </label>
-                <input
-                  type="date"
-                  id="from-date"
-                  value={dateRange.from}
-                  onChange={(e) => setDateRange(prev => ({ ...prev, from: e.target.value }))}
-                  className="block w-full rounded-lg border border-gray-300 bg-white px-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
-                />
-              </div>
-              <div>
-                <label htmlFor="to-date" className="block text-sm font-medium text-gray-700 mb-1">
-                  To Date
-                </label>
-                <input
-                  type="date"
-                  id="to-date"
-                  value={dateRange.to}
-                  onChange={(e) => setDateRange(prev => ({ ...prev, to: e.target.value }))}
-                  className="block w-full rounded-lg border border-gray-300 bg-white px-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
-                />
-              </div>
-            </div>
+  if (loading) {
+    return (
+      <Dashboard>
+        <div className="min-h-screen bg-gray-50 p-6 flex items-center justify-center">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto"></div>
+            <p className="mt-3 text-gray-600">Loading dashboard data...</p>
           </div>
-        </motion.div>
+        </div>
+      </Dashboard>
+    );
+  }
 
-        {/* KPI Cards Grid */}
+  if (!dashboardData || !chartData) {
+    return (
+      <Dashboard>
+        <div className="min-h-screen bg-gray-50 p-6 flex items-center justify-center">
+          <div className="text-center">
+            <p className="text-gray-600">No data available</p>
+            <button 
+              onClick={() => fetchDashboardData()}
+              className="mt-3 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600"
+            >
+              Retry
+            </button>
+          </div>
+        </div>
+      </Dashboard>
+    );
+  }
+
+  return (
+    <Dashboard>
+      <div className="min-h-screen bg-gray-50 p-4 md:p-6">
         <motion.div
           variants={containerVariants}
-          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 mb-8"
+          initial="hidden"
+          animate="visible"
+          className="max-w-7xl mx-auto"
         >
-          <KPICard
-            title="Total Appointments"
-            value={kpis.totalAppointments}
-            change={12}
-            color="blue"
-          />
-          <KPICard
-            title="Completed Appointments"
-            value={kpis.completedAppointments}
-            change={8}
-            color="green"
-          />
-          <KPICard
-            title="Active Appointments"
-            value={kpis.activeAppointments}
-            change={15}
-            color="blue"
-          />
-          <KPICard
-            title="Pending Appointments"
-            value={kpis.pendingAppointments}
-            change={-5}
-            color="orange"
-          />
-        </motion.div>
-
-        {/* Charts Section */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
-          {/* Area Chart - Appointments Over Time */}
-          <motion.div
-            variants={itemVariants}
-            className="lg:col-span-2 bg-white rounded-xl shadow-sm border border-gray-100 p-6"
-          >
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">
-              Appointments Trend ({dateRange.from} to {dateRange.to})
-            </h3>
-            <div className="h-80">
-              <ResponsiveContainer width="100%" height="100%">
-                <AreaChart data={filteredData.appointmentsOverTime}>
-                  <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
-                  <XAxis 
-                    dataKey="date" 
-                    tick={{ fontSize: 12 }}
-                    tickFormatter={(value) => new Date(value).getDate()}
+          {/* Header */}
+          <motion.div variants={itemVariants} className="mb-8">
+            <div className="flex flex-col md:flex-row md:items-center md:justify-between">
+              <div>
+                <h1 className="text-2xl md:text-3xl font-bold text-gray-900">
+                  Analytics Dashboard
+                </h1>
+                <p className="text-gray-600 mt-2">
+                  Track appointments, revenue, and performance metrics
+                </p>
+                {dashboardData.today_date && (
+                  <p className="text-sm text-gray-500 mt-1">
+                    Today's Date: {dashboardData.today_date}
+                  </p>
+                )}
+              </div>
+              
+              {/* Date Range Filter */}
+              <div className="mt-4 md:mt-0 flex flex-col sm:flex-row gap-4">
+                <div>
+                  <label htmlFor="start-date" className="block text-sm font-medium text-gray-700 mb-1">
+                    Start Date
+                  </label>
+                  <input
+                    type="date"
+                    id="start-date"
+                    value={dateRange.start_date}
+                    onChange={(e) => setDateRange(prev => ({ ...prev, start_date: e.target.value }))}
+                    className="block w-full rounded-lg border border-gray-300 bg-white px-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
                   />
-                  <YAxis tick={{ fontSize: 12 }} />
-                  <Tooltip 
-                    formatter={(value) => [value, 'Appointments']}
-                    labelFormatter={(label) => `Date: ${label}`}
+                </div>
+                <div>
+                  <label htmlFor="end-date" className="block text-sm font-medium text-gray-700 mb-1">
+                    End Date
+                  </label>
+                  <input
+                    type="date"
+                    id="end-date"
+                    value={dateRange.end_date}
+                    onChange={(e) => setDateRange(prev => ({ ...prev, end_date: e.target.value }))}
+                    className="block w-full rounded-lg border border-gray-300 bg-white px-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
                   />
-                  <Legend />
-                  <Area 
-                    type="monotone" 
-                    dataKey="completed" 
-                    stackId="1"
-                    stroke="#10B981" 
-                    fill="#10B981"
-                    fillOpacity={0.2}
-                    name="Completed"
-                  />
-                  <Area 
-                    type="monotone" 
-                    dataKey="active" 
-                    stackId="1"
-                    stroke="#3B82F6" 
-                    fill="#3B82F6"
-                    fillOpacity={0.2}
-                    name="Active"
-                  />
-                  <Area 
-                    type="monotone" 
-                    dataKey="pending" 
-                    stackId="1"
-                    stroke="#F59E0B" 
-                    fill="#F59E0B"
-                    fillOpacity={0.2}
-                    name="Pending"
-                  />
-                </AreaChart>
-              </ResponsiveContainer>
+                </div>
+                <div className="flex items-end gap-2">
+                  <button
+                    onClick={handleDateFilter}
+                    disabled={!dateRange.start_date || !dateRange.end_date}
+                    className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 disabled:bg-gray-400 disabled:cursor-not-allowed"
+                  >
+                    Apply Filter
+                  </button>
+                  <button
+                    onClick={handleClearFilter}
+                    className="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600"
+                  >
+                    Clear
+                  </button>
+                </div>
+              </div>
             </div>
           </motion.div>
 
-          {/* Right Side Charts */}
-          <div className="space-y-6">
+          {/* KPI Cards Grid */}
+          <motion.div
+            variants={containerVariants}
+            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 mb-8"
+          >
+            <KPICard
+              title="Total Appointments"
+              value={dashboardData.total_appointments}
+              color="blue"
+            />
+            <KPICard
+              title="Today's Appointments"
+              value={dashboardData.today_appointments}
+              color="green"
+            />
+            <KPICard
+              title="Completed Appointments"
+              value={dashboardData.completed_appointments}
+              color="green"
+            />
+            <KPICard
+              title="Total Revenue"
+              value={dashboardData.total_revenue}
+              prefix="₹"
+              color="purple"
+            />
+          </motion.div>
+
+          {/* Additional KPIs */}
+          <motion.div
+            variants={containerVariants}
+            className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6 mb-8"
+          >
+            {/* <KPICard
+              title="Check-in Appointments"
+              value={dashboardData.check_in_appointments}
+              color="blue"
+            />
+            <KPICard
+              title="Confirmed Appointments"
+              value={dashboardData.confirmed_appointments}
+              color="yellow"
+            /> */}
+            <KPICard
+              title="Completion Rate"
+              value={dashboardData.total_appointments > 0 ? 
+                ((dashboardData.completed_appointments / dashboardData.total_appointments) * 100).toFixed(1) + '%' : '0%'
+              }
+              color="green"
+            />
+          </motion.div>
+
+          {/* Charts Section */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
             {/* Pie Chart - Appointment Status */}
             <motion.div
               variants={itemVariants}
@@ -295,19 +283,20 @@ const AnalyticsDashboard = () => {
               <h3 className="text-lg font-semibold text-gray-900 mb-4">
                 Appointment Status Distribution
               </h3>
-              <div className="h-64">
+              <div className="h-80">
                 <ResponsiveContainer width="100%" height="100%">
                   <PieChart>
                     <Pie
-                      data={filteredData.appointmentStatusData}
+                      data={chartData.appointmentStatusData}
                       cx="50%"
                       cy="50%"
-                      innerRadius={40}
-                      outerRadius={80}
+                      innerRadius={60}
+                      outerRadius={100}
                       paddingAngle={5}
                       dataKey="value"
+                      label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
                     >
-                      {filteredData.appointmentStatusData.map((entry, index) => (
+                      {chartData.appointmentStatusData.map((entry, index) => (
                         <Cell key={`cell-${index}`} fill={entry.color} />
                       ))}
                     </Pie>
@@ -318,77 +307,113 @@ const AnalyticsDashboard = () => {
               </div>
             </motion.div>
 
-            {/* Horizontal Bar Chart - Hospital Wise */}
-            <motion.div
+            {/* Bar Chart - Revenue by Status */}
+            {/* <motion.div
               variants={itemVariants}
               className="bg-white rounded-xl shadow-sm border border-gray-100 p-6"
             >
               <h3 className="text-lg font-semibold text-gray-900 mb-4">
-                Appointments by Hospital
+                Revenue by Appointment Status
               </h3>
-              <div className="h-64">
+              <div className="h-80">
                 <ResponsiveContainer width="100%" height="100%">
-                  <BarChart
-                    data={filteredData.appointmentsByHospital}
-                    layout="vertical"
-                    margin={{ left: 100 }}
-                  >
+                  <BarChart data={chartData.revenueData}>
                     <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
-                    <XAxis type="number" />
-                    <YAxis 
-                      type="category" 
-                      dataKey="hospital" 
-                      width={80}
-                      tick={{ fontSize: 12 }}
-                    />
-                    <Tooltip />
+                    <XAxis dataKey="name" />
+                    <YAxis />
+                    <Tooltip formatter={(value) => [`₹${value}`, 'Revenue']} />
                     <Legend />
                     <Bar 
-                      dataKey="completed" 
-                      name="Completed"
-                      fill="#10B981"
-                      radius={[0, 4, 4, 0]}
-                    />
-                    <Bar 
-                      dataKey="active" 
-                      name="Active"
-                      fill="#3B82F6"
-                      radius={[0, 4, 4, 0]}
-                    />
+                      dataKey="revenue" 
+                      name="Revenue"
+                      fill="#8884d8"
+                      radius={[4, 4, 0, 0]}
+                    >
+                      {chartData.revenueData.map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={entry.color} />
+                      ))}
+                    </Bar>
                   </BarChart>
                 </ResponsiveContainer>
               </div>
-            </motion.div>
+            </motion.div> */}
           </div>
-        </div>
 
-        {/* Summary Section */}
-        <motion.div
-          variants={itemVariants}
-          className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 mb-8"
-        >
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">
-            Appointment Summary
-          </h3>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="text-center p-4 bg-green-50 rounded-lg">
-              <p className="text-2xl font-bold text-green-600">{kpis.completedAppointments}</p>
-              <p className="text-green-700">Completed Appointments</p>
+          {/* Appointment Distribution Bar Chart */}
+          <motion.div
+            variants={itemVariants}
+            className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 mb-8"
+          >
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">
+              Appointment Distribution
+            </h3>
+            <div className="h-80">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={chartData.appointmentDistributionData}>
+                  <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
+                  <XAxis dataKey="name" />
+                  <YAxis />
+                  <Tooltip formatter={(value) => [`${value}`, 'Appointments']} />
+                  <Legend />
+                  <Bar 
+                    dataKey="count" 
+                    name="Appointments"
+                    radius={[4, 4, 0, 0]}
+                  >
+                    {chartData.appointmentDistributionData.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={entry.color} />
+                    ))}
+                  </Bar>
+                </BarChart>
+              </ResponsiveContainer>
             </div>
-            <div className="text-center p-4 bg-blue-50 rounded-lg">
-              <p className="text-2xl font-bold text-blue-600">{kpis.activeAppointments}</p>
-              <p className="text-blue-700">Active Appointments</p>
+          </motion.div>
+
+          {/* Revenue Summary */}
+          {/* <motion.div
+            variants={itemVariants}
+            className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 mb-8"
+          >
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">
+              Revenue Summary by Status
+            </h3>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="text-center p-4 bg-blue-50 rounded-lg">
+                <p className="text-2xl font-bold text-blue-600">
+                  ₹{dashboardData.revenue_by_status.check_in}
+                </p>
+                <p className="text-blue-700">Check-in Revenue</p>
+              </div>
+              <div className="text-center p-4 bg-yellow-50 rounded-lg">
+                <p className="text-2xl font-bold text-yellow-600">
+                  ₹{dashboardData.revenue_by_status.confirmed}
+                </p>
+                <p className="text-yellow-700">Confirmed Revenue</p>
+              </div>
+              <div className="text-center p-4 bg-green-50 rounded-lg">
+                <p className="text-2xl font-bold text-green-600">
+                  ₹{dashboardData.revenue_by_status.completed}
+                </p>
+                <p className="text-green-700">Completed Revenue</p>
+              </div>
             </div>
-            <div className="text-center p-4 bg-orange-50 rounded-lg">
-              <p className="text-2xl font-bold text-orange-600">
-                {((kpis.completedAppointments / kpis.totalAppointments) * 100).toFixed(1)}%
-              </p>
-              <p className="text-orange-700">Completion Rate</p>
+          </motion.div> */}
+
+          {/* Current Filters */}
+          {/* <motion.div
+            variants={itemVariants}
+            className="bg-gray-100 rounded-lg p-4 mb-8"
+          >
+            <h4 className="text-sm font-medium text-gray-700 mb-2">Current Filters</h4>
+            <div className="flex flex-wrap gap-4 text-sm text-gray-600">
+              <span>Start Date: <strong>{dateRange.start_date || 'All time'}</strong></span>
+              <span>End Date: <strong>{dateRange.end_date || 'All time'}</strong></span>
+              <span>Today's Date: <strong>{dashboardData.today_date}</strong></span>
             </div>
-          </div>
+          </motion.div> */}
         </motion.div>
-      </motion.div>
-    </div>
+      </div>
+    </Dashboard>
   );
 };
 

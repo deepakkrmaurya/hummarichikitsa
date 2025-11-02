@@ -100,20 +100,14 @@ function App() {
               <Route path="/confirmation/:appointmentId" element={<ConfirmationPage />} />
               <Route path="/appointment_details_page/:id" element={<AppointmentDetailsPage />} />
             </Route>
-
-              <Route path="/analytics/dashboard" element={<AnalyticsDashboard />} />
-
-
+            <Route path="/analytics/dashboard" element={<AnalyticsDashboard />} />
             <Route element={<RequireAuth allowedRoles={["doctor", 'hospital', 'admin', 'staff']} />}>
-
               <Route path='/doctor/dashboard' element={<DoctorDashboard />} />
               <Route path='/patient' element={<Patients />} />
               <Route path='/book/appointment' element={<BookAppointment />} />
               <Route path='/appointment/:id' element={<AppointmentDetails />} />
               <Route path='/hospital/setting' element={<Setting />} />
-
             </Route>
-
             <Route element={<RequireAuth allowedRoles={["admin"]} />}>
 
               <Route path='/hospital/list' element={<HospitalList />} />

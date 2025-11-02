@@ -103,6 +103,19 @@ const Dashboard = ({ children }) => {
               <ul className="space-y-1 sm:space-y-2">
                 <li>
                   <NavLink
+                    to='/analytics/dashboard'
+                    className={({ isActive }) =>
+                      `flex items-center p-2 sm:p-3 rounded-lg transition text-sm sm:text-base ${isActive ? "bg-blue-50 text-blue-600" : "text-gray-600 hover:bg-gray-100"
+                      }`
+                    }
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
+                    <Calendar className="h-4 w-4 sm:h-5 sm:w-5 mr-2 sm:mr-3" />
+                    <span className="font-medium">Dashboard</span>
+                  </NavLink>
+                </li>
+                <li>
+                  <NavLink
                     to='/doctor/dashboard'
                     className={({ isActive }) =>
                       `flex items-center p-2 sm:p-3 rounded-lg transition text-sm sm:text-base ${isActive ? "bg-blue-50 text-blue-600" : "text-gray-600 hover:bg-gray-100"
@@ -114,6 +127,8 @@ const Dashboard = ({ children }) => {
                     <span className="font-medium">Appointments</span>
                   </NavLink>
                 </li>
+
+                
 
                 {currentRole !== 'admin' && (
                   <li>
