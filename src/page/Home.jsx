@@ -106,8 +106,7 @@ const Home = () => {
   const [appointmentsLoading, setAppointmentsLoading] = useState(true);
   const appoint = useSelector((state) => state.appointment?.appointment);
   const [appointments, setAppointments] = useState([]);
-  const doct = useSelector((state) => state?.doctors?.doctors);
-  // console.log(doct)
+  const doct = useSelector((state) => state?.doctors?.doctors.doctors);
   const [doctors, setdoctors] = useState([])
   useEffect(() => {
     setdoctors(doct)
@@ -122,7 +121,7 @@ const Home = () => {
       // console.log("👉 Live Update:", data);
 
       setAppointments((prev) => {
-        const exists = prev.some((a) => a._id === data._id);
+        const exists = prev?.some((a) => a._id === data._id);
         if (exists) {
           return prev.map((a) => (a._id === data._id ? data : a));
         }

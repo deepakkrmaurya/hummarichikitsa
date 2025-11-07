@@ -17,7 +17,7 @@ const DoctorListPage = () => {
 
   // Redux state
   const hospitals = useSelector((state) => state.hospitals.hospitals);
-  const { doctors, loading: doctorsLoading } = useSelector((state) => state.doctors);
+  const { doctors, loading: doctorsLoading } = useSelector((state) => state.doctors.doctors);
   const { loading: hospitalsLoading } = useSelector((state) => state.hospitals);
   // console.log(doctors)
   // Local state

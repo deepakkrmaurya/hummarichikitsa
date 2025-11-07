@@ -281,8 +281,7 @@ import hospital_img from '../../src/assets/hospital_image.png';
 const HospitalListPage = () => {
   const navigate = useNavigate();
   const hospitals = useSelector((state) => state.hospitals.hospitals);
-  const { doctors } = useSelector((state) => state?.doctors);
-
+  const { doctors } = useSelector((state) => state?.doctors.doctors);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCity, setSelectedCity] = useState('');
   const [selectedSpecialty, setSelectedSpecialty] = useState('');
@@ -436,7 +435,7 @@ const HospitalListPage = () => {
               </>
             ) : filteredHospitals.length > 0 ? (
               filteredHospitals.map((hospital) => {
-                const doctorCount = doctors.filter(d => d?.hospitalId?._id === hospital?._id).length;
+                const doctorCount = doctors?.filter(d => d?.hospitalId?._id === hospital?._id).length;
 
                 return (
                   <div

@@ -46,10 +46,12 @@ function BookAppointment() {
         if (hospitalId === undefined) {
           hospitalId = response?.data?.user?._id
         }
+        console.log(hospitalId)
         setHospitalId(hospitalId);
 
         const doctorsResponse = await dispatch(GetDoctorHospitalId(hospitalId));
-        setDoctors(doctorsResponse?.payload || []);
+        setDoctors(doctorsResponse?.payload?.doctors || []);
+        console.log(doctorsResponse.payload)
       } catch (err) {
         setErrors(prev => ({ ...prev, doctors: 'Failed to load doctors' }));
       } finally {
@@ -287,7 +289,7 @@ function BookAppointment() {
                     disabled={loading.doctors}
                   >
                     <option value="">Select a Doctor</option>
-                    {doctors.map(doctor => (
+                    {doctors?.map(doctor => (
                       <option key={doctor._id} value={doctor._id}>
                         {doctor.name} ({doctor.specialty})
                       </option>

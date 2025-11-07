@@ -5,6 +5,7 @@ import Dashboard from '../../components/Layout/Dashboard';
 import avatar from '../../../src/assets/logo-def.png';
 import toast from 'react-hot-toast';
 import { ChangePassword } from '../../Redux/doctorSlice';
+import Slots from './Slots';
 const DoctorSetting = () => {
     const dispatch = useDispatch()
     const [currentPassword, setCurrentPassword] = useState("");
@@ -159,7 +160,7 @@ const DoctorSetting = () => {
     return (
         <Dashboard>
             <div className="min-h-screen bg-slate-50 px-4 py-6">
-                <div className="max-w-4xl mx-auto">
+                <div className=" mx-auto">
                     {/* Header */}
                     <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6 mb-6">
                         <div className="flex flex-col md:flex-row md:items-center justify-between">
@@ -408,6 +409,8 @@ const DoctorSetting = () => {
                             </div>
                         </div>
                     </div>
+
+                    <Slots/>
 
                     {/* Statistics Card */}
                     <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6 mb-6">

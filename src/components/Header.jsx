@@ -65,7 +65,7 @@ const Header = () => {
                 <div className="flex items-center justify-between">
                     <Link to="/" className="flex items-center">
                         <Calendar className="h-8 w-8 text-blue-600" />
-                        <span className="ml-2 text-xl font-semibold text-gray-800">MediBook</span>
+                        <span className="ml-2 text-xl font-semibold text-gray-800">hummari chikitsa</span>
                     </Link>
 
                     {/* Desktop Navigation */}

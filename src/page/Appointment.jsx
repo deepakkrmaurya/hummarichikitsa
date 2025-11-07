@@ -13,7 +13,8 @@ function Appointment() {
     const hospital = useSelector((state) => state.hospitals.hospitals);
     const appoint = useSelector((state) => state.appointment?.appointment);
     const dispatch = useDispatch();
-    const doct = useSelector((state) => state?.doctors?.doctors);
+    const doct = useSelector((state) => state?.doctors?.doctors.doctors);
+
     const isLoading = useSelector((state) => state.appointment?.loading);
     const [activeTab, setActiveTab] = useState('active');
     const [doctors, setdoctors] = useState([])
@@ -50,16 +51,16 @@ function Appointment() {
             });
         })
 
-         socket.on("doctoractive", (data) => {
-              setdoctors((prev) => {
+        socket.on("doctoractive", (data) => {
+            setdoctors((prev) => {
                 const exists = prev.some((a) => a._id === data._id);
                 console.log(exists)
                 if (exists) {
-                  return prev.map((a) => (a._id === data._id ? data : a));
+                    return prev.map((a) => (a._id === data._id ? data : a));
                 }
                 return [...prev, data];
-              });
-            })
+            });
+        })
 
         return () => {
             socket.off("appointmentUpdate");
@@ -208,7 +209,7 @@ function Appointment() {
 
                             let finalStatus;
                             const doctor = doctors?.find(d => d._id === appointment?.doctorId?._id);
-
+                            const availability = appointment.doctorId.availability.filter((d) => d.date == appointment.date)
                             const hospitals = hospital.find(h => h._id === appointment?.hospitalId);
                             //   alert(appointment.status)
                             if (appointment.status === "completed") {
@@ -231,7 +232,7 @@ function Appointment() {
                                     <div className="p-6">
 
                                         {/* ✅ Live Status Section (Top) */}
-                                        {finalStatus !== 'Completed' && doctor.active && (
+                                        {finalStatus !== 'Completed' && doctor.active ? (
                                             <div className="bg-gradient-to-r from-green-50 to-teal-50 rounded-xl p-4 mb-6 border border-green-100 shadow-sm">
                                                 <div className="flex items-center justify-between">
                                                     <div className="flex items-center space-x-3">
@@ -248,10 +249,14 @@ function Appointment() {
                                                     </p>
                                                 </div>
                                             </div>
+                                        ) : (
+                                            <p className="text-center text-gray-500 bg-gray-50 border border-gray-200 rounded-lg py-4 px-6 shadow-sm">
+                                                The doctor currently has no patients to view.
+                                            </p>
                                         )}
 
                                         {/* ✅ Header Section */}
-                                        <div className="flex items-start justify-between mb-6">
+                                        <div className="flex items-start  pt-1 justify-between mb-6">
                                             <div className="flex items-center space-x-4">
                                                 <div className="relative">
                                                     <img
@@ -280,10 +285,10 @@ function Appointment() {
 
                                             <span
                                                 className={`px-3 py-1.5 text-xs font-semibold rounded-full ${finalStatus === 'Active'
-                                                        ? 'bg-green-100 text-green-700'
-                                                        : finalStatus === 'Completed'
-                                                            ? 'bg-blue-100 text-blue-700'
-                                                            : 'bg-gray-100 text-gray-700'
+                                                    ? 'bg-green-100 text-green-700'
+                                                    : finalStatus === 'Completed'
+                                                        ? 'bg-blue-100 text-blue-700'
+                                                        : 'bg-gray-100 text-gray-700'
                                                     }`}
                                             >
                                                 {finalStatus}
@@ -299,6 +304,7 @@ function Appointment() {
                                                 <div>
                                                     <p className="text-xs text-gray-500 font-medium">Appointment Date</p>
                                                     <p className="font-semibold text-gray-900">{formatDate(appointment.date)}</p>
+                                                    <p className="font-semibold text-gray-900">{availability[0]?.display[0]}</p>
                                                 </div>
                                             </div>
 
@@ -331,7 +337,7 @@ function Appointment() {
                                         <div className="flex justify-center">
                                             <Link
                                                 to={`/appointment_details_page/${appointment?._id}`}
-                                                className="w-full bg-[#009689] text-white text-center py-3 px-4 rounded-xl font-semibold transition-all duration-300 shadow-md hover:shadow-lg hover:scale-[1.02]">  
+                                                className="w-full bg-[#009689] text-white text-center py-3 px-4 rounded-xl font-semibold transition-all duration-300 shadow-md hover:shadow-lg hover:scale-[1.02]">
                                                 View Full Details
                                             </Link>
                                         </div>

@@ -44,7 +44,7 @@ const DoctorDashboard = () => {
 
   // Filter appointments based on search, filter status, and doctor
   const filteredAppointments = appointments?.filter(appointment => {
-    console.log("filter",appointment.doctorId._id)
+    
     const matchesSearch =
       appointment?.token?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       appointment._id.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -114,7 +114,7 @@ const DoctorDashboard = () => {
   // Socket.io event handlers
   useEffect(() => {
     const handleAppointmentUpdate = (data) => {
-      console.log("🟢 Socket appointmentUpdate received:", data);
+      console.log("Socket appointmentUpdate received:", data);
       setAppointments(prev => {
         const exists = prev.some(a => a._id === data._id);
         if (exists) {
@@ -125,7 +125,6 @@ const DoctorDashboard = () => {
     };
 
     const handleAppointmentCreate = (data) => {
-      console.log("🟢 Socket createAppointment received:", data);
       setAppointments(prev => {
         const exists = prev.some(a => a._id === data._id);
         if (exists) {
@@ -145,8 +144,9 @@ const DoctorDashboard = () => {
   }, []);
 
   const ActiveDoctor = async () => {
-    const res = await axiosInstance.put(`/doctor/${currentUser?.data?._id}/active/doctor`)
-    setactive(res?.data?.getDoctor?.active)
+   
+    const res = await axiosInstance.put(`/doctor/${currentUser?._id}/active/doctor`)
+    setactive(res?.data.doctor.active)
   }
 
   useEffect(() => {
@@ -154,12 +154,14 @@ const DoctorDashboard = () => {
       try {
         const response = await axiosInstance.get("/user/me");
         var hospitalId = response?.data?.hospital?._id;
+        console.log(hospitalId)
         if (hospitalId === undefined) {
           hospitalId = response?.data?.user?._id
         }
         
         const doctorsResponse = await dispatch(GetDoctorHospitalId(hospitalId));
         setDoctors(doctorsResponse?.payload || []);
+        
       } catch (err) {
         console.error("Failed to load doctors:", err);
       }
@@ -179,6 +181,7 @@ const DoctorDashboard = () => {
     const fetchData = async () => {
       try {
         await axiosInstance.patch('/appointment/hospital/patient');
+
         await getAppointment();
         await dispatch(getAllAppointment());
         await dispatch(getAllHospital());
@@ -366,16 +369,13 @@ const DoctorDashboard = () => {
             <div className="px-6 py-4 border-b border-gray-200 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 relative">
               <div>
                 <div className="flex items-center space-x-2 mr-4">
-                  <span className="relative flex h-3 w-3">
-                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#009689] opacity-75"></span>
-                    <span className="relative inline-flex rounded-full h-3 w-3 bg-[#009689]"></span>
-                  </span>
+                 
                   <span className="font-semibold text-gray-700">Today's Appointments</span>
                   {currentUser?.role === 'doctor' && (
                     <button
                       onClick={ActiveDoctor}
                       className={`relative cursor-pointer w-20 h-8 rounded-full transition-all duration-300 flex items-center 
-                        ${active ? "bg-gray-400" : "bg-gradient-to-r from-emerald-500 to-teal-600"}`}
+                        ${active ? "bg-gradient-to-r from-red-500 to-red-600" : "bg-gray-400"}`}
                     >
                       <span
                         className={`absolute left-1 w-6 h-6 bg-white rounded-full shadow-md transform transition-transform duration-300 
@@ -625,11 +625,9 @@ const DoctorDashboard = () => {
                           <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                             Patient
                           </th>
+                          
                           <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Doctor
-                          </th>
-                          <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Time
+                            Date
                           </th>
                           <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                             Token
@@ -673,11 +671,7 @@ const DoctorDashboard = () => {
                                       </div>
                                     </div>
                                   </td>
-                                  <td className="px-6 py-4">
-                                    <div className="text-sm font-medium text-gray-900">
-                                      {appointment.doctor?.name ? `Dr. ${appointment.doctor.name}` : 'Not assigned'}
-                                    </div>
-                                  </td>
+                                  
                                   <td className="px-6 py-4 whitespace-nowrap">
                                     <div className="text-sm font-medium text-gray-900">{appointment?.slot}</div>
                                     <div className="text-sm text-gray-500">{appointment?.date}</div>
