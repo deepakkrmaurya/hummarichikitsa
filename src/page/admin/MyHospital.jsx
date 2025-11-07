@@ -73,6 +73,7 @@ const MyHospital = () => {
             try {
                 const response = await axiosInstance.get("/user/me");
                 sethospital(response.data.user);
+                
             } catch (error) {
                 console.error("Error fetching data:", error);
             }
@@ -109,7 +110,7 @@ const MyHospital = () => {
             async () => {
                 getstaff()
                 const res = axiosInstance.get(`/doctor/?hospitalId=${hospital?._id}`)
-                const doc = (await res).data
+                const doc = (await res).data.doctors
                 setDoctor(doc)
 
             }

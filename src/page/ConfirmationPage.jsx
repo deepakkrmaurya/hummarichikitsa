@@ -432,10 +432,10 @@ const ConfirmationPage = () => {
               View All Appointments
             </button>
             <button
-              onClick={() => navigate(`/doctors/${doctor?._id}`)}
+              onClick={() => navigate(`/hospitals`)}
               className="py-3 px-6 bg-white border border-teal-300 text-teal-700 rounded-lg hover:bg-teal-50 transition flex-1 text-center shadow-sm"
             >
-              Book Follow-up
+              book another appointment
             </button>
           </div>
         </div>

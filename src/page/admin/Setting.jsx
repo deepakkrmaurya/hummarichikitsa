@@ -20,8 +20,9 @@ const Setting = () => {
       try {
         const response = await axiosInstance.get("/user/me");
         const res = await dispatch(GetDoctorHospitalId(response.data.user?._id))
-        setHospitalInfo(response.data.user)
-        setDoctors(res?.payload);
+        setHospitalInfo(response?.data?.user)
+        console.log("doctor",res.payload.doctors)
+        setDoctors(res.payload.doctors);
       } catch (error) {
         console.error("Error fetching data:", error);
       }
@@ -146,9 +147,9 @@ const Setting = () => {
   };
 
   // Get doctors by service
-  const getDoctorsByService = (serviceId) => {
-    return doctors.filter(doctor => doctor.serviceId === serviceId);
-  };
+  // const getDoctorsByService = (serviceId) => {
+  //   return doctors.filter(doctor => doctor.serviceId === serviceId);
+  // };
 
   // Filter doctors based on search term
   const filteredDoctors = doctors?.filter(doctor =>

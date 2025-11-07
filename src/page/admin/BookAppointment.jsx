@@ -7,11 +7,12 @@ import axiosInstance from '../../Helper/axiosInstance';
 
 function BookAppointment() {
   // Date handling
+  
   const today = new Date().toISOString().split('T')[0];
   const tomorrow = new Date();
   tomorrow.setDate(tomorrow.getDate() + 1);
   const tomorrowFormatted = tomorrow.toISOString().split('T')[0];
-
+   const [selectDoctor,setDoctor]=useState({})
   // State management
   const [formData, setFormData] = useState({
     patient: '',
@@ -51,7 +52,7 @@ function BookAppointment() {
 
         const doctorsResponse = await dispatch(GetDoctorHospitalId(hospitalId));
         setDoctors(doctorsResponse?.payload?.doctors || []);
-        console.log(doctorsResponse.payload)
+       
       } catch (err) {
         setErrors(prev => ({ ...prev, doctors: 'Failed to load doctors' }));
       } finally {
@@ -69,13 +70,21 @@ function BookAppointment() {
       ...prev,
       [name]: value
     }));
-
+    if(name==='doctorId'){
+      const doc = doctors.filter((d)=>d._id===value)
+      //  console.log(doc[0].consultationFee)
+       setFormData({
+        ...formData,
+        booking_amount:doc[0].consultationFee
+       })
+    }
+    
     // Clear error when field is edited
     if (errors[name]) {
       setErrors(prev => ({ ...prev, [name]: '' }));
     }
   };
-
+  console.log(formData)
   // Form validation
   const validateForm = () => {
     const newErrors = {};
@@ -364,6 +373,7 @@ function BookAppointment() {
                       <input
                         type="text"
                         name="booking_amount"
+                        disabled={formData.booking_amount ? true : false}
                         value={formData.booking_amount}
                         placeholder='0'
                         onChange={(e) => {
