@@ -21,7 +21,7 @@ export const RegisterDoctor = createAsyncThunk('/register/doctor', async (data) 
     })
     return (await response)?.data
   } catch (error) {
-    console.log(error?.response?.data?.message)
+    
     toast.error(error?.response?.data?.message)
   }
 })
@@ -38,7 +38,7 @@ export const RegisterDoctorUpdate = createAsyncThunk('/register/doctor/update', 
     })
     return (await response)?.data
   } catch (error) {
-    console.log(error?.response)
+   
     toast.error(error?.response?.data?.message)
   }
 })

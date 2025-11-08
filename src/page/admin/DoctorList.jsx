@@ -49,7 +49,7 @@ const DoctorList = () => {
   //   alert(hospitalId)
   // console.log(doctors)
   const doctor = doctors.filter((d) => d.hospitalId?._id == hospitalId);
-  console.log(doctor)
+  
   const dispatch = useDispatch();
   useEffect(() => {
     (

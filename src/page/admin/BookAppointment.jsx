@@ -4,25 +4,15 @@ import { GetDoctorHospitalId } from '../../Redux/doctorSlice';
 import { AppointmentCreate } from '../../Redux/appointment';
 import Dashboard from '../../components/Layout/Dashboard';
 import axiosInstance from '../../Helper/axiosInstance';
-
+import { jwtDecode } from "jwt-decode";
 function BookAppointment() {
   // Date handling
-  
+
   const today = new Date().toISOString().split('T')[0];
   const tomorrow = new Date();
   tomorrow.setDate(tomorrow.getDate() + 1);
   const tomorrowFormatted = tomorrow.toISOString().split('T')[0];
-   const [selectDoctor,setDoctor]=useState({})
-  // State management
-  const [formData, setFormData] = useState({
-    patient: '',
-    mobile: '',
-    dob: '',
-    doctorId: '',
-    booking_amount: '',
-    paymentStatus: 'Cash'
-  });
-
+  const [selectDoctor, setDoctor] = useState({})
   const [selectedDate, setSelectedDate] = useState('');
   const [hospitalId, setHospitalId] = useState(null);
   const [doctors, setDoctors] = useState([]);
@@ -35,6 +25,20 @@ function BookAppointment() {
   const [success, setSuccess] = useState('');
 
   const dispatch = useDispatch();
+  // State management
+  const decoded = jwtDecode(localStorage.getItem('token'));
+  const [formData, setFormData] = useState({
+    patient: '',
+    mobile: '',
+    dob: '',
+    doctorId: '',
+    booking_amount: '',
+    paymentStatus: 'Cash'
+  });
+
+
+
+
 
   // Fetch doctors when component mounts
   useEffect(() => {
@@ -47,12 +51,20 @@ function BookAppointment() {
         if (hospitalId === undefined) {
           hospitalId = response?.data?.user?._id
         }
-        console.log(hospitalId)
+        
         setHospitalId(hospitalId);
 
         const doctorsResponse = await dispatch(GetDoctorHospitalId(hospitalId));
         setDoctors(doctorsResponse?.payload?.doctors || []);
-       
+        if (decoded.role === 'doctor') {
+          const doc = doctorsResponse?.payload?.doctors.filter((e) => decoded.id === e._id)
+          setFormData({
+            ...formData,
+            booking_amount: doc[0].consultationFee,
+            doctorId: decoded.id
+          })
+        }
+
       } catch (err) {
         setErrors(prev => ({ ...prev, doctors: 'Failed to load doctors' }));
       } finally {
@@ -70,22 +82,21 @@ function BookAppointment() {
       ...prev,
       [name]: value
     }));
-    if(name==='doctorId'){
-      const doc = doctors.filter((d)=>d._id===value)
-      //  console.log(doc[0].consultationFee)
-       setFormData({
-        ...formData,
-        booking_amount:doc[0].consultationFee
-       })
-    }
+
+    const doc = doctors.filter((d) => d._id === value)
     
+    setFormData({
+      ...formData,
+      booking_amount: doc[0].consultationFee,
+    })
+
+
     // Clear error when field is edited
     if (errors[name]) {
       setErrors(prev => ({ ...prev, [name]: '' }));
     }
   };
-  console.log(formData)
-  // Form validation
+
   const validateForm = () => {
     const newErrors = {};
 
@@ -290,20 +301,56 @@ function BookAppointment() {
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Doctor *</label>
-                  <select
+                  {/* <select
                     name="doctorId"
                     value={formData.doctorId}
                     onChange={handleChange}
                     className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-1 text-sm appearance-none ${errors.doctorId ? 'border-red-300 focus:ring-red-500' : 'border-gray-300 focus:ring-blue-500'}`}
-                    disabled={loading.doctors}
+                  // disabled={decoded.role==='doctor'?true : false}
                   >
                     <option value="">Select a Doctor</option>
                     {doctors?.map(doctor => (
-                      <option key={doctor._id} value={doctor._id}>
+                      <option key={doctor._id} value={doctor._id}
+                        selected={decoded.role === 'doctor' && decoded._id === doctor._id ? true : false}
+                      >
                         {doctor.name} ({doctor.specialty})
                       </option>
                     ))}
+                    
+                  </select> */}
+                  <select
+                    name="doctorId"
+                    value={decoded.role === 'doctor' ? decoded._id : formData.doctorId}
+                    onChange={handleChange}
+                    className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-1 text-sm appearance-none ${errors.doctorId
+                      ? 'border-red-300 focus:ring-red-500'
+                      : 'border-gray-300 focus:ring-blue-500'
+                      }`}
+                  // disabled={decoded.role === 'doctor'}
+                  >
+                    {decoded?.role === 'doctor' ? (
+
+                      <>
+                        {doctors?.filter((e) => decoded?.id === e?._id).map((doctor) => (
+                          <option key={doctor._id} value={doctor._id}>
+                            {doctor.name} ({doctor.specialty})
+                          </option>
+                        ))}
+                      </>
+                    ) : (
+
+                      <>
+                        <option value="">Select a Doctor</option>
+                        {doctors?.map((doctor) => (
+                          <option key={doctor._id} value={doctor._id}>
+                            {doctor.name} ({doctor.specialty})
+                          </option>
+                        ))}
+                      </>
+                    )}
+
                   </select>
+
                   {errors.doctorId && <p className="mt-1 text-xs text-red-600">{errors.doctorId}</p>}
                 </div>
 
@@ -362,7 +409,7 @@ function BookAppointment() {
                   </svg>
                   Payment Information
                 </h3>
-                
+
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">Booking Amount *</label>

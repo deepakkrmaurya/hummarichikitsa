@@ -127,7 +127,7 @@ const AppointmentsSection = ({ isLoggedIn, currentUser, appointments, doctors, h
                     statusColor = "bg-[#009689] text-white";
                   }
                 }
-                //  card section 
+              
                 return (
                   <>
                     <div key={appointment._id} className="bg-white rounded-2xl shadow-lg overflow-hidden border border-gray-100 transition-all duration-300 hover:shadow-xl hover:-translate-y-1">

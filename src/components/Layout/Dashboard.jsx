@@ -53,9 +53,7 @@ const Dashboard = ({ children }) => {
 
   // Get role from multiple possible sources
   const currentRole = userRole || userData.role || data?.user?.role || role || '';
-  // console.log("Current role:", currentRole);
-  // console.log("Redux data:", data);
-  // console.log("User data:", userData);
+  
 
   return (
     <div className="min-h-screen flex flex-col lg:flex-row bg-gray-50">

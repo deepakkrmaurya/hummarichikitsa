@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useCallback, useRef } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, } from 'react-router-dom';
 import { Calendar, Clock, User, FileText, Search, CheckCircle, XCircle, ChevronRight, Filter, MoreVertical } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { AppointmentConferm, getAllAppointment, todayAppointment } from '../../Redux/appointment';
@@ -44,15 +44,15 @@ const DoctorDashboard = () => {
 
   // Filter appointments based on search, filter status, and doctor
   const filteredAppointments = appointments?.filter(appointment => {
-    
+
     const matchesSearch =
       appointment?.token?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       appointment._id.toLowerCase().includes(searchTerm.toLowerCase()) ||
       appointment.patient?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       appointment?.mobile?.toLowerCase().includes(searchTerm.toLowerCase());
-      
+
     const matchesFilter = filterStatus === 'all' || appointment.status === filterStatus;
-    
+
     const matchesDoctor = filterDoctor === 'all' || appointment.doctorId._id === filterDoctor;
 
     return matchesSearch && matchesFilter && matchesDoctor;
@@ -114,7 +114,7 @@ const DoctorDashboard = () => {
   // Socket.io event handlers
   useEffect(() => {
     const handleAppointmentUpdate = (data) => {
-      console.log("Socket appointmentUpdate received:", data);
+      
       setAppointments(prev => {
         const exists = prev.some(a => a._id === data._id);
         if (exists) {
@@ -144,7 +144,7 @@ const DoctorDashboard = () => {
   }, []);
 
   const ActiveDoctor = async () => {
-   
+
     const res = await axiosInstance.put(`/doctor/${currentUser?._id}/active/doctor`)
     setactive(res?.data.doctor.active)
   }
@@ -154,14 +154,15 @@ const DoctorDashboard = () => {
       try {
         const response = await axiosInstance.get("/user/me");
         var hospitalId = response?.data?.hospital?._id;
-        console.log(hospitalId)
+        
         if (hospitalId === undefined) {
           hospitalId = response?.data?.user?._id
         }
-        
+
         const doctorsResponse = await dispatch(GetDoctorHospitalId(hospitalId));
-        setDoctors(doctorsResponse?.payload || []);
-        
+        // console.log(doctorsResponse.payload.doctors)
+        setDoctors(doctorsResponse.payload.doctors || []);
+
       } catch (err) {
         console.error("Failed to load doctors:", err);
       }
@@ -317,13 +318,31 @@ const DoctorDashboard = () => {
       <div className="min-h-screen bg-gray-50">
         <div className="mx-auto px-4 sm:px-6 lg:px-8 py-8">
           {/* Header */}
-          <div className="mb-8">
-            <h1 className="text-2xl font-bold text-gray-900">Doctor Dashboard</h1>
-            <p className="text-gray-600 mt-2">Manage your appointments and patient schedule</p>
+          <div className="mb-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            {/* Left Section */}
+            <div>
+              <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">
+                Doctor Dashboard
+              </h1>
+              <p className="text-gray-600 mt-1 sm:mt-2 text-sm sm:text-base">
+                Manage your appointments and patient schedule
+              </p>
+            </div>
+
+            {/* Right Section */}
+            <div>
+              <Link
+                to="/book/appointment"
+                className="inline-block px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg shadow-sm transition-all text-sm sm:text-base text-center"
+              >
+                Book Appointment
+              </Link>
+            </div>
           </div>
 
+
           {/* Stats Grid */}
-          <motion.div
+          {/* <motion.div
             variants={containerVariants}
             initial="hidden"
             animate="show"
@@ -356,7 +375,7 @@ const DoctorDashboard = () => {
                 </div>
               </motion.div>
             ))}
-          </motion.div>
+          </motion.div> */}
 
           {/* Appointments Card */}
           <motion.div
@@ -369,9 +388,9 @@ const DoctorDashboard = () => {
             <div className="px-6 py-4 border-b border-gray-200 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 relative">
               <div>
                 <div className="flex items-center space-x-2 mr-4">
-                 
+
                   <span className="font-semibold text-gray-700">Today's Appointments</span>
-                  {currentUser?.role === 'doctor' && (
+                  {/* {currentUser?.role === 'doctor' && (
                     <button
                       onClick={ActiveDoctor}
                       className={`relative cursor-pointer w-20 h-8 rounded-full transition-all duration-300 flex items-center 
@@ -385,7 +404,26 @@ const DoctorDashboard = () => {
                         {active ? "OFF" : "ON"}
                       </span>
                     </button>
+                  )} */}
+                  {currentUser?.role === 'doctor' && (
+                    <button
+                      onClick={ActiveDoctor}
+                      className={`relative cursor-pointer w-20 h-8 rounded-full transition-all duration-300 flex items-center
+      ${active ? "bg-gradient-to-r from-green-500 to-green-600" : "bg-gray-400"}`}
+                    >
+                      {/* Toggle circle */}
+                      <span
+                        className={`absolute left-1 w-6 h-6 bg-white rounded-full shadow-md transform transition-transform duration-300
+        ${active ? "translate-x-12" : "translate-x-0"}`}
+                      ></span>
+
+                      {/* Label */}
+                      <span className="absolute text-white w-full text-xs font-semibold text-center">
+                        {active ? "ON" : "OFF"}
+                      </span>
+                    </button>
                   )}
+
                 </div>
                 <p className="text-sm text-gray-600 mt-1">
                   {new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
@@ -409,27 +447,27 @@ const DoctorDashboard = () => {
 
                 {/* Doctor Filter Dropdown */}
                 {
-                  currentUser?.role ==='staff' && (
-                      <div className="relative">
-                  <select
-                    value={filterDoctor}
-                    onChange={(e) => handleDoctorFilterChange(e.target.value)}
-                    className="pl-3 pr-8 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm w-full bg-white appearance-none"
-                  >
-                    <option value="all">All Doctors</option>
-                    {Doctors?.map((doctor) => (
-                      <option key={doctor?._id} value={doctor?._id}>
-                        {doctor?.name}
-                      </option>
-                    ))}
-                  </select>
-                  <div className="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none">
-                    <ChevronRight className="h-4 w-4 text-gray-400 transform rotate-90" />
-                  </div>
-                </div>
+                  currentUser?.role === 'staff' && (
+                    <div className="relative">
+                      <select
+                        value={filterDoctor}
+                        onChange={(e) => handleDoctorFilterChange(e.target.value)}
+                        className="pl-3 pr-8 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm w-full bg-white appearance-none"
+                      >
+                        <option value="all">All Doctors</option>
+                        {Doctors?.map((doctor) => (
+                          <option key={doctor?._id} value={doctor?._id}>
+                            {doctor?.name}
+                          </option>
+                        ))}
+                      </select>
+                      <div className="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none">
+                        <ChevronRight className="h-4 w-4 text-gray-400 transform rotate-90" />
+                      </div>
+                    </div>
                   )
                 }
-                
+
 
                 {/* Status Filter Dropdown */}
                 <div className="relative z-50" ref={filterRef}>
@@ -483,10 +521,10 @@ const DoctorDashboard = () => {
             {/* Appointments Table */}
             {isLoading ? (
               <div className="p-8 flex justify-center">
-                <div className="flex flex-col items-center">
+                {/* <div className="flex flex-col items-center">
                   <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
                   <p className="mt-3 text-gray-600">Loading appointments...</p>
-                </div>
+                </div> */}
               </div>
             ) : (
               <div className="overflow-x-auto">
@@ -618,14 +656,14 @@ const DoctorDashboard = () => {
                   </div>
 
                   {/* Desktop Table View */}
-                  <div className="hidden md:block overflow-auto rounded-xl max-h-96">
+                  <div className="hidden md:block overflow-auto rounded-xl max-h-[90vh]">
                     <table className="min-w-full divide-y divide-gray-200">
                       <thead className="bg-gray-50 sticky top-0 z-10">
                         <tr>
                           <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                             Patient
                           </th>
-                          
+
                           <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                             Date
                           </th>
@@ -671,7 +709,7 @@ const DoctorDashboard = () => {
                                       </div>
                                     </div>
                                   </td>
-                                  
+
                                   <td className="px-6 py-4 whitespace-nowrap">
                                     <div className="text-sm font-medium text-gray-900">{appointment?.slot}</div>
                                     <div className="text-sm text-gray-500">{appointment?.date}</div>

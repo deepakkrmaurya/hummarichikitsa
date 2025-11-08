@@ -5,6 +5,7 @@ import { useParams } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { FaUser, FaUserMd, FaCalendarAlt, FaClock, FaMoneyBillWave, FaPhone, FaFileAlt, FaHospital, FaDownload } from 'react-icons/fa';
 import { IoMdCheckmarkCircle, IoMdCloseCircle } from 'react-icons/io';
+import Dashboard from '../../components/Layout/Dashboard';
 
 const AppointmentDetails = () => {
     const [isLoading, setIsLoading] = useState(true);
@@ -38,9 +39,9 @@ const AppointmentDetails = () => {
     if (isLoading) {
         return (
             <div className="flex justify-center items-center h-screen bg-gray-50">
-                <div className="text-center">
-                    <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-indigo-500 mx-auto"></div>
-                    <p className="mt-4 text-gray-600">Loading appointment details...</p>
+                <div className="flex flex-col items-center">
+                  <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+                  
                 </div>
             </div>
         );
@@ -52,16 +53,17 @@ const AppointmentDetails = () => {
     };
 
     return (
-        <div className="min-h-screen bg-gray-50 py-8 px-4 sm:px-6 lg:px-8">
+        <Dashboard>
+            <div className="min-h-screen bg-gray-50 py-1 px-4 ">
             <motion.div 
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.3 }}
-                className="max-w-4xl mx-auto"
+                className=" mx-auto"
             >
                 {/* Header Card */}
                 <div className="bg-white rounded-xl shadow-sm overflow-hidden mb-6 border border-gray-200">
-                    <div className="bg-gradient-to-r from-indigo-500 to-indigo-600 p-6 text-white">
+                    <div className="bg-blue-600 p-6 text-white">
                         <div className="flex justify-between items-start">
                             <div>
                                 <h1 className="text-2xl font-bold">Appointment Details</h1>
@@ -220,6 +222,7 @@ const AppointmentDetails = () => {
                 </div> */}
             </motion.div>
         </div>
+        </Dashboard>
     );
 };
 

@@ -11,7 +11,7 @@ const Payment = () => {
     useEffect(() => {
         // Check if orderData exists and has required properties
         if (!orderData || !orderData.orderId) {
-            console.error('Invalid order data:', orderData);
+            
             navigate('/');
             return;
         }

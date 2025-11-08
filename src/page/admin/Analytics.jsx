@@ -26,7 +26,7 @@ const AnalyticsDashboard = () => {
       if (endDate) params.end_date = endDate;
       
       const res = await axiosInstance.get('/dashboard', { params });
-      console.log('Dashboard Data:', res.data.data);
+      
       setDashboardData(res.data.data);
     } catch (error) {
       console.error('Error fetching dashboard data:', error);

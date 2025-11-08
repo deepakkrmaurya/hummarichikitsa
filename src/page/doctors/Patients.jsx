@@ -30,7 +30,7 @@ const Patients = () => {
     };
 
     const appointments = useSelector((state) => state.appointment?.appointment);
-    console.log(appointments)
+    
     // Process appointments by date
     useEffect(() => {
         if (appointments?.length) {

@@ -103,7 +103,7 @@ const navigate = useNavigate();
       })
 
       const data = (await response).data;
-      console.log(data)
+   
       if (data.success) {
         toast.success(data.message)
         setFormData({
@@ -123,7 +123,7 @@ const navigate = useNavigate();
 
 
     } catch (err) {
-      console.log()
+     
       setError(err.response.data.message || 'Registration failed. Please try again.');
     } finally {
       setLoading(false);

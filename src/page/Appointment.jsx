@@ -43,7 +43,7 @@ function Appointment() {
         socket.on("doctorUpdate", (data) => {
             setdoctors((prev) => {
                 const exists = prev.some((a) => a._id === data._id);
-                console.log(exists)
+                
                 if (exists) {
                     return prev.map((a) => (a._id === data._id ? data : a));
                 }
@@ -54,7 +54,7 @@ function Appointment() {
         socket.on("doctoractive", (data) => {
             setdoctors((prev) => {
                 const exists = prev.some((a) => a._id === data._id);
-                console.log(exists)
+                
                 if (exists) {
                     return prev.map((a) => (a._id === data._id ? data : a));
                 }

@@ -104,7 +104,7 @@ const StaffDasboard = () => {
   // Socket.io event handlers
   useEffect(() => {
     const handleAppointmentUpdate = (data) => {
-      console.log("🟢 Socket appointmentUpdate received:", data);
+      
       setAppointments(prev => {
         const exists = prev.some(a => a._id === data._id);
         if (exists) {
@@ -147,8 +147,7 @@ const StaffDasboard = () => {
    setactive(res.payload.user.active)
    })()
   }, []);
-   console.log()
-  // Initial data loading
+   
   useEffect(() => {
     const fetchData = async () => {
       try {

@@ -45,7 +45,7 @@ const DoctorLogin = () => {
         } else if (activeTab === 'staff') {
           const res = await dispatch(StaffLogin(values))
           response = res
-          console.log(res)
+          
         }else if (activeTab === 'admin') {
           const res = await dispatch(AdminLogin(values))
           response = res

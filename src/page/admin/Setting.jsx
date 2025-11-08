@@ -21,7 +21,7 @@ const Setting = () => {
         const response = await axiosInstance.get("/user/me");
         const res = await dispatch(GetDoctorHospitalId(response.data.user?._id))
         setHospitalInfo(response?.data?.user)
-        console.log("doctor",res.payload.doctors)
+       
         setDoctors(res.payload.doctors);
       } catch (error) {
         console.error("Error fetching data:", error);

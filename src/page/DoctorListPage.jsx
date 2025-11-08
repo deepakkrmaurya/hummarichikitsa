@@ -78,7 +78,7 @@ const DoctorListPage = () => {
 
   useEffect(() => {
     socket.on("doctorStatusUpdate", (data) => {
-      console.log("🔄 Doctor status update:", data);
+      
       dispatch(updateDoctorStatus(data));
     });
 

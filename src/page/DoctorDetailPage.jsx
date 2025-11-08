@@ -51,7 +51,7 @@ const DoctorDetailPage = () => {
     const { loading: hospitalsLoading } = useSelector((state) => state.hospitals);
 
     // Find doctor and hospital data
-    const doctor = doctors.find(d => d?._id === doctorId);
+    const doctor = doctors?.find(d => d?._id === doctorId);
     const hospital = doctor ? hospitals.find(h => h?._id === doctor?.hospitalId?._id) : null;
 
     // Local state
@@ -152,12 +152,12 @@ const DoctorDetailPage = () => {
         const res = await dispatch(AppointmentCreate(newAppointment));
 
         if (res?.payload?.success) {
-             console.log(res?.payload.savedAppointment.mobile)
+          
             // Patient ka mobile number (country code ke sath, e.g. 91 for India)
-            const mobileNumber = 91+res?.payload.savedAppointment.mobile; // e.g. "919876543210"
-            console.log(res?.payload.savedAppointment)
+            const mobileNumber = 91 + res?.payload.savedAppointment.mobile; // e.g. "919876543210"
+            
             // Message banate hain
-const message = `
+            const message = `
 Hello ${res?.payload.savedAppointment.patient},
 📅 *Appointment Details*
 ───────────────────────
@@ -167,8 +167,8 @@ Hello ${res?.payload.savedAppointment.patient},
 📅 Date: ${res?.payload.savedAppointment.date}
 ✅ Please reach on time.
 `;
-                                // //  👨‍⚕️ Doctor: ${"doctor?.name"}
-                                //  🏥 Hospital: ${"hospital?.name"}
+            // //  👨‍⚕️ Doctor: ${"doctor?.name"}
+            //  🏥 Hospital: ${"hospital?.name"}
 
             // Encode karna zaruri hai warna space/emoji break karenge
             const encodedMessage = encodeURIComponent(message);
@@ -694,16 +694,39 @@ Hello ${res?.payload.savedAppointment.patient},
                                         <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
                                             <span className="text-gray-500">+91</span>
                                         </div>
-                                        <input
+                                        {/* <input
                                             type="tel"
                                             value={mobile}
-                                            onChange={(e) => setMobile(e.target.value)}
+                                            onChange={(e) => {
+                                                setMobile(e.target.value)
+                                                if (/^\d{0,10}$/.test(e.target.value)) {
+                                                    handleChange(e);
+                                                }
+                                            }}
                                             placeholder="98765 43210"
                                             className="w-full pl-12 px-4 py-2.5 rounded-lg border border-gray-300 focus:border-teal-500 focus:ring-2 focus:ring-teal-200 transition-all placeholder:text-gray-400"
                                             maxLength="10"
                                             pattern="[0-9]{10}"
                                             required
+
+                                        /> */}
+                                        <input
+                                            type="tel"
+                                            value={mobile}
+                                            onChange={(e) => {
+                                                const value = e.target.value;
+                                                if (/^\d{0,10}$/.test(value)) {
+                                                    setMobile(value);
+                                                    handleChange(e);
+                                                }
+                                            }}
+                                            placeholder="98765 43210"
+                                            className="w-full pl-12 px-4 py-2.5 rounded-lg border border-gray-300 focus:border-teal-500 focus:ring-2 focus:ring-teal-200 transition-all placeholder:text-gray-400"
+                                            inputMode="numeric"    // mobile keyboard shows numbers only
+                                            maxLength={10}
+                                            required
                                         />
+
                                     </div>
                                     <p className="text-xs text-gray-500 mt-1">
                                         We'll send appointment confirmation via WhatsApp
@@ -719,7 +742,14 @@ Hello ${res?.payload.savedAppointment.patient},
                                     <input
                                         type="text"
                                         value={dob}
-                                        onChange={(e) => setDob(e.target.value)}
+
+                                        onChange={(e) => {
+                                            const value = e.target.value;
+                                            if (/^\d{0,3}$/.test(value)) {
+                                                setDob(value);
+                                                handleChange(e);
+                                            }
+                                        }}
                                         className="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:border-teal-500 focus:ring-2 focus:ring-teal-200 transition-all text-gray-700"
                                     />
                                 </div>

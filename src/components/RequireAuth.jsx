@@ -12,7 +12,7 @@ const RequireAuth = ({ allowedRoles }) => {
     async function fetchData() {
       try {
         const response = await axiosInstance.get("/user/me");
-        // console.log(response.data.role);
+        
         setRole(response.data.user.role);
       } catch (error) {
         console.error("Error fetching data:", error);

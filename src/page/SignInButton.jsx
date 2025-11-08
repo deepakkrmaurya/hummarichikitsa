@@ -55,7 +55,7 @@ const SignInButton = () => {
         window.phoneEmailListener = async function (userObj) {
             // Prevent multiple calls
             if (isProcessing.current) {
-                console.log('Login already in process, skipping duplicate call');
+                
                 return;
             }
 
