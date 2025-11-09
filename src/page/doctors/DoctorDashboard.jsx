@@ -261,8 +261,8 @@ const DoctorDashboard = () => {
     if (appointment.status === "completed") return "completed";
     if (appointment.status === "cancelled") return "cancelled";
     if (appointment.status === "pending") return "pending";
-    if (appointment.status === "confirmed") return "confirmed";
-    if (appointment.status === "check-in") return "check-in";
+    if (appointment.status === "confirmed") return "check-in";
+    if (appointment.status === "check-in") return "confirmed";
 
     const today = new Date();
     today.setHours(0, 0, 0, 0);
