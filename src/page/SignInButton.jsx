@@ -46,8 +46,8 @@ const SignInButton = () => {
     const isProcessing = useRef(false); // To track if we're already processing a login
 
     useEffect(() => {
-         const from = location.pathname || "/";
-           
+        const from = location.pathname || "/";
+
         // Load the external script
         const script = document.createElement('script');
         script.src = "https://www.phone.email/sign_in_button_v1.js";
@@ -57,21 +57,26 @@ const SignInButton = () => {
         window.phoneEmailListener = async function (userObj) {
             // Prevent multiple calls
             if (isProcessing.current) {
-                
+
                 return;
             }
 
             isProcessing.current = true;
             try {
-               
-                const response = await dispatch(AuthLogin({ userid: userObj.user_phone_number,userObj:userObj }));
-                
-                navigate(from, { replace: true });
-                
+
+                const response = await dispatch(AuthLogin({ userid: userObj.user_phone_number, userObj: userObj }));
+
+                if (from === '/login') {
+                    navigate('/',{ replace: true })
+                } else {
+
+                    navigate(from, { replace: true });
+                }
+
             } catch (error) {
                 console.error('Login failed', error);
             }
-            
+
         };
 
         // Add script to document
