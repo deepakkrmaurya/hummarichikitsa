@@ -59,8 +59,9 @@ const Dashboard = ({ children }) => {
     <div className="min-h-screen flex flex-col lg:flex-row bg-gray-50">
       {/* Mobile Header */}
       <div className="lg:hidden bg-white shadow-sm py-4 px-5 flex justify-between items-center">
-        <h1 className="text-xl font-bold text-gray-800">
-          {currentRole === 'doctor' ? 'Doctor' : currentRole === 'hospital' ? 'Hospital' : 'Admin'} Dashboard
+        
+        <h1 className="text-xl flex font-bold text-gray-800">
+          <Calendar className="h-8 w-8 text-blue-600" /> Hummari chikitsa
         </h1>
         <button
           onClick={() => setMobileMenuOpen(!mobileMenuOpen)}

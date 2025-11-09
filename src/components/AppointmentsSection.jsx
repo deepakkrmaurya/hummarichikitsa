@@ -245,147 +245,149 @@ const AppointmentsSection = ({ isLoggedIn, currentUser, appointments, doctors, h
             //   })}
             // </div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-  {filteredAppointments.slice(0, 3).map((appointment) => {
-    // Fixed: Handle both object and string doctorId
-    const doctor = hospitalDoctor?.find(d => d?._id === (appointment.doctorId?._id || appointment.doctorId));
-    const hospitalInfo = hospital.find(h => h._id === appointment.hospitalId);
-    const availability = appointment.doctorId.availability.filter((d) => d.date == appointment.date)
-    
-    // Determine status for display
-    let displayStatus;
-    let statusColor;
-    if (appointment.status === "completed") {
-      displayStatus = "Completed";
-      statusColor = "bg-blue-100 text-blue-800";
-    } else {
-      const today = new Date();
-      today.setHours(0, 0, 0, 0);
-      const appointmentDate = new Date(appointment.date);
-      appointmentDate.setHours(0, 0, 0, 0);
+              {filteredAppointments.slice(0, 3).map((appointment) => {
+                // Fixed: Handle both object and string doctorId
+                const doctor = hospitalDoctor?.find(d => d?._id === (appointment.doctorId?._id || appointment.doctorId));
+                const hospitalInfo = hospital.find(h => h._id === appointment.hospitalId);
+                const availability = appointment.doctorId.availability.filter((d) => d.date == appointment.date)
 
-      if (appointmentDate < today) {
-        displayStatus = "Completed";
-        statusColor = "bg-blue-100 text-blue-800";
-      } else if (appointmentDate.getTime() === today.getTime()) {
-        displayStatus = "Active";
-        statusColor = "bg-[#009689] text-white";
-      } else {
-        displayStatus = "Active";
-        statusColor = "bg-[#009689] text-white";
-      }
-    }
+                // Determine status for display
+                let displayStatus;
+                let statusColor;
+                if (appointment.status === "completed") {
+                  displayStatus = "Completed";
+                  statusColor = "bg-blue-100 text-blue-800";
+                } else {
+                  const today = new Date();
+                  today.setHours(0, 0, 0, 0);
+                  const appointmentDate = new Date(appointment.date);
+                  appointmentDate.setHours(0, 0, 0, 0);
 
-    return (
-      <div key={appointment._id} className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden transition-all duration-200 hover:shadow-md">
-        {/* Status Header */}
-        <div className="px-4 py-2 border-b border-gray-100">
-          <div className="flex justify-between items-center">
-            <span className={`text-xs font-medium px-2 py-1 rounded-full ${statusColor}`}>
-              {displayStatus}
-            </span>
-            
-            {/* Live Status Indicator */}
-            {displayStatus !== "Completed" && doctor?.active && (
-              <div className="flex items-center text-xs text-green-600">
-                <span className="relative flex h-2 w-2 mr-1">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
-                  <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
-                </span>
-                Live
-              </div>
-            )}
-          </div>
-        </div>
+                  if (appointmentDate < today) {
+                    displayStatus = "Completed";
+                    statusColor = "bg-blue-100 text-blue-800";
+                  } else if (appointmentDate.getTime() === today.getTime()) {
+                    displayStatus = "Active";
+                    statusColor = "bg-[#009689] text-white";
+                  } else {
+                    displayStatus = "Active";
+                    statusColor = "bg-[#009689] text-white";
+                  }
+                }
 
-        <div className="p-4">
-          {/* Doctor Info - Compact */}
-          <div className="flex items-start space-x-3 mb-3">
-            <div className="relative flex-shrink-0">
-              <img
-                src={doctor?.image || avatar}
-                className="w-12 h-12 rounded-lg object-cover border border-gray-200"
-                alt={doctor?.name}
-              />
-              <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-blue-500 rounded-full flex items-center justify-center">
-                <svg className="w-2 h-2 text-white" fill="currentColor" viewBox="0 0 20 20">
-                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd"></path>
-                </svg>
-              </div>
-            </div>
-            <div className="flex-1 min-w-0">
-              <h3 className="font-semibold text-gray-900 text-sm truncate">{doctor?.name}</h3>
-              <p className="text-xs text-gray-600 truncate">{doctor?.specialty}</p>
-              <div className="flex items-center text-xs text-gray-500 mt-1">
-                <svg className="w-3 h-3 mr-1 text-blue-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-4m-8 0H3m2 0h4M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
-                </svg>
-                <span className="truncate">{hospitalInfo?.name}</span>
-              </div>
-            </div>
-          </div>
+                return (
+                  <div key={appointment._id} className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden transition-all duration-200 hover:shadow-md">
+                    {/* Status Header */}
+                    <div className="px-4 py-2 border-b border-gray-100">
+                      <div className="flex justify-between items-center">
+                        <span className={`text-xs font-medium px-2 py-1 rounded-full ${statusColor}`}>
+                          {displayStatus}
+                        </span>
 
-          {/* Current Status Section - Only for Active Appointments */}
-          {displayStatus !== "Completed" && doctor?.active && (
-            <div className="bg-green-50 rounded-lg p-2 mb-3 border border-green-100">
-              <div className="flex justify-between text-xs">
-                <div className="text-gray-700">
-                  Currently Serving: <span className="font-semibold text-green-600">{doctor?.currentAppointment}</span>
-                </div>
-                <div className="text-gray-700">
-                  Your Turn: <span className="font-semibold text-blue-600">{appointment?.appointmentNumber}</span>
-                </div>
-              </div>
-            </div>
-          )}
 
-          {displayStatus !== "Completed" && !doctor?.active && (
-            <div className="bg-amber-50 rounded-lg p-2 mb-3 border border-amber-100">
-              <p className="text-xs text-amber-700 text-center">
-               The doctor currently has no patients to view.
-               
-              </p>
-              <p className="text-xs text-amber-700 text-center">
-               Waiting for doctor to come online...
-              </p>
-            </div>
-          )}
+                        {/* Live Status Indicator */}
+                        {displayStatus !== "Completed" && doctor?.active && (
+                          <div className="flex items-center text-xs text-green-600">
+                            <span className="relative flex h-2 w-2 mr-1">
+                              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                              <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
+                            </span>
+                            Live
+                          </div>
+                        )}
+                      </div>
+                    </div>
 
-          {/* Appointment Details */}
-          <div className="flex-col items-center justify-between text-xs text-gray-600 bg-gray-50 rounded-lg px-3 py-2 mb-3">
-            <div className="flex items-center">
-              <Calendar className="w-3 h-3 mr-1 text-blue-500" />
-              {new Date(appointment.date).toLocaleDateString('en-US', { 
-                month: 'short', 
-                day: 'numeric' 
+                    <div className="p-4">
+                      {/* Doctor Info - Compact */}
+                      {displayStatus !== "Completed" && !doctor?.active && (
+                        <div className="bg-amber-50 rounded-lg p-2 mb-3 border border-amber-100">
+                          <p className="text-xs text-amber-700 text-center">
+                            The doctor currently has no patients to view.
+
+                          </p>
+                          <p className="text-xs text-amber-700 text-center">
+                            Waiting for doctor to come online...
+                          </p>
+                        </div>
+                      )}
+                      <div className="flex items-start space-x-3 mb-3">
+                        <div className="relative flex-shrink-0">
+                          <img
+                            src={doctor?.image || avatar}
+                            className="w-12 h-12 rounded-lg object-cover border border-gray-200"
+                            alt={doctor?.name}
+                          />
+                          <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-blue-500 rounded-full flex items-center justify-center">
+                            <svg className="w-2 h-2 text-white" fill="currentColor" viewBox="0 0 20 20">
+                              <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd"></path>
+                            </svg>
+                          </div>
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <h3 className="font-semibold text-gray-900 text-sm truncate">{doctor?.name}</h3>
+                          <p className="text-xs text-gray-600 truncate">{doctor?.specialty}</p>
+                          <div className="flex items-center text-xs text-gray-500 mt-1">
+                            <svg className="w-3 h-3 mr-1 text-blue-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-4m-8 0H3m2 0h4M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
+                            </svg>
+                            <span className="truncate">{hospitalInfo?.name}</span>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Current Status Section - Only for Active Appointments */}
+                      {displayStatus !== "Completed" && doctor?.active && (
+                        <div className="bg-green-50 rounded-lg p-2 mb-3 border border-green-100">
+                          <div className="flex justify-between text-xs">
+                            <div className="text-gray-700">
+                              Currently Serving: <span className="font-semibold text-green-600">{doctor?.currentAppointment}</span>
+                            </div>
+                            <div className="text-gray-700">
+                              Your Turn: <span className="font-semibold text-blue-600">{appointment?.appointmentNumber}</span>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+
+
+
+                      {/* Appointment Details */}
+                      <div className="flex-col items-center justify-between text-xs text-gray-600 bg-gray-50 rounded-lg px-3 py-2 mb-3">
+                        <div className="flex items-center">
+                          <Calendar className="w-3 h-3 mr-1 text-blue-500" />
+                          {new Date(appointment.date).toLocaleDateString('en-US', {
+                            month: 'short',
+                            day: 'numeric'
+                          })}
+                        </div>
+                        <div className="flex items-center">
+                          <Clock className="w-3 h-3 mr-1 text-blue-500" />
+                          {availability[0]?.display[0]}
+                        </div>
+                      </div>
+
+                      {/* Footer with Payment and Action */}
+                      <div className="flex items-center justify-between">
+                        <div className="text-xs text-gray-600 flex items-center">
+                          <CreditCard className="w-3 h-3 mr-1 text-blue-500" />
+                          ₹{appointment.booking_amount}
+                        </div>
+                        <Link
+                          to={`/appointment_details_page/${appointment._id}`}
+                          className="text-xs text-blue-600 hover:text-blue-800 font-medium flex items-center transition-colors"
+                        >
+                          Details
+                          <svg className="w-3 h-3 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7"></path>
+                          </svg>
+                        </Link>
+                      </div>
+                    </div>
+                  </div>
+                );
               })}
             </div>
-            <div className="flex items-center">
-              <Clock className="w-3 h-3 mr-1 text-blue-500" />
-              {availability[0]?.display[0]}
-            </div>
-          </div>
-
-          {/* Footer with Payment and Action */}
-          <div className="flex items-center justify-between">
-            <div className="text-xs text-gray-600 flex items-center">
-              <CreditCard className="w-3 h-3 mr-1 text-blue-500" />
-              ₹{appointment.booking_amount}
-            </div>
-            <Link
-              to={`/appointment_details_page/${appointment._id}`}
-              className="text-xs text-blue-600 hover:text-blue-800 font-medium flex items-center transition-colors"
-            >
-              Details
-              <svg className="w-3 h-3 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7"></path>
-              </svg>
-            </Link>
-          </div>
-        </div>
-      </div>
-    );
-  })}
-</div>
           ) : (
             <div className="bg-white rounded-2xl shadow-sm p-10 text-center border border-dashed border-gray-300">
               <div className="inline-flex items-center justify-center w-20 h-20 bg-blue-50 rounded-full mb-6">
