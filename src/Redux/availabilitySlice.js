@@ -7,7 +7,7 @@ export const addAvailability = createAsyncThunk(
   'availability/addAvailability',
   async ({ doctorId, date, startTime, endTime }, { rejectWithValue }) => {
     try {
-
+       
       const response = await axiosInstance.post(`/doctor/${doctorId}/availability`, {
         date,
         startTime,

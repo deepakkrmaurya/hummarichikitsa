@@ -48,8 +48,8 @@ const Availability = () => {
   const { isLoggedIn, data } = useSelector((store) => store.LoginAuth || {});
   
   // Mock current doctor - Replace with actual doctor data from your app
-
-
+   
+   
   // Initialize selected date
   useEffect(() => {
     if (!selectedDate && bulkMode === "single") {
@@ -130,7 +130,7 @@ const Availability = () => {
       toast.error("Please select a date", "error");
       return;
     }
-
+   
     if (bulkMode === "multiple" && selectedDates.length === 0) {
       toast.error("Please select at least one date", "error");
       return;
@@ -174,7 +174,7 @@ const Availability = () => {
       showMessage(error, "error");
     }
   };
-
+// console.log(data._id)
   // Handle Delete Availability
   const handleDeleteAvailability = async () => {
     if (bulkMode === "single" && !selectedDate) {
