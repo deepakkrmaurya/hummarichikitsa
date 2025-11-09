@@ -311,6 +311,18 @@ const AppointmentsSection = ({ isLoggedIn, currentUser, appointments, doctors, h
                           </p>
                         </div>
                       )}
+                      {displayStatus !== "Completed" && doctor?.active && (
+                        <div className="bg-green-50 rounded-lg p-2 mb-3 border border-green-100">
+                          <div className="flex justify-between text-xs">
+                            <div className="text-gray-700">
+                              Currently Serving: <span className="font-semibold text-green-600">{doctor?.currentAppointment}</span>
+                            </div>
+                            <div className="text-gray-700">
+                              Your Turn: <span className="font-semibold text-blue-600">{appointment?.appointmentNumber}</span>
+                            </div>
+                          </div>
+                        </div>
+                      )}
                       <div className="flex items-start space-x-3 mb-3">
                         <div className="relative flex-shrink-0">
                           <img
@@ -337,18 +349,7 @@ const AppointmentsSection = ({ isLoggedIn, currentUser, appointments, doctors, h
                       </div>
 
                       {/* Current Status Section - Only for Active Appointments */}
-                      {displayStatus !== "Completed" && doctor?.active && (
-                        <div className="bg-green-50 rounded-lg p-2 mb-3 border border-green-100">
-                          <div className="flex justify-between text-xs">
-                            <div className="text-gray-700">
-                              Currently Serving: <span className="font-semibold text-green-600">{doctor?.currentAppointment}</span>
-                            </div>
-                            <div className="text-gray-700">
-                              Your Turn: <span className="font-semibold text-blue-600">{appointment?.appointmentNumber}</span>
-                            </div>
-                          </div>
-                        </div>
-                      )}
+                      
 
 
 
