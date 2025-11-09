@@ -344,6 +344,9 @@ const AppointmentsSection = ({ isLoggedIn, currentUser, appointments, doctors, h
                The doctor currently has no patients to view.
                
               </p>
+              <p className="text-xs text-amber-700 text-center">
+               Waiting for doctor to come online...
+              </p>
             </div>
           )}
 
