@@ -1,6 +1,6 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import axiosInstance from '../Helper/axiosInstance';
-import axios from 'axios';
+
 
 // Async thunks
 export const addAvailability = createAsyncThunk(
@@ -24,7 +24,8 @@ export const addBulkAvailability = createAsyncThunk(
   'availability/addBulkAvailability',
   async ({ doctorId, dates, startTime, endTime }, { rejectWithValue }) => {
     try {
-      const response = await axiosInstance.post(`/doctors/${doctorId}/availability/bulk`, {
+      
+      const response = await axiosInstance.post(`/doctor/${doctorId}/availability/bulk`, {
         dates,
         startTime,
         endTime
@@ -40,10 +41,11 @@ export const removeAvailability = createAsyncThunk(
   'availability/removeAvailability',
   async ({ doctorId, dates }, { rejectWithValue }) => {
     try {
-      const response = await axiosInstance.delete(`/doctors/${doctorId}/availability`, {
+      
+      const response =  axiosInstance.delete(`/doctor/${doctorId}/availability`, {
         data: { dates }
       });
-      return response.data;
+      return (await response).data;
     } catch (error) {
       return rejectWithValue(error.response?.data?.message || 'Failed to remove availability');
     }
@@ -54,9 +56,9 @@ export const getDoctorAvailability = createAsyncThunk(
   'availability/getDoctorAvailability',
   async (doctorId, { rejectWithValue }) => {
     try {
-      const response = await axios.get(`/doctor/${doctorId}/availability`);
+      const response =  axiosInstance.get(`/doctor/${doctorId}/availability`);
 
-      return response.data;
+      return (await response).data
     } catch (error) {
       return rejectWithValue(error.response?.data?.message || 'Failed to fetch availability');
     }

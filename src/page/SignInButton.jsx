@@ -38,14 +38,16 @@
 import React, { useEffect, useRef } from 'react';
 import { useDispatch } from 'react-redux';
 import { AuthLogin } from '../Redux/authSlice';
-import { useNavigate } from 'react-router-dom';
-
+import { useLocation, useNavigate } from "react-router-dom";
 const SignInButton = () => {
     const navigate = useNavigate()
+    // const location = useLocation();
     const dispatch = useDispatch();
     const isProcessing = useRef(false); // To track if we're already processing a login
 
     useEffect(() => {
+         const from = location.pathname || "/";
+           
         // Load the external script
         const script = document.createElement('script');
         script.src = "https://www.phone.email/sign_in_button_v1.js";
@@ -61,16 +63,15 @@ const SignInButton = () => {
 
             isProcessing.current = true;
             try {
+               
                 const response = await dispatch(AuthLogin({ userid: userObj.user_phone_number,userObj:userObj }));
-                navigate("/")
+                
+                navigate(from, { replace: true });
+                
             } catch (error) {
                 console.error('Login failed', error);
-            } finally {
-                // Reset after a delay to prevent immediate subsequent calls
-                setTimeout(() => {
-                    isProcessing.current = false;
-                }, 2000);
             }
+            
         };
 
         // Add script to document

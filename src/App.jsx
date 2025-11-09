@@ -13,6 +13,7 @@ import DoctorSetting from './page/doctors/DoctorSetting';
 import UserProfilePopup from './page/Profile';
 import AdminRequire from './components/AdminRequire';
 import AnalyticsDashboard from './page/admin/Analytics';
+import PrivateRoute from './page/PrivateRoute';
 
 
 // import Homes from './pages/Dashboard/Home';

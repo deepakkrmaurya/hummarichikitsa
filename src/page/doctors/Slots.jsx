@@ -46,13 +46,9 @@ const Availability = () => {
   const [localMessage, setLocalMessage] = useState({ text: "", type: "" });
   const [bulkMode, setBulkMode] = useState("single");
   const { isLoggedIn, data } = useSelector((store) => store.LoginAuth || {});
- 
+  
   // Mock current doctor - Replace with actual doctor data from your app
-  const [currentDoctor] = useState({
-    _id: localStorage.getItem("doctorId") || "doctor123",
-    name: "Dr. John Doe",
-    specialty: "Cardiologist",
-  });
+
 
   // Initialize selected date
   useEffect(() => {
@@ -64,9 +60,12 @@ const Availability = () => {
 
   // Load availability on component mount
   useEffect(() => {
-    if (currentDoctor?._id) {
-      dispatch(getDoctorAvailability(data._id));
+    (async()=>{
+      if (data?._id) {
+     const ss = await  dispatch(getDoctorAvailability(data._id));
+     
     }
+    })()
   }, [data?._id, dispatch]);
 
   // Handle Redux messages and errors
@@ -153,7 +152,7 @@ const Availability = () => {
       } else if (bulkMode === "multiple") {
         result = await dispatch(
           addBulkAvailability({
-            doctorId: currentDoctor._id,
+            doctorId: data._id,
             dates: selectedDates,
             startTime,
             endTime,
@@ -165,7 +164,7 @@ const Availability = () => {
         showMessage(result.message, "success");
 
         // Refresh availability data
-        dispatch(getDoctorAvailability(currentDoctor._id));
+        dispatch(getDoctorAvailability(data._id));
 
         if (bulkMode === "multiple") {
           setSelectedDates([]);
@@ -207,7 +206,7 @@ const Availability = () => {
     try {
       const result = await dispatch(
         removeAvailability({
-          doctorId: currentDoctor._id,
+          doctorId: data._id,
           dates: datesToDelete,
         })
       ).unwrap();
@@ -215,7 +214,7 @@ const Availability = () => {
       showMessage(result.message, "success");
 
       // Refresh availability data
-      dispatch(getDoctorAvailability(currentDoctor._id));
+      dispatch(getDoctorAvailability(data._id));
 
       if (bulkMode === "multiple") {
         setSelectedDates([]);
@@ -306,7 +305,7 @@ const Availability = () => {
   };
 
   const refreshData = () => {
-    dispatch(getDoctorAvailability(currentDoctor._id));
+    dispatch(getDoctorAvailability(data._id));
     showMessage("Data refreshed successfully", "success");
   };
 
@@ -418,14 +417,14 @@ const Availability = () => {
                 Set your available timings for patient appointments
               </p>
             </div>
-            {currentDoctor && (
+            {data && (
               <div className="flex items-center gap-3">
                 <div className="bg-white px-4 py-2 rounded-lg border border-gray-200">
                   <p className="text-sm text-gray-600">
-                    Dr. {currentDoctor.name}
+                    Dr. {data.name}
                   </p>
                   <p className="text-xs text-gray-500">
-                    {currentDoctor.specialty}
+                    {data.specialty}
                   </p>
                 </div>
                 <button
