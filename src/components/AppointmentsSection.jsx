@@ -351,7 +351,7 @@ const AppointmentsSection = ({ isLoggedIn, currentUser, appointments, doctors, h
           )}
 
           {/* Appointment Details */}
-          <div className="flex items-center justify-between text-xs text-gray-600 bg-gray-50 rounded-lg px-3 py-2 mb-3">
+          <div className="flex-col items-center justify-between text-xs text-gray-600 bg-gray-50 rounded-lg px-3 py-2 mb-3">
             <div className="flex items-center">
               <Calendar className="w-3 h-3 mr-1 text-blue-500" />
               {new Date(appointment.date).toLocaleDateString('en-US', { 
