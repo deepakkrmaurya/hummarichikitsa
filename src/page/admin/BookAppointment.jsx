@@ -132,15 +132,29 @@ function BookAppointment() {
         setSuccess(`Appointment booked successfully! Token: ${response.payload.savedAppointment.token}`);
 
         // Reset form
+        if(decoded.role==='doctor'){
+          setFormData({
+          patient: '',
+          mobile: '',
+          dob: '',
+          doctorId: '',
+          paymentStatus: 'Cash'
+          
+        });
+          setActiveSection('patient')
+          setSelectedDate(" ")
+          return
+        }
         setFormData({
           patient: '',
           mobile: '',
           dob: '',
           doctorId: '',
-          booking_amount: 0,
+          booking_amount: '',
           paymentStatus: 'Cash'
         });
         setSelectedDate('');
+        setActiveSection('patient')
       }
     } catch (err) {
       setErrors(prev => ({ ...prev, form: err.response?.data?.message || 'Failed to book appointment' }));
