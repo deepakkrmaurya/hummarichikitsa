@@ -758,7 +758,7 @@ Hello ${res?.payload.savedAppointment.patient},
                                                 Age
                                             </label>
                                             <input
-                                                type="text"
+                                                type="tel"
                                                 value={dob}
 
                                                 onChange={(e) => {

@@ -321,9 +321,7 @@ const DoctorDashboard = () => {
           <div className="mb-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             {/* Left Section */}
             <div>
-              <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">
-                Doctor Dashboard
-              </h1>
+              
               <p className="text-gray-600 mt-1 sm:mt-2 text-sm sm:text-base">
                 Manage your appointments and patient schedule
               </p>

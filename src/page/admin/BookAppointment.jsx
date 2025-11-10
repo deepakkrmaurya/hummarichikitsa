@@ -23,7 +23,7 @@ function BookAppointment() {
   });
   const [errors, setErrors] = useState({});
   const [success, setSuccess] = useState('');
-
+  const { isLoggedIn, data } = useSelector((store) => store.LoginAuth || {});
   const dispatch = useDispatch();
   // State management
   const decoded = jwtDecode(localStorage.getItem('token'));
@@ -51,7 +51,7 @@ function BookAppointment() {
         if (hospitalId === undefined) {
           hospitalId = response?.data?.user?._id
         }
-        
+
         setHospitalId(hospitalId);
 
         const doctorsResponse = await dispatch(GetDoctorHospitalId(hospitalId));
@@ -84,7 +84,8 @@ function BookAppointment() {
     }));
 
     const doc = doctors.filter((d) => d._id === value)
-    
+
+
     setFormData({
       ...formData,
       booking_amount: doc[0].consultationFee,
@@ -132,15 +133,15 @@ function BookAppointment() {
         setSuccess(`Appointment booked successfully! Token: ${response.payload.savedAppointment.token}`);
 
         // Reset form
-        if(decoded.role==='doctor'){
+        if (decoded.role === 'doctor') {
           setFormData({
-          patient: '',
-          mobile: '',
-          dob: '',
-          doctorId: '',
-          paymentStatus: 'Cash'
-          
-        });
+            patient: '',
+            mobile: '',
+            dob: '',
+            doctorId: decoded.id,
+            paymentStatus: 'Cash',
+            booking_amount: data.consultationFee,
+          });
           setActiveSection('patient')
           setSelectedDate(" ")
           return
@@ -258,7 +259,7 @@ function BookAppointment() {
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Mobile Number *</label>
                   <input
-                    type="text"
+                    type="tel"
                     name="mobile"
                     value={formData.mobile}
                     className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-1 text-sm ${errors.mobile ? 'border-red-300 focus:ring-red-500' : 'border-gray-300 focus:ring-blue-500'}`}
@@ -276,7 +277,7 @@ function BookAppointment() {
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Age *</label>
                   <input
-                    type="text"
+                    type="tel"
                     name="dob"
                     value={formData.dob}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-blue-500 text-sm"
@@ -432,11 +433,10 @@ function BookAppointment() {
                         <span className="text-gray-500 text-sm">₹</span>
                       </div>
                       <input
-                        type="text"
+                        type="tel"
                         name="booking_amount"
-                        disabled={formData.booking_amount ? true : false}
+
                         value={formData.booking_amount}
-                        placeholder='0'
                         onChange={(e) => {
                           const value = e.target.value;
                           if (/^\d*$/.test(value)) {
@@ -444,8 +444,7 @@ function BookAppointment() {
                           }
                         }}
                         className={`w-full pl-8 pr-3 py-2 border rounded-lg focus:outline-none focus:ring-1 text-sm ${errors.booking_amount ? 'border-red-300 focus:ring-red-500' : 'border-gray-300 focus:ring-blue-500'}`}
-                        min=""
-                        step="0.01"
+
                       />
                       {errors.booking_amount && <p className="mt-1 text-xs text-red-600">{errors.booking_amount}</p>}
                     </div>
