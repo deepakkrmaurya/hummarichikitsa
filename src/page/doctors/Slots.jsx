@@ -710,7 +710,7 @@ const Availability = () => {
                   )}
                 </div>
 
-                <div className="grid grid-cols-7 gap-1 sm:gap-2">
+                <div className="grid grid-cols-5 gap-1 sm:gap-2">
                   {weekDates.map((date, index) => {
                     const dateStr = formatDate(date);
                     const dayAvailability = getAvailabilityForDate(dateStr);
@@ -815,7 +815,7 @@ const Availability = () => {
                   ))}
                 </div>
 
-                <div className="grid grid-cols-7 gap-0.5 sm:gap-1">
+                <div className="grid grid-cols-5 gap-0.5 sm:gap-1">
                   {monthDates.map((date, index) => {
                     const dateStr = formatDate(date);
                     const dayAvailability = getAvailabilityForDate(dateStr);

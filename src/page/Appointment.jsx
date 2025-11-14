@@ -371,14 +371,15 @@ function Appointment() {
                                                     </span>
                                                 </p>
                                             </div>
-                                        ) : (
+                                        ) : finalStatus === "Completed" ? (
+                                            <div></div>
+                                        ):(
+
                                             <div className="bg-gradient-to-br from-amber-50 to-orange-50 border border-amber-200 rounded-2xl p-6 shadow-lg">
                                                 <div className="text-center ">
                                                     <div className="">
                                                      
-                                                        {/* <p className="text-amber-700 text-lg font-medium leading-relaxed">
-                                                            The doctor is currently unavailable for a short time.
-                                                        </p> */}
+                                                        
                                                         <p className="text-amber-600 text-base leading-relaxed">
                                                             Please wait — your consultation will resume once the doctor is active again.
                                                         </p>
