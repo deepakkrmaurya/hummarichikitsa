@@ -73,7 +73,7 @@ const DoctorDashboard = () => {
     } finally {
       setIsLoading(false);
     }
-  }, [dispatch]);
+  }, []);
 
   // Handle filter change
   const handleFilterChange = (status) => {
@@ -193,7 +193,7 @@ const DoctorDashboard = () => {
     };
 
     fetchData();
-  }, [dispatch, getAppointment]);
+  }, []);
 
   // Animation variants
   const containerVariants = {
