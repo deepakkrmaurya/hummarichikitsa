@@ -470,7 +470,7 @@ const Home = () => {
                 role: "Cardiac Patient",
                 content: "The cardiology team provided exceptional care during my treatment. Their expertise and compassion made all the difference.",
                 rating: 5,
-                image: `jaya`
+                image: `${abhay}`
               },
               {
                 name: "Abhay Patel",
