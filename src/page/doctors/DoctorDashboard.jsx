@@ -306,11 +306,11 @@ const DoctorDashboard = () => {
   // Filter options
   const filterOptions = [
     { value: 'all', label: 'All Appointments' },
-    { value: 'confirmed', label: 'Confirmed' },
-    { value: 'pending', label: 'Pending' },
+    { value: 'check-in', label: 'Confirmed' },
+    // { value: 'pending', label: 'Pending' },
     { value: 'completed', label: 'Completed' },
-    { value: 'cancelled', label: 'Cancelled' },
-    { value: 'check-in', label: 'Check In' }
+    // { value: 'cancelled', label: 'Cancelled' },
+    { value: 'check-inn', label: 'Check In' }
   ];
 
   return (
@@ -339,44 +339,6 @@ const DoctorDashboard = () => {
               </Link>
             </div>
           </div>
-
-
-          {/* Stats Grid */}
-          {/* <motion.div
-            variants={containerVariants}
-            initial="hidden"
-            animate="show"
-            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8"
-          >
-            {stats.map((stat, index) => (
-              <motion.div
-                key={index}
-                variants={itemVariants}
-                className="bg-white rounded-xl shadow-sm p-6 border-l-4"
-                style={{ borderLeftColor: stat.color }}
-              >
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm font-medium text-gray-600">{stat.title}</p>
-                    <p className="text-2xl font-bold text-gray-900 mt-1">
-                      {isLoading ? (
-                        <div className="h-8 w-12 bg-gray-200 rounded animate-pulse"></div>
-                      ) : (
-                        stat.value
-                      )}
-                    </p>
-                  </div>
-                  <div
-                    className="p-3 rounded-full"
-                    style={{ backgroundColor: `${stat.color}20` }}
-                  >
-                    {stat.icon}
-                  </div>
-                </div>
-              </motion.div>
-            ))}
-          </motion.div> */}
-
           {/* Appointments Card */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -496,7 +458,7 @@ const DoctorDashboard = () => {
                           {filterOptions.map((option) => (
                             <button
                               key={option.value}
-                              onClick={() => handleFilterChange(option.value)}
+                              onClick={() => handleFilterChange(option.value==="check-inn"?"check-in":option.value)}
                               className={`block w-full text-left px-4 py-2.5 text-sm transition-colors duration-150 ${filterStatus === option.value
                                 ? 'bg-blue-50 text-blue-700 font-medium border-r-2 border-blue-500'
                                 : 'text-gray-700 hover:bg-gray-50'
