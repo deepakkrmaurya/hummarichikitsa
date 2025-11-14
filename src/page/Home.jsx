@@ -8,7 +8,7 @@ import { getAllDoctors} from "../Redux/doctorSlice";
 import Layout from "../components/Layout/Layout";
 import { useState } from "react";
 import hospital_img from '../../src/assets/hospital_image.png';
-import deepak from '../../src/assets/';
+import deepak from '../../src/assets/deepak.jpg';
 import abhay from '../../src/assets/abjay.jpg';
 import rohit from '../../src/assets/rohit.jpg';
 import AppointmentsSection from "../components/AppointmentsSection";
@@ -470,7 +470,7 @@ const Home = () => {
                 role: "Cardiac Patient",
                 content: "The cardiology team provided exceptional care during my treatment. Their expertise and compassion made all the difference.",
                 rating: 5,
-                image: `${deepak}`
+                image: `jaya`
               },
               {
                 name: "Abhay Patel",
