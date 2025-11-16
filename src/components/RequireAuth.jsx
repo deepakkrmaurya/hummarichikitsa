@@ -16,14 +16,11 @@ const RequireAuth = ({ allowedRoles }) => {
         setRole(response.data.user.role);
 
       } catch (error) {
-        if (error.response.data.message == 'invalid signature') {
           localStorage.removeItem("data");
           localStorage.removeItem("isLoggedIn");
           localStorage.removeItem("role");
           localStorage.removeItem("token");
           window.location.href = '/';
-        }
-        
       }
     }
 
