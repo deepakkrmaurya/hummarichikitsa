@@ -20,17 +20,17 @@
 //     const [activeTab, setActiveTab] = useState('active');
 //     const [doctors, setdoctors] = useState([])
 //     const [appointments, setappointments] = useState([])
-    
+
 //     useEffect(() => {
 //         setdoctors(doct)
 //     }, [doct])
-    
+
 //     useEffect(() => {
 //         if (appoint) {
 //             setappointments(appoint);
 //         }
 //     }, [appoint]);
-    
+
 //     useEffect(() => {
 //         socket.on("appointmentUpdate", (data) => {
 //             setappointments((prev) => {
@@ -68,7 +68,7 @@
 //             socket.off("doctoractive");
 //         };
 //     }, [dispatch]);
-    
+
 //     useEffect(() => {
 //         (async () => {
 //             if (!doctors || doctors.length === 0) {
@@ -115,18 +115,18 @@
 //     const getTimeSlot = (appointment) => {
 //         try {
 //             const doctor = doctors?.find(d => d?._id === (appointment?.doctorId?._id || appointment.doctorId));
-            
+
 //             if (!doctor?.availability) return 'Time not available';
-            
+
 //             // Find availability for the specific appointment date
 //             const availabilityForDate = doctor.availability.find(avail => 
 //                 avail?.date === appointment?.date
 //             );
-            
+
 //             if (!availabilityForDate?.display || !Array.isArray(availabilityForDate.display)) {
 //                 return 'Time not available';
 //             }
-            
+
 //             // Get the first time slot or a default message
 //             return availabilityForDate.display[0] || 'Time not available';
 //         } catch (error) {
@@ -214,7 +214,7 @@
 //                         {filteredAppointments.map((appointment) => {
 //                             const doctor = doctors?.find(d => d?._id === (appointment?.doctorId?._id || appointment.doctorId));
 //                             const hospitalInfo = hospital?.find(h => h._id === appointment?.hospitalId);
-                            
+
 //                             // Get time slot using helper function
 //                             const timeSlot = getTimeSlot(appointment);
 
@@ -376,17 +376,17 @@ function Appointment() {
     const [activeTab, setActiveTab] = useState('active');
     const [doctors, setdoctors] = useState([])
     const [appointments, setappointments] = useState([])
-    
+
     useEffect(() => {
         setdoctors(doct)
     }, [doct])
-    
+
     useEffect(() => {
         if (appoint) {
             setappointments(appoint);
         }
     }, [appoint]);
-    
+
     useEffect(() => {
         socket.on("appointmentUpdate", (data) => {
             setappointments((prev) => {
@@ -424,7 +424,7 @@ function Appointment() {
             socket.off("doctoractive");
         };
     }, [dispatch]);
-    
+
     useEffect(() => {
         (async () => {
             if (!doctors || doctors.length === 0) {
@@ -480,18 +480,18 @@ function Appointment() {
     const getTimeSlot = (appointment) => {
         try {
             const doctor = doctors?.find(d => d?._id === (appointment?.doctorId?._id || appointment.doctorId));
-            
+
             if (!doctor?.availability) return 'Time not available';
-            
+
             // Find availability for the specific appointment date
-            const availabilityForDate = doctor.availability.find(avail => 
+            const availabilityForDate = doctor.availability.find(avail =>
                 avail?.date === appointment?.date
             );
-            
+
             if (!availabilityForDate?.display || !Array.isArray(availabilityForDate.display)) {
                 return 'Time not available';
             }
-            
+
             // Get the first time slot or a default message
             return availabilityForDate.display[0] || 'Time not available';
         } catch (error) {
@@ -579,7 +579,7 @@ function Appointment() {
                         {filteredAppointments.map((appointment) => {
                             const doctor = doctors?.find(d => d?._id === (appointment?.doctorId?._id || appointment.doctorId));
                             const hospitalInfo = hospital?.find(h => h._id === appointment?.hospitalId);
-                            
+
                             // Get time slot using helper function
                             const timeSlot = getTimeSlot(appointment);
 
@@ -629,18 +629,19 @@ function Appointment() {
                                                     Live
                                                 </div>
                                             )}
+                                            {appointmentIsToday && displayStatus !== "Completed" && !doctor?.active && (
+                                                <div className="flex items-center   px-1 text-wrap  border-amber-100">
+                                                    <p className="text-xs text-red-700 text-center">
+                                                        Doctor is OUT now, He is not actively looking for a patient please wait for him to start.
+                                                    </p>
+                                                </div>
+                                            )}
                                         </div>
                                     </div>
 
                                     <div className="p-4">
                                         {/* Doctor Info - Compact - ONLY FOR TODAY'S APPOINTMENTS */}
-                                        {appointmentIsToday && displayStatus !== "Completed" && !doctor?.active && (
-                                            <div className="bg-amber-50 rounded-lg px-1 mb-3 border border-amber-100">
-                                                <p className="text-xs text-red-700 text-center">
-                                                    Doctor is OUT now, He is not actively looking for a patient please wait for him to start.
-                                                </p>
-                                            </div>
-                                        )}
+
                                         {appointmentIsToday && displayStatus !== "Completed" && doctor?.active && (
                                             <div className="bg-green-50 rounded-lg p-2 mb-3 border border-green-100">
                                                 <div className="flex justify-between text-xs">

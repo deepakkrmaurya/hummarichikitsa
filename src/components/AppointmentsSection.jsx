@@ -512,18 +512,25 @@ const AppointmentsSection = ({ isLoggedIn, currentUser, appointments, doctors, h
                             Live
                           </div>
                         )}
+                        {appointmentIsToday && displayStatus !== "Completed" && !doctor?.active && (
+                                                <div className="flex items-center   px-1 text-wrap  border-amber-100">
+                                                    <p className="text-xs text-red-700 text-center">
+                                                        Doctor is OUT now, He is not actively looking for a patient please wait for him to start.
+                                                    </p>
+                                                </div>
+                                            )}
                       </div>
                     </div>
 
                     <div className="p-4">
                       {/* Doctor Info - Compact - ONLY FOR TODAY'S APPOINTMENTS */}
-                      {appointmentIsToday && displayStatus !== "Completed" && !doctor?.active && (
+                      {/* {appointmentIsToday && displayStatus !== "Completed" && !doctor?.active && (
                         <div className="bg-amber-50 rounded-lg px-1 mb-3 border border-amber-100">
                           <p className="text-xs text-red-700 text-center">
                             Doctor is OUT now, He is not actively looking for a patient please wait for him to start.
                           </p>
                         </div>
-                      )}
+                      )} */}
                       {appointmentIsToday && displayStatus !== "Completed" && doctor?.active && (
                         <div className="bg-green-50 rounded-lg p-2 mb-3 border border-green-100">
                           <div className="flex justify-between text-xs">
