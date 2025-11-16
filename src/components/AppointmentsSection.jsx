@@ -1,6 +1,4 @@
 
-
-
 // import { useEffect, useState } from 'react';
 // import { Link, useNavigate } from 'react-router-dom';
 // import { Calendar, Clock, MapPin, CreditCard } from 'lucide-react';
@@ -38,6 +36,31 @@
 //       return appointmentDate < today;
 //     }
 //   });
+
+//   // Helper function to get time slot
+//   const getTimeSlot = (appointment) => {
+//     try {
+//       const doctor = hospitalDoctor?.find(d => d?._id === (appointment?.doctorId?._id || appointment.doctorId));
+
+//       if (!doctor?.availability) return 'Time not available';
+
+//       // Find availability for the specific appointment date
+//       const availabilityForDate = doctor.availability.find(avail =>
+//         avail?.date === appointment?.date
+//       );
+
+//       if (!availabilityForDate?.display || !Array.isArray(availabilityForDate.display)) {
+//         return 'Time not available';
+//       }
+
+//       // Get the first time slot or a default message
+//       return availabilityForDate.display[0] || 'Time not available';
+//     } catch (error) {
+//       console.error('Error getting time slot:', error);
+//       return 'Time not available';
+//     }
+//   };
+
 //   return (
 //     isLoggedIn && !currentUser?.isDoctor && (
 //       <section className="py-16 bg-gradient-to-br from-blue-50 to-indigo-50">
@@ -101,10 +124,10 @@
 //                 // Fixed: Handle both object and string doctorId
 //                 const doctor = hospitalDoctor?.find(d => d?._id === (appointment?.doctorId?._id || appointment.doctorId));
 //                 const hospitalInfo = hospital?.find(h => h._id === appointment?.hospitalId);
-//                 const availability = appointment?.doctorId?.availability?.filter((d) => d?.date === appointment?.date)
-//                 // console.log(availability[0].display[0])
-//                 console.log(availability)
-//                 console.log("sda",appointment.date)
+
+//                 // Get time slot using helper function
+//                 const timeSlot = getTimeSlot(appointment);
+
 //                 // Determine status for display
 //                 let displayStatus;
 //                 let statusColor;
@@ -138,7 +161,6 @@
 //                           {displayStatus}
 //                         </span>
 
-
 //                         {/* Live Status Indicator */}
 //                         {displayStatus !== "Completed" && doctor?.active && (
 //                           <div className="flex items-center text-xs text-green-600">
@@ -155,13 +177,9 @@
 //                     <div className="p-4">
 //                       {/* Doctor Info - Compact */}
 //                       {displayStatus !== "Completed" && !doctor?.active && (
-//                         <div className="bg-amber-50 rounded-lg p-2 mb-3 border border-amber-100">
-//                           <p className="text-xs text-amber-700 text-center">
-//                             The doctor currently has no patients to view.
-
-//                           </p>
-//                           <p className="text-xs text-amber-700 text-center">
-//                             Waiting for doctor to come online...
+//                         <div className="bg-amber-50 rounded-lg px-1 mb-3 border border-amber-100">
+//                           <p className="text-xs text-red-700 text-center">
+//                             Doctor is OUT now,  He is not actively looking for a patient please wait for him to start.
 //                           </p>
 //                         </div>
 //                       )}
@@ -202,23 +220,19 @@
 //                         </div>
 //                       </div>
 
-//                       {/* Current Status Section - Only for Active Appointments */}
-                      
-
-
-
 //                       {/* Appointment Details */}
 //                       <div className="flex-col items-center justify-between text-xs text-gray-600 bg-gray-50 rounded-lg px-3 py-2 mb-3">
-//                         <div className="flex items-center">
+//                         <div className="flex items-center mb-1">
 //                           <Calendar className="w-3 h-3 mr-1 text-blue-500" />
 //                           {new Date(appointment.date).toLocaleDateString('en-US', {
 //                             month: 'short',
-//                             day: 'numeric'
+//                             day: 'numeric',
+//                             year: 'numeric'
 //                           })}
 //                         </div>
 //                         <div className="flex items-center">
 //                           <Clock className="w-3 h-3 mr-1 text-blue-500" />
-//                           {/* {availability[0]?.display[0]} */}
+//                           {timeSlot}
 //                         </div>
 //                       </div>
 
@@ -314,7 +328,6 @@
 // export default AppointmentsSection;
 
 
-
 import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Calendar, Clock, MapPin, CreditCard } from 'lucide-react';
@@ -375,6 +388,15 @@ const AppointmentsSection = ({ isLoggedIn, currentUser, appointments, doctors, h
       console.error('Error getting time slot:', error);
       return 'Time not available';
     }
+  };
+
+  // Check if appointment is for today
+  const isToday = (appointmentDate) => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const appointment = new Date(appointmentDate);
+    appointment.setHours(0, 0, 0, 0);
+    return appointment.getTime() === today.getTime();
   };
 
   return (
@@ -444,6 +466,9 @@ const AppointmentsSection = ({ isLoggedIn, currentUser, appointments, doctors, h
                 // Get time slot using helper function
                 const timeSlot = getTimeSlot(appointment);
 
+                // Check if appointment is for today
+                const appointmentIsToday = isToday(appointment.date);
+
                 // Determine status for display
                 let displayStatus;
                 let statusColor;
@@ -477,8 +502,8 @@ const AppointmentsSection = ({ isLoggedIn, currentUser, appointments, doctors, h
                           {displayStatus}
                         </span>
 
-                        {/* Live Status Indicator */}
-                        {displayStatus !== "Completed" && doctor?.active && (
+                        {/* Live Status Indicator - ONLY FOR TODAY'S APPOINTMENTS */}
+                        {appointmentIsToday && displayStatus !== "Completed" && doctor?.active && (
                           <div className="flex items-center text-xs text-green-600">
                             <span className="relative flex h-2 w-2 mr-1">
                               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
@@ -491,18 +516,15 @@ const AppointmentsSection = ({ isLoggedIn, currentUser, appointments, doctors, h
                     </div>
 
                     <div className="p-4">
-                      {/* Doctor Info - Compact */}
-                      {displayStatus !== "Completed" && !doctor?.active && (
-                        <div className="bg-amber-50 rounded-lg p-2 mb-3 border border-amber-100">
-                          <p className="text-xs text-amber-700 text-center">
-                            The doctor currently has no patients to view.
-                          </p>
-                          <p className="text-xs text-amber-700 text-center">
-                            Waiting for doctor to come online...
+                      {/* Doctor Info - Compact - ONLY FOR TODAY'S APPOINTMENTS */}
+                      {appointmentIsToday && displayStatus !== "Completed" && !doctor?.active && (
+                        <div className="bg-amber-50 rounded-lg px-1 mb-3 border border-amber-100">
+                          <p className="text-xs text-red-700 text-center">
+                            Doctor is OUT now, He is not actively looking for a patient please wait for him to start.
                           </p>
                         </div>
                       )}
-                      {displayStatus !== "Completed" && doctor?.active && (
+                      {appointmentIsToday && displayStatus !== "Completed" && doctor?.active && (
                         <div className="bg-green-50 rounded-lg p-2 mb-3 border border-green-100">
                           <div className="flex justify-between text-xs">
                             <div className="text-gray-700">

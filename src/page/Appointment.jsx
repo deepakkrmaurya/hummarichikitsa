@@ -1,4 +1,361 @@
-import React, { useEffect, useState } from 'react'
+
+// import React, { useEffect, useState } from 'react';
+// import { Calendar, CreditCard, MapPin, Clock, Frown, PlusCircle } from 'lucide-react';
+// import { useDispatch, useSelector } from 'react-redux';
+// import { getAllAppointment } from '../Redux/appointment';
+// import { getAllDoctors } from '../Redux/doctorSlice';
+// import { getAllHospital } from '../Redux/hospitalSlice';
+// import avatar from '../../src/assets/logo-def.png';
+// import { Link } from 'react-router-dom';
+// import Layout from '../components/Layout/Layout';
+// import socket from '../Helper/socket';
+
+// function Appointment() {
+//     const hospital = useSelector((state) => state.hospitals.hospitals);
+//     const appoint = useSelector((state) => state.appointment?.appointment);
+//     const dispatch = useDispatch();
+//     const doct = useSelector((state) => state?.doctors?.doctors.doctors);
+
+//     const isLoading = useSelector((state) => state.appointment?.loading);
+//     const [activeTab, setActiveTab] = useState('active');
+//     const [doctors, setdoctors] = useState([])
+//     const [appointments, setappointments] = useState([])
+    
+//     useEffect(() => {
+//         setdoctors(doct)
+//     }, [doct])
+    
+//     useEffect(() => {
+//         if (appoint) {
+//             setappointments(appoint);
+//         }
+//     }, [appoint]);
+    
+//     useEffect(() => {
+//         socket.on("appointmentUpdate", (data) => {
+//             setappointments((prev) => {
+//                 const exists = prev.some((a) => a._id === data._id);
+//                 if (exists) {
+//                     return prev.map((a) => (a._id === data._id ? data : a));
+//                 }
+//                 return [...prev, data];
+//             });
+//         });
+
+//         socket.on("doctorUpdate", (data) => {
+//             setdoctors((prev) => {
+//                 const exists = prev.some((a) => a._id === data._id);
+//                 if (exists) {
+//                     return prev.map((a) => (a._id === data._id ? data : a));
+//                 }
+//                 return [...prev, data];
+//             });
+//         })
+
+//         socket.on("doctoractive", (data) => {
+//             setdoctors((prev) => {
+//                 const exists = prev.some((a) => a._id === data._id);
+//                 if (exists) {
+//                     return prev.map((a) => (a._id === data._id ? data : a));
+//                 }
+//                 return [...prev, data];
+//             });
+//         })
+
+//         return () => {
+//             socket.off("appointmentUpdate");
+//             socket.off("doctorUpdate");
+//             socket.off("doctoractive");
+//         };
+//     }, [dispatch]);
+    
+//     useEffect(() => {
+//         (async () => {
+//             if (!doctors || doctors.length === 0) {
+//                 await dispatch(getAllDoctors())
+//             }
+//             if (!hospital || hospital.length === 0) {
+//                 await dispatch(getAllHospital())
+//             }
+//         })()
+//     }, [])
+
+//     useEffect(() => {
+//         if (!appointments || appointments.length === 0) {
+//             (async () => {
+//                 await dispatch(getAllAppointment())
+//             })()
+//         }
+//     }, [])
+
+//     // Filter appointments based on tab selection
+//     const filteredAppointments = appointments?.filter(appointment => {
+//         if (activeTab === 'active') {
+//             if (appointment.status === "completed") return false;
+
+//             const today = new Date();
+//             today.setHours(0, 0, 0, 0);
+//             const appointmentDate = new Date(appointment.date);
+//             appointmentDate.setHours(0, 0, 0, 0);
+
+//             return appointmentDate >= today;
+//         } else {
+//             if (appointment.status === "completed") return true;
+
+//             const today = new Date();
+//             today.setHours(0, 0, 0, 0);
+//             const appointmentDate = new Date(appointment.date);
+//             appointmentDate.setHours(0, 0, 0, 0);
+
+//             return appointmentDate < today;
+//         }
+//     }) || [];
+
+//     // Helper function to get time slot
+//     const getTimeSlot = (appointment) => {
+//         try {
+//             const doctor = doctors?.find(d => d?._id === (appointment?.doctorId?._id || appointment.doctorId));
+            
+//             if (!doctor?.availability) return 'Time not available';
+            
+//             // Find availability for the specific appointment date
+//             const availabilityForDate = doctor.availability.find(avail => 
+//                 avail?.date === appointment?.date
+//             );
+            
+//             if (!availabilityForDate?.display || !Array.isArray(availabilityForDate.display)) {
+//                 return 'Time not available';
+//             }
+            
+//             // Get the first time slot or a default message
+//             return availabilityForDate.display[0] || 'Time not available';
+//         } catch (error) {
+//             console.error('Error getting time slot:', error);
+//             return 'Time not available';
+//         }
+//     };
+
+//     useEffect(() => {
+//         window.scrollTo({ top: 0, behavior: "smooth" });
+//     }, []);
+
+//     if (isLoading) {
+//         return (
+//             <Layout>
+//                 <div className="flex justify-center items-center h-[100vh]">
+//                     <span className="Loader"></span>
+//                 </div>
+//             </Layout>
+//         );
+//     }
+
+//     return (
+//         <Layout>
+//             <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+//                 <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-4">
+//                     <h1 className="text-2xl font-bold text-gray-900">My Appointments</h1>
+
+//                     {/* Tab Navigation */}
+//                     <div className="flex bg-white rounded-lg shadow-sm p-1 border border-gray-200">
+//                         <button
+//                             onClick={() => setActiveTab('active')}
+//                             className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${activeTab === 'active'
+//                                 ? 'bg-blue-600 text-white'
+//                                 : 'text-gray-600 hover:text-gray-900'}`}
+//                         >
+//                             Active
+//                         </button>
+//                         <button
+//                             onClick={() => setActiveTab('completed')}
+//                             className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${activeTab === 'completed'
+//                                 ? 'bg-blue-600 text-white'
+//                                 : 'text-gray-600 hover:text-gray-900'}`}
+//                         >
+//                             Completed
+//                         </button>
+//                     </div>
+
+//                     <Link
+//                         to="/hospitals"
+//                         className="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-md shadow-sm transition-colors duration-150"
+//                     >
+//                         <PlusCircle className="w-5 h-5 mr-2" />
+//                         Book New Appointment
+//                     </Link>
+//                 </div>
+
+//                 {filteredAppointments.length === 0 ? (
+//                     <div className="bg-white rounded-xl shadow-sm overflow-hidden border border-gray-200 p-12 text-center">
+//                         <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-blue-100">
+//                             <Frown className="h-6 w-6 text-blue-600" />
+//                         </div>
+//                         <h3 className="mt-4 text-lg font-medium text-gray-900">
+//                             {activeTab === 'active' ? 'No Active Appointments' : 'No Completed Appointments'}
+//                         </h3>
+//                         <p className="mt-2 text-sm text-gray-500">
+//                             {activeTab === 'active'
+//                                 ? "You don't have any upcoming appointments"
+//                                 : "Your completed appointments will appear here"}
+//                         </p>
+//                         <div className="mt-6">
+//                             {activeTab === 'active' && (
+//                                 <Link
+//                                     to="/hospitals"
+//                                     className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+//                                 >
+//                                     <PlusCircle className="-ml-1 mr-2 h-5 w-5" />
+//                                     Book Appointment
+//                                 </Link>
+//                             )}
+//                         </div>
+//                     </div>
+//                 ) : (
+//                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+//                         {filteredAppointments.map((appointment) => {
+//                             const doctor = doctors?.find(d => d?._id === (appointment?.doctorId?._id || appointment.doctorId));
+//                             const hospitalInfo = hospital?.find(h => h._id === appointment?.hospitalId);
+                            
+//                             // Get time slot using helper function
+//                             const timeSlot = getTimeSlot(appointment);
+
+//                             // Determine status for display
+//                             let displayStatus;
+//                             let statusColor;
+//                             if (appointment.status === "completed") {
+//                                 displayStatus = "Completed";
+//                                 statusColor = "bg-blue-100 text-blue-800";
+//                             } else {
+//                                 const today = new Date();
+//                                 today.setHours(0, 0, 0, 0);
+//                                 const appointmentDate = new Date(appointment.date);
+//                                 appointmentDate.setHours(0, 0, 0, 0);
+
+//                                 if (appointmentDate < today) {
+//                                     displayStatus = "Completed";
+//                                     statusColor = "bg-blue-100 text-blue-800";
+//                                 } else if (appointmentDate.getTime() === today.getTime()) {
+//                                     displayStatus = "Active";
+//                                     statusColor = "bg-[#009689] text-white";
+//                                 } else {
+//                                     displayStatus = "Active";
+//                                     statusColor = "bg-[#009689] text-white";
+//                                 }
+//                             }
+
+//                             return (
+//                                 <div key={appointment._id} className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden transition-all duration-200 hover:shadow-md">
+//                                     {/* Status Header */}
+//                                     <div className="px-4 py-2 border-b border-gray-100">
+//                                         <div className="flex justify-between items-center">
+//                                             <span className={`text-xs font-medium px-2 py-1 rounded-full ${statusColor}`}>
+//                                                 {displayStatus}
+//                                             </span>
+
+//                                             {/* Live Status Indicator */}
+//                                             {displayStatus !== "Completed" && doctor?.active && (
+//                                                 <div className="flex items-center text-xs text-green-600">
+//                                                     <span className="relative flex h-2 w-2 mr-1">
+//                                                         <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+//                                                         <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
+//                                                     </span>
+//                                                     Live
+//                                                 </div>
+//                                             )}
+//                                         </div>
+//                                     </div>
+
+//                                     <div className="p-4">
+//                                         {/* Doctor Info - Compact */}
+//                                         {displayStatus !== "Completed" && !doctor?.active && (
+//                                             <div className="bg-amber-50 rounded-lg px-1 mb-3 border border-amber-100">
+//                                                 <p className="text-xs text-red-700 text-center">
+//                                                     Doctor is OUT now, He is not actively looking for a patient please wait for him to start.
+//                                                 </p>
+//                                             </div>
+//                                         )}
+//                                         {displayStatus !== "Completed" && doctor?.active && (
+//                                             <div className="bg-green-50 rounded-lg p-2 mb-3 border border-green-100">
+//                                                 <div className="flex justify-between text-xs">
+//                                                     <div className="text-gray-700">
+//                                                         Currently Serving: <span className="font-semibold text-green-600">{doctor?.currentAppointment}</span>
+//                                                     </div>
+//                                                     <div className="text-gray-700">
+//                                                         Your Turn: <span className="font-semibold text-blue-600">{appointment?.appointmentNumber}</span>
+//                                                     </div>
+//                                                 </div>
+//                                             </div>
+//                                         )}
+//                                         <div className="flex items-start space-x-3 mb-3">
+//                                             <div className="relative flex-shrink-0">
+//                                                 <img
+//                                                     src={doctor?.image || avatar}
+//                                                     className="w-12 h-12 rounded-lg object-cover border border-gray-200"
+//                                                     alt={doctor?.name}
+//                                                 />
+//                                                 <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-blue-500 rounded-full flex items-center justify-center">
+//                                                     <svg className="w-2 h-2 text-white" fill="currentColor" viewBox="0 0 20 20">
+//                                                         <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd"></path>
+//                                                     </svg>
+//                                                 </div>
+//                                             </div>
+//                                             <div className="flex-1 min-w-0">
+//                                                 <h3 className="font-semibold text-gray-900 text-sm truncate">{doctor?.name}</h3>
+//                                                 <p className="text-xs text-gray-600 truncate">{doctor?.specialty}</p>
+//                                                 <div className="flex items-center text-xs text-gray-500 mt-1">
+//                                                     <svg className="w-3 h-3 mr-1 text-blue-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+//                                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-4m-8 0H3m2 0h4M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
+//                                                     </svg>
+//                                                     <span className="truncate">{hospitalInfo?.name}</span>
+//                                                 </div>
+//                                             </div>
+//                                         </div>
+
+//                                         {/* Appointment Details */}
+//                                         <div className="flex-col items-center justify-between text-xs text-gray-600 bg-gray-50 rounded-lg px-3 py-2 mb-3">
+//                                             <div className="flex items-center mb-1">
+//                                                 <Calendar className="w-3 h-3 mr-1 text-blue-500" />
+//                                                 {new Date(appointment.date).toLocaleDateString('en-US', {
+//                                                     month: 'short',
+//                                                     day: 'numeric',
+//                                                     year: 'numeric'
+//                                                 })}
+//                                             </div>
+//                                             <div className="flex items-center">
+//                                                 <Clock className="w-3 h-3 mr-1 text-blue-500" />
+//                                                 {timeSlot}
+//                                             </div>
+//                                         </div>
+
+//                                         {/* Footer with Payment and Action */}
+//                                         <div className="flex items-center justify-between">
+//                                             <div className="text-xs text-gray-600 flex items-center">
+//                                                 <CreditCard className="w-3 h-3 mr-1 text-blue-500" />
+//                                                 ₹{appointment.booking_amount}
+//                                             </div>
+//                                             <Link
+//                                                 to={`/appointment_details_page/${appointment._id}`}
+//                                                 className="text-xs text-blue-600 hover:text-blue-800 font-medium flex items-center transition-colors"
+//                                             >
+//                                                 Details
+//                                                 <svg className="w-3 h-3 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+//                                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7"></path>
+//                                                 </svg>
+//                                             </Link>
+//                                         </div>
+//                                     </div>
+//                                 </div>
+//                             );
+//                         })}
+//                     </div>
+//                 )}
+//             </div>
+//         </Layout>
+//     )
+// }
+
+// export default Appointment;
+
+import React, { useEffect, useState } from 'react';
 import { Calendar, CreditCard, MapPin, Clock, Frown, PlusCircle } from 'lucide-react';
 import { useDispatch, useSelector } from 'react-redux';
 import { getAllAppointment } from '../Redux/appointment';
@@ -19,18 +376,19 @@ function Appointment() {
     const [activeTab, setActiveTab] = useState('active');
     const [doctors, setdoctors] = useState([])
     const [appointments, setappointments] = useState([])
+    
     useEffect(() => {
         setdoctors(doct)
     }, [doct])
+    
     useEffect(() => {
         if (appoint) {
             setappointments(appoint);
         }
     }, [appoint]);
+    
     useEffect(() => {
         socket.on("appointmentUpdate", (data) => {
-            // console.log("👉 Live Update:", data);
-
             setappointments((prev) => {
                 const exists = prev.some((a) => a._id === data._id);
                 if (exists) {
@@ -43,7 +401,6 @@ function Appointment() {
         socket.on("doctorUpdate", (data) => {
             setdoctors((prev) => {
                 const exists = prev.some((a) => a._id === data._id);
-
                 if (exists) {
                     return prev.map((a) => (a._id === data._id ? data : a));
                 }
@@ -54,7 +411,6 @@ function Appointment() {
         socket.on("doctoractive", (data) => {
             setdoctors((prev) => {
                 const exists = prev.some((a) => a._id === data._id);
-
                 if (exists) {
                     return prev.map((a) => (a._id === data._id ? data : a));
                 }
@@ -68,12 +424,12 @@ function Appointment() {
             socket.off("doctoractive");
         };
     }, [dispatch]);
+    
     useEffect(() => {
         (async () => {
             if (!doctors || doctors.length === 0) {
                 await dispatch(getAllDoctors())
             }
-
             if (!hospital || hospital.length === 0) {
                 await dispatch(getAllHospital())
             }
@@ -88,10 +444,18 @@ function Appointment() {
         }
     }, [])
 
+    // Check if appointment is for today
+    const isToday = (appointmentDate) => {
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        const appointment = new Date(appointmentDate);
+        appointment.setHours(0, 0, 0, 0);
+        return appointment.getTime() === today.getTime();
+    };
+
     // Filter appointments based on tab selection
     const filteredAppointments = appointments?.filter(appointment => {
         if (activeTab === 'active') {
-            // For active tab, show appointments that are not completed and not in the past
             if (appointment.status === "completed") return false;
 
             const today = new Date();
@@ -101,7 +465,6 @@ function Appointment() {
 
             return appointmentDate >= today;
         } else {
-            // For completed tab, show completed appointments and past appointments
             if (appointment.status === "completed") return true;
 
             const today = new Date();
@@ -113,21 +476,29 @@ function Appointment() {
         }
     }) || [];
 
-    // Function to format date with ordinal suffix
-    const formatDate = (dateString) => {
-        const date = new Date(dateString);
-        const day = date.getDate();
-        const month = date.toLocaleString('default', { month: 'short' });
-        const weekday = date.toLocaleString('default', { weekday: 'short' });
-
-        // Add ordinal suffix
-        let suffix = 'th';
-        if (day % 10 === 1 && day !== 11) suffix = 'st';
-        else if (day % 10 === 2 && day !== 12) suffix = 'nd';
-        else if (day % 10 === 3 && day !== 13) suffix = 'rd';
-
-        return `${weekday}, ${month} ${day}${suffix}`;
-    }
+    // Helper function to get time slot
+    const getTimeSlot = (appointment) => {
+        try {
+            const doctor = doctors?.find(d => d?._id === (appointment?.doctorId?._id || appointment.doctorId));
+            
+            if (!doctor?.availability) return 'Time not available';
+            
+            // Find availability for the specific appointment date
+            const availabilityForDate = doctor.availability.find(avail => 
+                avail?.date === appointment?.date
+            );
+            
+            if (!availabilityForDate?.display || !Array.isArray(availabilityForDate.display)) {
+                return 'Time not available';
+            }
+            
+            // Get the first time slot or a default message
+            return availabilityForDate.display[0] || 'Time not available';
+        } catch (error) {
+            console.error('Error getting time slot:', error);
+            return 'Time not available';
+        }
+    };
 
     useEffect(() => {
         window.scrollTo({ top: 0, behavior: "smooth" });
@@ -137,7 +508,7 @@ function Appointment() {
         return (
             <Layout>
                 <div className="flex justify-center items-center h-[100vh]">
-                    <span class="Loader"></span>
+                    <span className="Loader"></span>
                 </div>
             </Layout>
         );
@@ -145,7 +516,7 @@ function Appointment() {
 
     return (
         <Layout>
-            <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
                 <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-4">
                     <h1 className="text-2xl font-bold text-gray-900">My Appointments</h1>
 
@@ -204,310 +575,143 @@ function Appointment() {
                         </div>
                     </div>
                 ) : (
-                    <div className="space-y-6">
-                        {filteredAppointments.map((appointment, index) => {
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        {filteredAppointments.map((appointment) => {
+                            const doctor = doctors?.find(d => d?._id === (appointment?.doctorId?._id || appointment.doctorId));
+                            const hospitalInfo = hospital?.find(h => h._id === appointment?.hospitalId);
+                            
+                            // Get time slot using helper function
+                            const timeSlot = getTimeSlot(appointment);
 
-                            let finalStatus;
-                            const doctor = doctors?.find(d => d._id === appointment?.doctorId?._id);
-                            const availability = appointment.doctorId.availability.filter((d) => d.date == appointment.date)
-                            const hospitals = hospital.find(h => h._id === appointment?.hospitalId);
-                            //   alert(appointment.status)
+                            // Check if appointment is for today
+                            const appointmentIsToday = isToday(appointment.date);
+
+                            // Determine status for display
+                            let displayStatus;
+                            let statusColor;
                             if (appointment.status === "completed") {
-                                finalStatus = "Completed";
+                                displayStatus = "Completed";
+                                statusColor = "bg-blue-100 text-blue-800";
                             } else {
                                 const today = new Date();
                                 today.setHours(0, 0, 0, 0);
-
                                 const appointmentDate = new Date(appointment.date);
                                 appointmentDate.setHours(0, 0, 0, 0);
 
-                                finalStatus = appointmentDate >= today ? "Active" : "Completed";
+                                if (appointmentDate < today) {
+                                    displayStatus = "Completed";
+                                    statusColor = "bg-blue-100 text-blue-800";
+                                } else if (appointmentDate.getTime() === today.getTime()) {
+                                    displayStatus = "Active";
+                                    statusColor = "bg-[#009689] text-white";
+                                } else {
+                                    displayStatus = "Active";
+                                    statusColor = "bg-[#009689] text-white";
+                                }
                             }
 
                             return (
-                                // <div
-                                //     key={index}
-                                //     className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden transition-all duration-300 hover:shadow-xl hover:-translate-y-1"
-                                // >
-                                //     <div className="p-6">
+                                <div key={appointment._id} className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden transition-all duration-200 hover:shadow-md">
+                                    {/* Status Header */}
+                                    <div className="px-4 py-2 border-b border-gray-100">
+                                        <div className="flex justify-between items-center">
+                                            <span className={`text-xs font-medium px-2 py-1 rounded-full ${statusColor}`}>
+                                                {displayStatus}
+                                            </span>
 
-                                //         {/* ✅ Live Status Section (Top) */}
-                                //         {finalStatus !== 'Completed' && doctor.active ? (
-                                //             <div className="bg-gradient-to-r from-green-50 to-teal-50 rounded-xl p-4 mb-6 border border-green-100 shadow-sm">
-                                //                 <div className="flex items-center justify-between">
-                                //                     <div className="flex items-center space-x-3">
-                                //                         <span className="relative flex h-3 w-3">
-                                //                             <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-500 opacity-75"></span>
-                                //                             <span className="relative inline-flex rounded-full h-3 w-3 bg-green-600"></span>
-                                //                         </span>
-                                //                         <p className="text-sm font-medium text-gray-700">
-                                //                             Current: <span className="text-green-700 font-bold">#{doctor?.currentAppointment}</span>
-                                //                         </p>
-                                //                     </div>
-                                //                     <p className="text-sm font-medium text-gray-700">
-                                //                         Your No: <span className="text-teal-700 font-bold">#{appointment?.appointmentNumber}</span>
-                                //                     </p>
-                                //                 </div>
-                                //             </div>
-                                //         ) : (
-                                //             <p className="text-center text-gray-500 bg-gray-50 border border-gray-200 rounded-lg py-4 px-6 shadow-sm">
-                                //                 The doctor currently has no patients to view.
-                                //             </p>
-                                //         )}
-
-                                //         {/* ✅ Header Section */}
-                                //         <div className="flex items-start  pt-1 justify-between mb-6">
-                                //             <div className="flex items-center space-x-4">
-                                //                 <div className="relative">
-                                //                     <img
-                                //                         src={doctor?.photo || avatar}
-                                //                         className="w-16 h-16 rounded-xl object-cover border-2 border-white shadow-md"
-                                //                         alt={`${doctor?.name}'s profile`}
-                                //                     />
-                                //                     <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-green-600 rounded-full flex items-center justify-center shadow">
-                                //                         <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
-                                //                             <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd"></path>
-                                //                         </svg>
-                                //                     </div>
-                                //                 </div>
-                                //                 <div>
-                                //                     <h3 className="font-bold text-gray-900 text-lg">{doctor?.name}</h3>
-                                //                     <p className="text-sm text-gray-600">{doctor?.specialty}</p>
-                                //                     <div className="mt-1 flex items-center text-sm text-gray-500">
-                                //                         <svg className="w-4 h-4 mr-1 text-teal-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                //                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
-                                //                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                                //                         </svg>
-                                //                         <span>{hospitals?.name}</span>
-                                //                     </div>
-                                //                 </div>
-                                //             </div>
-
-                                //             <span
-                                //                 className={`px-3 py-1.5 text-xs font-semibold rounded-full ${finalStatus === 'Active'
-                                //                     ? 'bg-green-100 text-green-700'
-                                //                     : finalStatus === 'Completed'
-                                //                         ? 'bg-blue-100 text-blue-700'
-                                //                         : 'bg-gray-100 text-gray-700'
-                                //                     }`}
-                                //             >
-                                //                 {finalStatus}
-                                //             </span>
-                                //         </div>
-
-                                //         {/* ✅ Appointment Details */}
-                                //         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-                                //             <div className="bg-gray-50 rounded-xl p-4 flex items-center">
-                                //                 <div className="bg-blue-100 p-2.5 rounded-lg mr-3">
-                                //                     <Calendar className="w-5 h-5 text-blue-600" />
-                                //                 </div>
-                                //                 <div>
-                                //                     <p className="text-xs text-gray-500 font-medium">Appointment Date</p>
-                                //                     <p className="font-semibold text-gray-900">{formatDate(appointment.date)}</p>
-                                //                     <p className="font-semibold text-gray-900">{availability[0]?.display[0]}</p>
-                                //                 </div>
-                                //             </div>
-
-                                //             <div className="bg-gray-50 rounded-xl p-4 flex items-center">
-                                //                 <div className="bg-blue-100 p-2.5 rounded-lg mr-3">
-                                //                     <CreditCard className="w-5 h-5 text-blue-600" />
-                                //                 </div>
-                                //                 <div>
-                                //                     <p className="text-xs text-gray-500 font-medium">Payment</p>
-                                //                     <p className="font-semibold text-gray-900">
-                                //                         ₹{appointment.booking_amount} • {appointment.paymentMethod}
-                                //                     </p>
-                                //                 </div>
-                                //             </div>
-
-                                //             <div className="bg-gray-50 rounded-xl p-4 flex items-center">
-                                //                 <div className="bg-blue-100 p-2.5 rounded-lg mr-3">
-                                //                     <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                //                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
-                                //                     </svg>
-                                //                 </div>
-                                //                 <div>
-                                //                     <p className="text-xs text-gray-500 font-medium">Token No</p>
-                                //                     <p className="font-semibold text-gray-900">{appointment?.token}</p>
-                                //                 </div>
-                                //             </div>
-                                //         </div>
-
-                                //         {/* ✅ Action Button */}
-                                //         <div className="flex justify-center">
-                                //             <Link
-                                //                 to={`/appointment_details_page/${appointment?._id}`}
-                                //                 className="w-full bg-[#009689] text-white text-center py-3 px-4 rounded-xl font-semibold transition-all duration-300 shadow-md hover:shadow-lg hover:scale-[1.02]">
-                                //                 View Full Details
-                                //             </Link>
-                                //         </div>
-                                //     </div>
-                                // </div>
-                                <div
-                                    key={index}
-                                    className="bg-white/80 backdrop-blur-sm rounded-2xl border border-gray-100 shadow-md hover:shadow-xl hover:-translate-y-1 transition-all duration-300"
-                                >
-                                    <div className="p-6 sm:p-8">
-
-                                        {/* 🟢 Live Status */}
-                                        {finalStatus !== "Completed" && doctor.active ? (
-                                            <div className="bg-gradient-to-r from-emerald-50 to-teal-50 rounded-xl p-4 mb-6 border border-emerald-100 flex justify-between items-center shadow-sm">
-                                                <div className="flex items-center space-x-3">
-                                                    <span className="relative flex h-3 w-3">
-                                                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-500 opacity-75"></span>
-                                                        <span className="relative inline-flex rounded-full h-3 w-3 bg-emerald-600"></span>
+                                            {/* Live Status Indicator - ONLY FOR TODAY'S APPOINTMENTS */}
+                                            {appointmentIsToday && displayStatus !== "Completed" && doctor?.active && (
+                                                <div className="flex items-center text-xs text-green-600">
+                                                    <span className="relative flex h-2 w-2 mr-1">
+                                                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                                                        <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
                                                     </span>
-                                                    <p className="text-sm text-gray-700">
-                                                        <span className="font-medium text-gray-800">Currently Serving:</span>{" "}
-                                                        <span className="text-emerald-700 font-semibold">
-                                                            #{doctor?.currentAppointment}
-                                                        </span>
-                                                    </p>
+                                                    Live
                                                 </div>
-                                                <p className="text-sm text-gray-700">
-                                                    <span className="font-medium text-gray-800">Your Turn:</span>{" "}
-                                                    <span className="text-teal-700 font-semibold">
-                                                        #{appointment?.appointmentNumber}
-                                                    </span>
+                                            )}
+                                        </div>
+                                    </div>
+
+                                    <div className="p-4">
+                                        {/* Doctor Info - Compact - ONLY FOR TODAY'S APPOINTMENTS */}
+                                        {appointmentIsToday && displayStatus !== "Completed" && !doctor?.active && (
+                                            <div className="bg-amber-50 rounded-lg px-1 mb-3 border border-amber-100">
+                                                <p className="text-xs text-red-700 text-center">
+                                                    Doctor is OUT now, He is not actively looking for a patient please wait for him to start.
                                                 </p>
                                             </div>
-                                        ) : finalStatus === "Completed" ? (
-                                            <div></div>
-                                        ):(
-
-                                            <div className="bg-gradient-to-br from-amber-50 to-orange-50 border border-amber-200 rounded-2xl p-6 shadow-lg">
-                                                <div className="text-center ">
-                                                    <div className="">
-                                                     
-                                                        
-                                                        <p className="text-amber-600 text-base leading-relaxed">
-                                                            Please wait — your consultation will resume once the doctor is active again.
-                                                        </p>
-                                                         <p className="text-amber-600 text-sm  font-medium">
-                                                            Waiting for doctor to come online...
-                                                        </p>
-                                                    </div>
-
-                                                    
-                                                </div>
-                                            </div>
-
                                         )}
-
-                                        {/* 👨‍⚕️ Doctor Info */}
-                                        <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-6">
-                                            <div className="flex items-center space-x-4">
-                                                <div className="relative">
-                                                    <img
-                                                        src={doctor?.photo || avatar}
-                                                        alt={`${doctor?.name}`}
-                                                        className="w-16 h-16 rounded-2xl object-cover border-2 border-white shadow-md"
-                                                    />
-                                                    {doctor.active && (
-                                                        <span className="absolute -bottom-1 -right-1 w-4 h-4 bg-green-500 border-2 border-white rounded-full"></span>
-                                                    )}
-                                                </div>
-                                                <div>
-                                                    <h3 className="text-lg font-bold text-gray-900">{doctor?.name}</h3>
-                                                    <p className="text-sm text-gray-600">{doctor?.specialty}</p>
-                                                    <div className="mt-1 flex items-center text-sm text-gray-500">
-                                                        <svg
-                                                            className="w-4 h-4 mr-1 text-teal-500"
-                                                            fill="none"
-                                                            stroke="currentColor"
-                                                            viewBox="0 0 24 24"
-                                                        >
-                                                            <path
-                                                                strokeLinecap="round"
-                                                                strokeLinejoin="round"
-                                                                strokeWidth="2"
-                                                                d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
-                                                            />
-                                                            <path
-                                                                strokeLinecap="round"
-                                                                strokeLinejoin="round"
-                                                                strokeWidth="2"
-                                                                d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
-                                                            />
-                                                        </svg>
-                                                        <span>{hospitals?.name}</span>
+                                        {appointmentIsToday && displayStatus !== "Completed" && doctor?.active && (
+                                            <div className="bg-green-50 rounded-lg p-2 mb-3 border border-green-100">
+                                                <div className="flex justify-between text-xs">
+                                                    <div className="text-gray-700">
+                                                        Currently Serving: <span className="font-semibold text-green-600">{doctor?.currentAppointment}</span>
+                                                    </div>
+                                                    <div className="text-gray-700">
+                                                        Your Turn: <span className="font-semibold text-blue-600">{appointment?.appointmentNumber}</span>
                                                     </div>
                                                 </div>
                                             </div>
-
-                                            <span
-                                                className={`mt-4 sm:mt-0 px-4 py-1.5 text-xs font-semibold rounded-full tracking-wide ${finalStatus === "Active"
-                                                    ? "bg-green-100 text-green-700"
-                                                    : finalStatus === "Completed"
-                                                        ? "bg-blue-100 text-blue-700"
-                                                        : "bg-gray-100 text-gray-700"
-                                                    }`}
-                                            >
-                                                {finalStatus}
-                                            </span>
-                                        </div>
-
-                                        {/* 📅 Appointment Details */}
-                                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-                                            <div className="bg-gray-50 rounded-xl p-4 flex items-center space-x-3 border border-gray-100">
-                                                <div className="bg-blue-100 p-2.5 rounded-lg">
-                                                    <Calendar className="w-5 h-5 text-blue-600" />
-                                                </div>
-                                                <div>
-                                                    <p className="text-xs text-gray-500 font-medium">Appointment Date</p>
-                                                    <p className="text-gray-900 font-semibold">{formatDate(appointment.date)}</p>
-                                                    <p className="text-gray-600 text-sm">{availability[0]?.display[0]}</p>
-                                                </div>
-                                            </div>
-
-                                            <div className="bg-gray-50 rounded-xl p-4 flex items-center space-x-3 border border-gray-100">
-                                                <div className="bg-blue-100 p-2.5 rounded-lg">
-                                                    <CreditCard className="w-5 h-5 text-blue-600" />
-                                                </div>
-                                                <div>
-                                                    <p className="text-xs text-gray-500 font-medium">Payment</p>
-                                                    <p className="text-gray-900 font-semibold">
-                                                        ₹{appointment.booking_amount} • {appointment.paymentMethod}
-                                                    </p>
-                                                </div>
-                                            </div>
-
-                                            <div className="bg-gray-50 rounded-xl p-4 flex items-center space-x-3 border border-gray-100">
-                                                <div className="bg-blue-100 p-2.5 rounded-lg">
-                                                    <svg
-                                                        className="w-5 h-5 text-blue-600"
-                                                        fill="none"
-                                                        stroke="currentColor"
-                                                        viewBox="0 0 24 24"
-                                                    >
-                                                        <path
-                                                            strokeLinecap="round"
-                                                            strokeLinejoin="round"
-                                                            strokeWidth="2"
-                                                            d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"
-                                                        />
+                                        )}
+                                        <div className="flex items-start space-x-3 mb-3">
+                                            <div className="relative flex-shrink-0">
+                                                <img
+                                                    src={doctor?.image || avatar}
+                                                    className="w-12 h-12 rounded-lg object-cover border border-gray-200"
+                                                    alt={doctor?.name}
+                                                />
+                                                <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-blue-500 rounded-full flex items-center justify-center">
+                                                    <svg className="w-2 h-2 text-white" fill="currentColor" viewBox="0 0 20 20">
+                                                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd"></path>
                                                     </svg>
                                                 </div>
-                                                <div>
-                                                    <p className="text-xs text-gray-500 font-medium">Token No</p>
-                                                    <p className="font-semibold text-gray-900">{appointment?.token}</p>
+                                            </div>
+                                            <div className="flex-1 min-w-0">
+                                                <h3 className="font-semibold text-gray-900 text-sm truncate">{doctor?.name}</h3>
+                                                <p className="text-xs text-gray-600 truncate">{doctor?.specialty}</p>
+                                                <div className="flex items-center text-xs text-gray-500 mt-1">
+                                                    <svg className="w-3 h-3 mr-1 text-blue-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-4m-8 0H3m2 0h4M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
+                                                    </svg>
+                                                    <span className="truncate">{hospitalInfo?.name}</span>
                                                 </div>
                                             </div>
                                         </div>
 
-                                        {/* 🔗 Action Button */}
-                                        <div className="flex justify-center">
+                                        {/* Appointment Details */}
+                                        <div className="flex-col items-center justify-between text-xs text-gray-600 bg-gray-50 rounded-lg px-3 py-2 mb-3">
+                                            <div className="flex items-center mb-1">
+                                                <Calendar className="w-3 h-3 mr-1 text-blue-500" />
+                                                {new Date(appointment.date).toLocaleDateString('en-US', {
+                                                    month: 'short',
+                                                    day: 'numeric',
+                                                    year: 'numeric'
+                                                })}
+                                            </div>
+                                            <div className="flex items-center">
+                                                <Clock className="w-3 h-3 mr-1 text-blue-500" />
+                                                {timeSlot}
+                                            </div>
+                                        </div>
+
+                                        {/* Footer with Payment and Action */}
+                                        <div className="flex items-center justify-between">
+                                            <div className="text-xs text-gray-600 flex items-center">
+                                                <CreditCard className="w-3 h-3 mr-1 text-blue-500" />
+                                                ₹{appointment.booking_amount}
+                                            </div>
                                             <Link
-                                                to={`/appointment_details_page/${appointment?._id}`}
-                                                className="w-full sm:w-auto bg-gradient-to-r from-teal-600 to-emerald-600 text-white text-center py-3 px-8 rounded-xl font-semibold shadow-md hover:shadow-lg hover:scale-[1.02] transition-all duration-300"
+                                                to={`/appointment_details_page/${appointment._id}`}
+                                                className="text-xs text-blue-600 hover:text-blue-800 font-medium flex items-center transition-colors"
                                             >
-                                                View Full Details
+                                                Details
+                                                <svg className="w-3 h-3 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7"></path>
+                                                </svg>
                                             </Link>
                                         </div>
                                     </div>
                                 </div>
-
-
                             );
                         })}
                     </div>
@@ -517,4 +721,4 @@ function Appointment() {
     )
 }
 
-export default Appointment
+export default Appointment;

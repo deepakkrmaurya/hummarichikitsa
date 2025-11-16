@@ -50,29 +50,29 @@ const Appointment = lazy(() => import('./page/Appointment'))
 const Contact = lazy(() => import('./page/Contact'))
 function App() {
   // const { isLoggedIn } = useSelector((state) => state?.auth)
-  useEffect(() => {
-    // Right-click disable
-    const handleContextMenu = (e) => e.preventDefault();
-    document.addEventListener("contextmenu", handleContextMenu);
+  // useEffect(() => {
+  //   // Right-click disable
+  //   const handleContextMenu = (e) => e.preventDefault();
+  //   document.addEventListener("contextmenu", handleContextMenu);
 
-    // DevTools shortcuts disable
-    const handleKeyDown = (e) => {
-      if (
-        e.key === "F12" ||
-        (e.ctrlKey && e.shiftKey && ["I", "J"].includes(e.key)) ||
-        (e.ctrlKey && e.key === "U")
-      ) {
-        e.preventDefault();
-        alert("Inspect is disabled!");
-      }
-    };
-    document.addEventListener("keydown", handleKeyDown);
+  //   // DevTools shortcuts disable
+  //   const handleKeyDown = (e) => {
+  //     if (
+  //       e.key === "F12" ||
+  //       (e.ctrlKey && e.shiftKey && ["I", "J"].includes(e.key)) ||
+  //       (e.ctrlKey && e.key === "U")
+  //     ) {
+  //       e.preventDefault();
+  //       alert("Inspect is disabled!");
+  //     }
+  //   };
+  //   document.addEventListener("keydown", handleKeyDown);
 
-    return () => {
-      document.removeEventListener("contextmenu", handleContextMenu);
-      document.removeEventListener("keydown", handleKeyDown);
-    };
-  }, []);
+  //   return () => {
+  //     document.removeEventListener("contextmenu", handleContextMenu);
+  //     document.removeEventListener("keydown", handleKeyDown);
+  //   };
+  // }, []);
 
   return (
 
