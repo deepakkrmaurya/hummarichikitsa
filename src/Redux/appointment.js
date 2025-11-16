@@ -44,7 +44,7 @@ export const AppointmentConferm = createAsyncThunk(
                     return error?.response?.data?.message || "Failed to book appointment. Please try again."
                 }
             });
-
+             
             return (await response).data
         } catch (error) {
             return toast.error(error.response?.data?.message || "Appointment booking failed.");
