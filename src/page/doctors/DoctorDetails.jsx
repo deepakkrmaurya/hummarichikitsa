@@ -29,7 +29,8 @@ const DoctorDetailsPage = () => {
 
   const getDoctorById = async () => {
     const res = await dispatch(GetDoctor(doctorId));
-    setDoctor(res?.payload);
+    console.log(res.payload.doctor)
+    setDoctor(res.payload.doctor);
   };
 
   const handleDateSelect = (date) => {
@@ -168,96 +169,7 @@ const DoctorDetailsPage = () => {
           </div>
 
           {/* Appointment Booking Section */}
-          <div className="border-t border-gray-200 px-8 py-6 bg-gray-50">
-            <h2 className="text-2xl font-semibold mb-6" style={{ color: colors.text }}>
-              Book Appointment
-            </h2>
-            
-            <div className="space-y-8">
-              {/* Date Selection */}
-              <div>
-                <div className="flex items-center mb-4">
-                  <FaCalendarAlt className="mr-2" style={{ color: colors.primary }} />
-                  <h3 className="text-lg font-medium" style={{ color: colors.text }}>Available Dates</h3>
-                </div>
-                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
-                  {doctor?.availableSlots.map((slot) => (
-                    <motion.button
-                      key={slot._id}
-                      whileHover={{ y: -2 }}
-                      whileTap={{ scale: 0.98 }}
-                      onClick={() => handleDateSelect(slot?.date)}
-                      className={`px-4 py-3 rounded-lg border transition-all ${
-                        selectedDate === slot?.date
-                          ? 'border-blue-500 bg-blue-50 shadow-inner'
-                          : 'border-gray-200 hover:border-blue-300'
-                      }`}
-                    >
-                      <div className="text-sm font-medium" style={{ color: selectedDate === slot?.date ? colors.primary : colors.text }}>
-                        {new Date(slot?.date).toLocaleDateString('en-US', { 
-                          weekday: 'short' 
-                        })}
-                      </div>
-                      <div className="text-lg font-bold" style={{ color: selectedDate === slot?.date ? colors.primary : colors.text }}>
-                        {new Date(slot?.date).getDate()}
-                      </div>
-                      <div className="text-xs" style={{ color: colors.lightText }}>
-                        {new Date(slot?.date).toLocaleDateString('en-US', { 
-                          month: 'short' 
-                        })}
-                      </div>
-                    </motion.button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Time Slot Selection */}
-              {selectedDate && (
-                <motion.div
-                  initial={{ opacity: 0, height: 0 }}
-                  animate={{ opacity: 1, height: 'auto' }}
-                  exit={{ opacity: 0, height: 0 }}
-                  transition={{ duration: 0.3 }}
-                >
-                  <div className="flex items-center mb-4">
-                    <FaClock className="mr-2" style={{ color: colors.primary }} />
-                    <h3 className="text-lg font-medium" style={{ color: colors.text }}>Available Time Slots</h3>
-                  </div>
-                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
-                    {doctor?.availableSlots
-                      .find(slot => slot?.date === selectedDate)
-                      .slots.map((time, index) => (
-                        <motion.button
-                          key={index}
-                          whileHover={{ y: -2 }}
-                          whileTap={{ scale: 0.98 }}
-                          onClick={() => setSelectedSlot(time)}
-                          className={`px-4 py-2 rounded-lg border transition-all ${
-                            selectedSlot === time
-                              ? 'border-blue-500 bg-blue-500 text-white'
-                              : 'border-gray-200 hover:border-blue-300'
-                          }`}
-                        >
-                          {time}
-                        </motion.button>
-                      ))}
-                  </div>
-                </motion.div>
-              )}
-
-              {/* Book Button */}
-              {selectedSlot && (
-                <motion.div
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.2 }}
-                  className="pt-4"
-                >
-                 
-                </motion.div>
-              )}
-            </div>
-          </div>
+          
         </motion.div>
 
         

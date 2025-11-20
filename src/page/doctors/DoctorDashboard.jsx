@@ -14,6 +14,36 @@ import socket from '../../Helper/socket';
 import { AuthMe } from '../../Redux/AuthLoginSlice';
 
 const DoctorDashboard = () => {
+  const [isOpen, setIsOpen] = useState(false);
+  const [phoneNumber, setPhoneNumber] = useState('');
+  const [message, setMessage] = useState('');
+  const [whatsaapmessage, setwhatsaapMessage] = useState('');
+
+  const handleWhatsAppSend = () => {
+    const phoneNumber = whatsaapmessage.mobile;
+     const data = whatsaapmessage
+    const message = `
+  Hello ${data.patient},
+  
+  Your Appointment Details:
+  • Appointment Number: ${data.appointmentNumber}
+  • Token Number: ${data.token}
+  • Date: ${data.date}
+  • Booking Amount: ₹${data.booking_amount}
+  • Payment Status: ${data.paymentStatus}
+  
+  Thank you!
+      `.trim();
+
+    const encodedMessage = encodeURIComponent(message);
+    const whatsappUrl = `https://wa.me/91${phoneNumber}?text=${encodedMessage}`;
+    window.open(whatsappUrl, '_blank');
+  };
+
+  const handleSMSSend = () => {
+    const smsUrl = `sms:${phoneNumber}?body=${encodeURIComponent(message)}`;
+    window.location.href = smsUrl;
+  };
   const dispatch = useDispatch();
   const [appointments, setAppointments] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
@@ -159,7 +189,7 @@ const DoctorDashboard = () => {
     try {
 
       const res = await dispatch(AppointmentConferm(appointment_id));
-     
+
       if (!res.payload.success) {
         setAppointments(prev => prev.map(app =>
           app._id === appointment_id
@@ -352,8 +382,17 @@ const DoctorDashboard = () => {
                     'Confirm'}
               </button>
             )}
+            <div onClick={()=>{
+              setwhatsaapMessage(appointment)
+              setIsOpen(true)}
+              }
+              className='bg-green-700 cursor-pointer py-1 px-2 text-white rounded'
+              >
+              send Appointment
+            </div>
           </div>
         </td>
+        
       </tr>
     );
   });
@@ -438,6 +477,52 @@ const DoctorDashboard = () => {
 
   return (
     <Dashboard>
+      {isOpen && (
+        <div className="fixed inset-0  bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-xl shadow-2xl p-6 w-full max-w-md mx-4">
+            {/* Modal Header */}
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-xl font-bold text-gray-800">Send Message</h2>
+              <button
+                onClick={() => setIsOpen(false)}
+                className="text-gray-500 hover:text-gray-700 text-2xl"
+              >
+                &times;
+              </button>
+            </div>
+            {/* Action Buttons */}
+            <div className="flex gap-3">
+              {/* WhatsApp Button */}
+              <button
+                onClick={handleWhatsAppSend}
+
+                className="flex-1 bg-green-500 hover:bg-green-600 disabled:bg-green-300 text-white py-3 px-4 rounded-lg font-medium transition-colors flex items-center justify-center gap-2"
+              >
+                <i className="fab fa-whatsapp text-lg"></i>
+                WhatsApp
+              </button>
+
+              {/* SMS Button */}
+              <button
+                onClick={handleSMSSend}
+
+                className="flex-1 bg-blue-500 hover:bg-blue-600 disabled:bg-blue-300 text-white py-3 px-4 rounded-lg font-medium transition-colors flex items-center justify-center gap-2"
+              >
+                <i className="fas fa-comment text-lg"></i>
+                SMS
+              </button>
+            </div>
+
+            {/* Close Button */}
+            <button
+              onClick={() => setIsOpen(false)}
+              className="w-full mt-4 bg-gray-500 hover:bg-gray-600 text-white py-2 px-4 rounded-lg font-medium transition-colors"
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
+      )}
       <div className="min-h-screen bg-gray-50">
         <div className="mx-auto px-4 sm:px-6 lg:px-8 py-8">
           {/* Header */}
